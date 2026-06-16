@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50/50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - SaaS Event Planner</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS / Vite -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Font styling overrides for premium feel -->
+    <style>
+        body {
+            font-family: 'Open Sans', 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8f9fe;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8f9fe;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Sidebar transition details */
+        #admin-sidebar {
+            transition: transform 0.25s ease-in-out;
+            transform: translateX(-18rem); /* Hidden by default on mobile */
+        }
+        #main-content-area {
+            transition: padding-left 0.25s ease-in-out;
+        }
+        
+        /* Desktop: sidebar is visible by default. .sidebar-collapsed hides it. */
+        @media (min-width: 1024px) {
+            #admin-sidebar {
+                transform: translateX(0); /* Visible by default on desktop */
+            }
+            .sidebar-collapsed #admin-sidebar {
+                transform: translateX(-18rem) !important;
+            }
+            #main-content-area {
+                padding-left: 18.5rem;
+            }
+            .sidebar-collapsed #main-content-area {
+                padding-left: 1.5rem !important; /* pl-6 */
+            }
+        }
+
+        /* Mobile/Tablet: sidebar is hidden by default. .mobile-sidebar-open shows it. */
+        @media (max-width: 1023px) {
+            .mobile-sidebar-open #admin-sidebar {
+                transform: translateX(0) !important;
+            }
+            .mobile-sidebar-open #sidebar-backdrop {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden text-slate-600 antialiased bg-[#f8f9fe] flex relative">
+
+    <!-- Top Blue background block (Argon style) -->
+    <div class="absolute top-0 left-0 w-full bg-[#5e72e4] h-[340px] z-0 transition-all"></div>
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden" onclick="toggleSidebar()" style="z-index: 55;"></div>
+
+    <!-- Floating Sidebar Wrapper (Argon 2 Style) -->
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-4 my-4 flex w-64 flex-col rounded-2xl bg-white border border-slate-100 shadow-xl" style="z-index: 60;">
+        <!-- Sidebar Brand / Logo -->
+        <div class="flex h-20 items-center justify-between px-6 border-b border-slate-50 shrink-0">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
+                    </svg>
+                </span>
+                <span class="text-sm font-bold text-slate-800 tracking-tight">Argon Admin</span>
+            </a>
+            
+            <!-- Hide Sidebar Button (inside sidebar, mobile only) -->
+            <button type="button" class="lg:hidden text-slate-400 hover:text-slate-600 focus:outline-none" onclick="toggleSidebar()">
+                <svg class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Sidebar Navigation (Argon menu lists) -->
+        <nav class="flex-1 space-y-1.5 px-4.5 py-6 overflow-y-auto">
+            @php
+                $currentRoute = Route::currentRouteName();
+            @endphp
+
+            <!-- Admin Dashboard -->
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-500' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h3.5m0 0h3.5m-3.5 0v3.5" />
+                    </svg>
+                </span>
+                Dashboard
+            </a>
+
+            <!-- Master Management -->
+            <a href="{{ route('admin.system-masters.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-orange-500 text-white' : 'bg-orange-50 text-orange-500' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75m-16.5-3.75v3.75" />
+                    </svg>
+                </span>
+                Master Management
+            </a>
+
+            <!-- Vendor CRUD -->
+            <a href="{{ route('admin.vendors.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.vendors') ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.vendors') ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-500' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m0 0a8.967 8.967 0 0 1-3.741-.479 3 3 0 0 1 4.682-2.72m.94 3.198.002.031c0 .225.012.447.037.666A11.944 11.944 0 0 0 12 21c2.17 0 4.207-.576 5.963-1.584A6.062 6.062 0 0 0 18 18.72m-12 0a9 9 0 0 0-9 9m9-9a9 9 0 0 1 9-9" />
+                    </svg>
+                </span>
+                Manage Vendor
+            </a>
+
+            <!-- Subscription Manager -->
+            <a href="{{ route('admin.subscriptions.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-cyan-50 text-cyan-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-cyan-500 text-white' : 'bg-cyan-50 text-cyan-500' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                    </svg>
+                </span>
+                Subscription Manager
+            </a>
+
+            <!-- Manage AI -->
+            <a href="{{ route('admin.ai.manage') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-500' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.187.904ZM18 9l.4-.6L19 8l-.6-.4L18 7l-.4.6-.6.4.6.4.4.6ZM13 4l.3-.45.45-.3-.45-.3L13 2.5l-.3.45-.45.3.45.3.3.45Z" />
+                    </svg>
+                </span>
+                Manage AI
+            </a>
+
+            <!-- Manage Area -->
+            <a href="{{ route('admin.areas.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-rose-50 text-rose-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-500' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm0 0V21m0-10.5H18M9 10.5H6m3 0V21m3-10.5V21" />
+                    </svg>
+                </span>
+                Manage Area
+            </a>
+        </nav>
+
+        <!-- Sidebar User Badge Card (Argon style) -->
+        <div class="p-4.5 border-t border-slate-50 bg-slate-50/50 rounded-b-2xl">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase">
+                    {{ substr(Auth::guard('admin')->user()->name ?? 'A', 0, 2) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold text-slate-700 truncate leading-none mb-0.5">{{ Auth::guard('admin')->user()->name ?? 'Admin' }}</p>
+                    <p class="text-[10px] text-slate-400 font-semibold truncate leading-none">{{ Auth::guard('admin')->user()->email ?? 'admin@eventplanner.com' }}</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Canvas Wrapper (Constrained to full height of view) -->
+    <div id="main-content-area" class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
+        
+        <!-- Top Horizontal Header (Navbar sits ON TOP with relative z-40) -->
+        <header class="flex h-20 items-center justify-between px-6 sm:px-8 lg:px-10 shrink-0 relative" style="z-index: 50;">
+            <!-- Left Header elements (Breadcrumbs & Hide/Show button) -->
+            <div class="flex items-center gap-4">
+                <!-- Hamburger Hide/Show toggle button -->
+                <button type="button" class="text-white hover:text-slate-100 focus:outline-none bg-white/10 hover:bg-white/15 p-2 rounded-xl border border-white/10 transition" onclick="toggleSidebar()" title="Toggle Sidebar">
+                    <span class="sr-only">Toggle Sidebar</span>
+                    <!-- Hamburger / Sidebar Toggle Icon -->
+                    <svg class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+                    </svg>
+                </button>
+
+                <!-- Breadcrumbs -->
+                <div class="hidden sm:block text-white">
+                    <div class="flex items-center gap-1.5 text-xs text-white/75 font-semibold">
+                        <span>Pages</span>
+                        <span>/</span>
+                        <span class="capitalize">{{ str_replace(['admin.', '-'], ['', ' '], $currentRoute ?: 'Dashboard') }}</span>
+                    </div>
+                    <h2 class="text-sm font-bold capitalize mt-0.5 tracking-wide">{{ str_replace(['admin.', '-'], ['', ' '], $currentRoute ?: 'Dashboard') }}</h2>
+                </div>
+            </div>
+
+            <!-- Right Header Navbar Actions -->
+            <div class="flex items-center gap-x-5">
+
+                <!-- User Profile actions -->
+                <div class="relative">
+                    <button type="button" class="flex items-center gap-2 focus:outline-none text-white font-semibold text-xs py-1.5 px-2 hover:bg-white/10 rounded-xl transition" id="user-menu-button" onclick="toggleUserDropdown(event)">
+                        <div class="h-7.5 w-7.5 rounded-full bg-white/20 text-white flex items-center justify-center font-bold uppercase ring-1 ring-white/15">
+                            {{ substr(Auth::guard('admin')->user()->name ?? 'A', 0, 1) }}
+                        </div>
+                        <span class="hidden md:block">{{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</span>
+                        <svg class="h-4 w-4 text-white/70" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown Panel (Highest z-index within header) -->
+                    <div id="user-menu-dropdown" class="absolute right-0 mt-2.5 w-48 origin-top-right rounded-xl bg-white p-1.5 shadow-lg border border-slate-150 focus:outline-none transition-all duration-150 scale-95 opacity-0 pointer-events-none" style="z-index: 100;">
+                        <a href="{{ route('admin.profile.edit') }}" class="block rounded-lg px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+                            My Profile
+                        </a>
+                        <form action="{{ route('admin.logout') }}" method="POST" class="block w-full">
+                            @csrf
+                            <button type="submit" class="w-full text-left block rounded-lg px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors focus:outline-none">
+                                Log Out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content area (Independently scrollable with relative z-10) -->
+        <main class="flex-1 overflow-y-auto px-6 sm:px-8 lg:px-10 pb-8 relative" style="z-index: 10;">
+            @yield('content')
+        </main>
+    </div>
+
+    <!-- Scripting for Dynamic Components (Argon Collapsible Sidebar) -->
+    <script>
+        // Toggle Sidebar state
+        function toggleSidebar() {
+            if (window.innerWidth >= 1024) {
+                document.body.classList.toggle('sidebar-collapsed');
+            } else {
+                document.body.classList.toggle('mobile-sidebar-open');
+            }
+        }
+
+        // Toggle User Menu Dropdown with smooth micro-animation
+        function toggleUserDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('user-menu-dropdown');
+            if (dropdown.classList.contains('opacity-0')) {
+                dropdown.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+                dropdown.classList.add('opacity-100', 'scale-100');
+            } else {
+                closeUserDropdown();
+            }
+        }
+
+        function closeUserDropdown() {
+            const dropdown = document.getElementById('user-menu-dropdown');
+            if (dropdown) {
+                dropdown.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                dropdown.classList.remove('opacity-100', 'scale-100');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            closeUserDropdown();
+        });
+    </script>
+</body>
+</html>
