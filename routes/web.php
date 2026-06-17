@@ -74,6 +74,9 @@ Route::prefix('admin')->group(function () {
         Route::post('/areas/subareas', [AreaController::class, 'storeSubarea'])->name('admin.areas.storeSubarea');
         Route::put('/areas/subareas/{subarea}', [AreaController::class, 'updateSubarea'])->name('admin.areas.updateSubarea');
         Route::delete('/areas/subareas/{subarea}', [AreaController::class, 'destroySubarea'])->name('admin.areas.destroySubarea');
+
+        // Manage Distributions
+        Route::resource('/distributions', \App\Http\Controllers\Admin\DistributionController::class)->only(['index', 'show', 'update', 'destroy'])->names('admin.distributions');
     });
 });
 

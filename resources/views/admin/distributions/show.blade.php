@@ -1,29 +1,15 @@
-@extends('vendor.layout')
+@extends('admin.layout')
 
 @section('content')
-<div class="space-y-6 mt-16 relative z-30">
+<div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-4">
+        <a href="{{ route('admin.distributions.index') }}" class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        </a>
         <div>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight font-serif-display">Registry & Budget Allocation</h1>
-            <p class="text-sm text-white/80 mt-1 font-medium">Distribute your budget share per event type.</p>
-        </div>
-        
-        <!-- Event Type Selector -->
-        <div class="bg-white/10 p-1.5 rounded-xl border border-white/20 backdrop-blur-sm shadow-sm w-full sm:w-auto min-w-[250px]">
-            <form action="{{ route('vendor.budget.edit') }}" method="GET" id="eventTypeForm" class="flex items-center">
-                <span class="pl-3 pr-2 text-white/70 font-semibold text-xs tracking-wide uppercase shrink-0">Event Type:</span>
-                <select name="event_type_id" class="peer w-full bg-transparent text-white font-bold text-sm border-0 focus:ring-0 cursor-pointer appearance-none outline-none py-1.5 px-2" style="background-image: none; padding-right: 0.5rem !important;" onchange="document.getElementById('eventTypeForm').submit()">
-                    @foreach($eventTypes as $type)
-                        <option value="{{ $type->id }}" class="text-slate-800" {{ $selectedEventTypeId == $type->id ? 'selected' : '' }}>
-                            {{ $type->label }}
-                        </option>
-                    @endforeach
-                </select>
-                <div class="pr-3 shrink-0 pointer-events-none transition-transform duration-300 peer-focus:rotate-180">
-                    <svg class="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                </div>
-            </form>
+            <h1 class="text-2xl font-extrabold text-white tracking-tight">View Distribution for {{ $vendor->business_name }}</h1>
+            <p class="text-sm text-white mt-1">Viewing budget allocations for : <strong class="text-white">{{ $eventType ? $eventType->label : 'Global' }}</strong>.</p>
         </div>
     </div>
     @include('admin.partials.alerts')
@@ -62,11 +48,12 @@
     </div>
 
     <!-- Main Workspace -->
-    <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-        <form action="{{ route('vendor.budget.update') }}" method="POST" class="space-y-8">
-            @csrf
+    <form action="{{ route('admin.distributions.update', $vendor->id) }}" method="POST" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 opacity-95">
+        @csrf
+        @method('PUT')
+        <div class="space-y-8">
             <input type="hidden" name="costing_type" id="costing_type" value="{{ $costingType }}">
-            <input type="hidden" name="event_type_id" value="{{ $selectedEventTypeId }}">
+            <input type="hidden" name="event_type_id" value="{{ $eventType ? $eventType->id : '' }}">
 
             @foreach($masterRegistries as $registry)
                 @php
@@ -164,16 +151,16 @@
             @endforeach
 
             <!-- Action buttons -->
-            <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-6 mt-6">
-                <a href="{{ route('vendor.dashboard') }}" class="rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-semibold px-5 py-2.5 transition">
-                    Back to Dashboard
+            <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-6 mt-6 pointer-events-auto">
+                <a href="{{ route('admin.distributions.index') }}" class="rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-semibold px-5 py-2.5 transition">
+                    Back to Distributions List
                 </a>
                 <button type="submit" class="rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-6 py-2.5 transition shadow-sm hover:shadow active:scale-[0.99]">
                     Save Allocations
                 </button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
 <script>
@@ -402,8 +389,6 @@
 
         // Initialize UI with current mode to fix progress bar and UI sync
         switchMode(currentMode);
-
-
 
         recalculateBudgetShares();
     });

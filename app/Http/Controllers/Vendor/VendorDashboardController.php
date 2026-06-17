@@ -125,22 +125,31 @@ class VendorDashboardController extends Controller
     /**
      * Show form to select registries and manage budget distributions.
      */
-    public function editBudget()
+    public function editBudget(Request $request)
     {
         $vendor = Auth::guard('vendor')->user();
         
-        // Load all registries configured by admin
-        $masterRegistries = MasterRegistry::all();
+        $eventTypes = SystemMaster::where('type', 'event_types')->orderBy('label')->get();
+        $selectedEventTypeId = $request->input('event_type_id', $eventTypes->first()->id ?? null);
+        
+        // Load all registries configured by admin (excluding location and event types)
+        $masterRegistries = MasterRegistry::whereNotIn('key', ['event_types', 'event_type', 'city', 'cities', 'states', 'areas', 'subareas'])->get();
         
         // Load subregistries (system masters) grouped by registry key
         $subregistries = SystemMaster::all()->groupBy('type');
         
-        // Load vendor's enabled registry items
-        $enabledItems = $vendor->registries->keyBy(function($item) {
-            return $item->registry_key . '_' . $item->item_label;
-        })->toArray();
+        // Load vendor's enabled registry items for the specific event type
+        $enabledItems = $vendor->registries()
+            ->where('event_type_id', $selectedEventTypeId)
+            ->get()
+            ->keyBy(function($item) {
+                return $item->registry_key . '_' . $item->item_label;
+            })->toArray();
 
-        return view('vendor.budget', compact('vendor', 'masterRegistries', 'subregistries', 'enabledItems'));
+        $basePrice = $vendor->base_price ?: 0;
+        $costingType = $vendor->costing_type ?: 'percentage';
+
+        return view('vendor.budget', compact('vendor', 'masterRegistries', 'subregistries', 'enabledItems', 'basePrice', 'costingType', 'eventTypes', 'selectedEventTypeId'));
     }
 
     /**
@@ -150,30 +159,60 @@ class VendorDashboardController extends Controller
     {
         $vendor = Auth::guard('vendor')->user();
 
+        $request->validate([
+            'costing_type' => ['required', 'in:percentage,rupees'],
+            'event_type_id' => ['required', 'exists:system_masters,id']
+        ]);
+
+        $costingType = $request->input('costing_type');
+        $eventTypeId = $request->input('event_type_id');
+        
+        $vendor->update(['costing_type' => $costingType]);
+
         // Expecting an array of enabled items with their percentages
-        // Format: items[registry_key][item_label] = share_percentage (or just registry keys / labels checked)
+        // Format: items[registry_key][item_label] = 1
         $itemsInput = $request->input('items', []);
         
-        // Remove existing distributions for vendor
-        VendorRegistry::where('vendor_id', $vendor->id)->delete();
+        // Remove existing distributions for vendor specifically for this event type
+        VendorRegistry::where('vendor_id', $vendor->id)
+            ->where('event_type_id', $eventTypeId)
+            ->delete();
 
         // Loop through inputs and insert new entries
         foreach ($itemsInput as $regKey => $labels) {
             foreach ($labels as $label => $enabled) {
-                // Read corresponding percentage from percentage inputs
-                $percentageKey = "percent_{$regKey}_" . str_replace(' ', '_', $label);
-                $percentage = floatval($request->input($percentageKey, 0.00));
+                // Read corresponding value from inputs
+                $valueKey = "value_{$regKey}_" . str_replace(' ', '_', $label);
+                $inputValue = floatval($request->input($valueKey, 0.00));
+                
+                $percentage = 0.00;
+                $rupees = 0.00;
+
+                if ($costingType === 'rupees') {
+                    $rupees = $inputValue;
+                    if ($vendor->base_price > 0) {
+                        $percentage = min(100, ($rupees / $vendor->base_price) * 100);
+                    }
+                } else {
+                    $percentage = $inputValue;
+                    if ($vendor->base_price > 0) {
+                        $rupees = ($percentage / 100) * $vendor->base_price;
+                    }
+                }
 
                 VendorRegistry::create([
                     'vendor_id' => $vendor->id,
+                    'event_type_id' => $eventTypeId,
                     'registry_key' => $regKey,
                     'item_label' => $label,
                     'share_percentage' => $percentage,
+                    'share_rupees' => $rupees,
+                    'status' => 1
                 ]);
             }
         }
 
-        return redirect()->route('vendor.budget.edit')
-            ->with('success', 'Registry options and budget distribution saved successfully!');
+        return redirect()->route('vendor.budget.edit', ['event_type_id' => $eventTypeId])
+            ->with('success', 'Budget distribution saved successfully!');
     }
 }

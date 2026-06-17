@@ -27,6 +27,7 @@ class Vendor extends Authenticatable
         'base_price',
         'rating',
         'password',
+        'costing_type',
     ];
 
     protected $hidden = [

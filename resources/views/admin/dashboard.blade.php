@@ -12,7 +12,7 @@
         <div class="rounded-2xl bg-white p-4 shadow-lg border border-slate-100/50 flex items-center justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
             <div class="min-w-0">
                 <p class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Total Users</p>
-                <h3 class="text-xl font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ number_format($totalUsers) }}</h3>
+                <h3 class="text-lg font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ number_format($totalUsers) }}</h3>
                 <p class="mt-2 text-[10px] font-bold text-emerald-500 flex items-center gap-0.5 whitespace-nowrap">
                     <span>+12%</span>
                     <span class="text-slate-400 font-normal">last month</span>
@@ -29,7 +29,7 @@
         <div class="rounded-2xl bg-white p-4 shadow-lg border border-slate-100/50 flex items-center justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
             <div class="min-w-0">
                 <p class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Total Events</p>
-                <h3 class="text-xl font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ number_format($totalEvents) }}</h3>
+                <h3 class="text-lg font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ number_format($totalEvents) }}</h3>
                 <p class="mt-2 text-[10px] font-bold text-emerald-500 flex items-center gap-0.5 whitespace-nowrap">
                     <span>+8%</span>
                     <span class="text-slate-400 font-normal">last week</span>
@@ -46,7 +46,7 @@
         <div class="rounded-2xl bg-white p-4 shadow-lg border border-slate-100/50 flex items-center justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
             <div class="min-w-0">
                 <p class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Total Vendors</p>
-                <h3 class="text-xl font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ number_format($totalVendors) }}</h3>
+                <h3 class="text-lg font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ number_format($totalVendors) }}</h3>
                 <p class="mt-2 text-[10px] font-bold text-sky-500 flex items-center gap-0.5 whitespace-nowrap">
                     <span>+15</span>
                     <span class="text-slate-400 font-normal">registered</span>
@@ -63,7 +63,7 @@
         <div class="rounded-2xl bg-white p-4 shadow-lg border border-slate-100/50 flex items-center justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
             <div class="min-w-0">
                 <p class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Total Revenue</p>
-                <h3 class="text-xl font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ $totalRevenue }}</h3>
+                <h3 class="text-lg font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ $totalRevenue }}</h3>
                 <p class="mt-2 text-[10px] font-bold text-emerald-500 flex items-center gap-0.5 whitespace-nowrap">
                     <span>+₹3.1L</span>
                     <span class="text-slate-400 font-normal">this month</span>
@@ -78,7 +78,7 @@
         <div class="rounded-2xl bg-white p-4 shadow-lg border border-slate-100/50 flex items-center justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-xl">
             <div class="min-w-0">
                 <p class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Plans Generated</p>
-                <h3 class="text-xl font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ number_format($plansGenerated) }}</h3>
+                <h3 class="text-lg font-bold text-slate-700 mt-1 leading-none tracking-tight">{{ number_format($plansGenerated) }}</h3>
                 <p class="mt-2 text-[10px] font-bold text-purple-500 flex items-center gap-0.5 whitespace-nowrap">
                     <span>+420</span>
                     <span class="text-slate-400 font-normal">today</span>
@@ -145,26 +145,26 @@
             </div>
             
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+                <table class="min-w-full text-xs">
                     <tbody>
                         <!-- Mumbai Row -->
                         <tr class="border-b border-slate-50">
-                            <td class="py-3.5 pr-4 flex items-center gap-3">
-                                <span class="h-6 w-9 rounded bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">IN-MH</span>
+                            <td class="py-2.5 px-3 flex items-center gap-3">
+                                <span class="h-5 w-8 rounded bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-600">IN-MH</span>
                                 <div>
                                     <span class="block text-xs text-slate-400 font-bold uppercase leading-none">City</span>
                                     <span class="text-xs font-bold text-slate-700 leading-normal">Mumbai</span>
                                 </div>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Sales</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">2,500</span>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Value</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">₹4,20,000</span>
                             </td>
-                            <td class="py-3.5 pl-4">
+                            <td class="py-2.5 pl-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Bounce</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">29.9%</span>
                             </td>
@@ -172,22 +172,22 @@
 
                         <!-- Delhi Row -->
                         <tr class="border-b border-slate-50">
-                            <td class="py-3.5 pr-4 flex items-center gap-3">
-                                <span class="h-6 w-9 rounded bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">IN-DL</span>
+                            <td class="py-2.5 px-3 flex items-center gap-3">
+                                <span class="h-5 w-8 rounded bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-600">IN-DL</span>
                                 <div>
                                     <span class="block text-xs text-slate-400 font-bold uppercase leading-none">City</span>
                                     <span class="text-xs font-bold text-slate-700 leading-normal">Delhi</span>
                                 </div>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Sales</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">1,820</span>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Value</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">₹3,40,000</span>
                             </td>
-                            <td class="py-3.5 pl-4">
+                            <td class="py-2.5 pl-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Bounce</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">34.2%</span>
                             </td>
@@ -195,22 +195,22 @@
 
                         <!-- Goa Row -->
                         <tr class="border-b border-slate-50">
-                            <td class="py-3.5 pr-4 flex items-center gap-3">
-                                <span class="h-6 w-9 rounded bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">IN-GA</span>
+                            <td class="py-2.5 px-3 flex items-center gap-3">
+                                <span class="h-5 w-8 rounded bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-600">IN-GA</span>
                                 <div>
                                     <span class="block text-xs text-slate-400 font-bold uppercase leading-none">City</span>
                                     <span class="text-xs font-bold text-slate-700 leading-normal">Goa</span>
                                 </div>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Sales</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">950</span>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Value</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">₹2,80,000</span>
                             </td>
-                            <td class="py-3.5 pl-4">
+                            <td class="py-2.5 pl-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Bounce</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">21.5%</span>
                             </td>
@@ -218,22 +218,22 @@
 
                         <!-- Bangalore Row -->
                         <tr>
-                            <td class="py-3.5 pr-4 flex items-center gap-3">
-                                <span class="h-6 w-9 rounded bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">IN-KA</span>
+                            <td class="py-2.5 px-3 flex items-center gap-3">
+                                <span class="h-5 w-8 rounded bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-600">IN-KA</span>
                                 <div>
                                     <span class="block text-xs text-slate-400 font-bold uppercase leading-none">City</span>
                                     <span class="text-xs font-bold text-slate-700 leading-normal">Bangalore</span>
                                 </div>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Sales</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">840</span>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-2.5 px-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Value</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">₹1,90,000</span>
                             </td>
-                            <td class="py-3.5 pl-4">
+                            <td class="py-2.5 pl-3">
                                 <span class="block text-xs text-slate-400 font-bold uppercase leading-none">Bounce</span>
                                 <span class="text-xs font-bold text-slate-700 leading-normal">25.0%</span>
                             </td>

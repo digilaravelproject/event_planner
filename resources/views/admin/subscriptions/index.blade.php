@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('content')
-<div class="space-y-6 -mt-16 relative z-30">
+<div class="space-y-6 mt-16 relative z-30">
     <!-- Header -->
     <div>
         <h1 class="text-3xl font-extrabold text-white tracking-tight font-serif-display">Subscription Plan Manager</h1>
