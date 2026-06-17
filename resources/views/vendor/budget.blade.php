@@ -11,18 +11,15 @@
         
         <!-- Event Type Selector -->
         <div class="bg-white/10 p-1.5 rounded-xl border border-white/20 backdrop-blur-sm shadow-sm w-full sm:w-auto min-w-[250px]">
-            <form action="{{ route('vendor.budget.edit') }}" method="GET" id="eventTypeForm" class="flex items-center">
+            <form action="{{ route('vendor.budget.edit') }}" method="GET" id="eventTypeForm" class="flex items-center" style="margin-left: 35px !important;">
                 <span class="pl-3 pr-2 text-white/70 font-semibold text-xs tracking-wide uppercase shrink-0">Event Type:</span>
-                <select name="event_type_id" class="peer w-full bg-transparent text-white font-bold text-sm border-0 focus:ring-0 cursor-pointer appearance-none outline-none py-1.5 px-2" style="background-image: none; padding-right: 0.5rem !important;" onchange="document.getElementById('eventTypeForm').submit()">
+                <select name="event_type_id" class="peer w-full bg-transparent text-white font-bold text-sm border-0 focus:ring-0 cursor-pointer appearance-none outline-none py-1.5 px-2" style="background-image: none; padding-right: 0.5rem !important; width: 80% !important;" onchange="document.getElementById('eventTypeForm').submit()">
                     @foreach($eventTypes as $type)
                         <option value="{{ $type->id }}" class="text-slate-800" {{ $selectedEventTypeId == $type->id ? 'selected' : '' }}>
                             {{ $type->label }}
                         </option>
                     @endforeach
                 </select>
-                <div class="pr-3 shrink-0 pointer-events-none transition-transform duration-300 peer-focus:rotate-180">
-                    <svg class="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                </div>
             </form>
         </div>
     </div>
