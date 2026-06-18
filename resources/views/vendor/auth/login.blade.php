@@ -45,6 +45,12 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="mb-4 text-xs font-semibold text-rose-600 bg-rose-50 p-3 rounded-xl border border-rose-100">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <form action="{{ route('vendor.login.submit') }}" method="POST" class="space-y-5">
                 @csrf
 

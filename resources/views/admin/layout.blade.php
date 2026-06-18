@@ -71,26 +71,26 @@
         }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden text-slate-600 antialiased bg-[#f8f9fe] flex relative">
+<body class="h-screen w-screen overflow-hidden text-slate-600 antialiased bg-[#f4f5f8] flex relative">
 
     <!-- Top Blue background block (Argon style) -->
-    <div class="absolute top-0 left-0 w-full bg-[#5e72e4] h-[340px] z-0 transition-all"></div>
+    <div class="absolute top-0 left-0 w-full bg-[#f4f5f8] h-0 z-0 transition-all hidden"></div>
 
     <!-- Mobile Sidebar Backdrop -->
     <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden" onclick="toggleSidebar()" style="z-index: 55;"></div>
 
     <!-- Floating Sidebar Wrapper (Argon 2 Style) -->
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-4 my-4 flex w-64 flex-col rounded-2xl bg-white border border-slate-100 shadow-xl" style="z-index: 60;">
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-4 my-4 flex w-64 flex-col rounded-2xl bg-white border border-slate-200/80 shadow-md" style="z-index: 60;">
         <!-- Sidebar Brand / Logo -->
-        <div class="flex h-20 items-center justify-between px-6 border-b border-slate-50 shrink-0">
+        <div class="flex h-20 items-center justify-between px-6 border-b border-slate-100 shrink-0">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
-                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00c689] text-white shadow-sm">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
                     </svg>
                 </span>
-                <span class="text-sm font-bold text-slate-800 tracking-tight">Event Panner Admin</span>
+                <span class="text-base font-extrabold text-[#3950a2] tracking-tight">Event<span class="text-[#00c689]">Planner</span></span>
             </a>
             
             <!-- Hide Sidebar Button (inside sidebar, mobile only) -->
@@ -108,8 +108,8 @@
             @endphp
 
             <!-- Admin Dashboard -->
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-500' }}">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h3.5m0 0h3.5m-3.5 0v3.5" />
                     </svg>
@@ -117,19 +117,19 @@
                 Dashboard
             </a>
 
-            <!-- Master Management -->
-            <a href="{{ route('admin.system-masters.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-orange-500 text-white' : 'bg-orange-50 text-orange-500' }}">
+            <!-- Manage Users -->
+            <a href="{{ route('admin.users.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75m-16.5-3.75v3.75" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0 1 8.625 21 11.357 11.357 0 0 1 3 19.5v-.109v-.003c0-1.113.285-2.16.786-3.07M15 7.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-6 0a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Zm4.5 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                     </svg>
                 </span>
-                Master Management
+                Manage Users
             </a>
 
             <!-- Vendor CRUD -->
-            <a href="{{ route('admin.vendors.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.vendors') ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.vendors') ? 'bg-emerald-500 text-white' : 'bg-emerald-50 text-emerald-500' }}">
+            <a href="{{ route('admin.vendors.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.vendors') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.vendors') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m0 0a8.967 8.967 0 0 1-3.741-.479 3 3 0 0 1 4.682-2.72m.94 3.198.002.031c0 .225.012.447.037.666A11.944 11.944 0 0 0 12 21c2.17 0 4.207-.576 5.963-1.584A6.062 6.062 0 0 0 18 18.72m-12 0a9 9 0 0 0-9 9m9-9a9 9 0 0 1 9-9" />
                     </svg>
@@ -137,9 +137,19 @@
                 Manage Vendor
             </a>
 
+            <!-- Master Management -->
+            <a href="{{ route('admin.system-masters.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75m-16.5-3.75v3.75" />
+                    </svg>
+                </span>
+                Master Management
+            </a>
+
             <!-- Manage Distribution -->
-            <a href="{{ route('admin.distributions.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-fuchsia-50 text-fuchsia-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-fuchsia-500 text-white' : 'bg-fuchsia-50 text-fuchsia-500' }}">
+            <a href="{{ route('admin.distributions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     </svg>
@@ -148,8 +158,8 @@
             </a>
 
             <!-- Subscription Manager -->
-            <a href="{{ route('admin.subscriptions.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-cyan-50 text-cyan-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-cyan-500 text-white' : 'bg-cyan-50 text-cyan-500' }}">
+            <a href="{{ route('admin.subscriptions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
                     </svg>
@@ -157,19 +167,9 @@
                 Subscription Manager
             </a>
 
-            <!-- Manage AI -->
-            <a href="{{ route('admin.ai.manage') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-500' }}">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.187.904ZM18 9l.4-.6L19 8l-.6-.4L18 7l-.4.6-.6.4.6.4.4.6ZM13 4l.3-.45.45-.3-.45-.3L13 2.5l-.3.45-.45.3.45.3.3.45Z" />
-                    </svg>
-                </span>
-                Manage AI
-            </a>
-
             <!-- Manage Area -->
-            <a href="{{ route('admin.areas.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-rose-50 text-rose-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-500' }}">
+            <a href="{{ route('admin.areas.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm0 0V21m0-10.5H18M9 10.5H6m3 0V21m3-10.5V21" />
                     </svg>
@@ -177,19 +177,19 @@
                 Manage Area
             </a>
 
-            <!-- Manage Users -->
-            <a href="{{ route('admin.users.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-500' }}">
+            <!-- Manage AI -->
+            <a href="{{ route('admin.ai.manage') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0 1 8.625 21 11.357 11.357 0 0 1 3 19.5v-.109v-.003c0-1.113.285-2.16.786-3.07M15 7.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-6 0a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Zm4.5 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.187.904ZM18 9l.4-.6L19 8l-.6-.4L18 7l-.4.6-.6.4.6.4.4.6ZM13 4l.3-.45.45-.3-.45-.3L13 2.5l-.3.45-.45.3.45.3.3.45Z" />
                     </svg>
                 </span>
-                Manage Users
+                Manage AI
             </a>
         </nav>
 
         <!-- Sidebar User Badge Card (Argon style) -->
-        <div class="p-4.5 border-t border-slate-50 bg-slate-50/50 rounded-b-2xl">
+        <div class="p-4.5 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl">
             <div class="flex items-center gap-3">
                 <div class="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 uppercase">
                     {{ substr(Auth::guard('admin')->user()->name ?? 'A', 0, 2) }}
@@ -206,11 +206,11 @@
     <div id="main-content-area" class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
         
         <!-- Top Horizontal Header (Navbar sits ON TOP with relative z-40) -->
-        <header class="flex h-20 items-center justify-between px-6 sm:px-8 lg:px-10 shrink-0 relative" style="z-index: 50;">
+        <header class="flex h-20 items-center justify-between px-6 sm:px-8 lg:px-10 shrink-0 relative bg-white border-b border-slate-150" style="z-index: 50;">
             <!-- Left Header elements (Breadcrumbs & Hide/Show button) -->
             <div class="flex items-center gap-4">
                 <!-- Hamburger Hide/Show toggle button -->
-                <button type="button" class="text-white hover:text-slate-100 focus:outline-none bg-white/10 hover:bg-white/15 p-2 rounded-xl border border-white/10 transition" onclick="toggleSidebar()" title="Toggle Sidebar">
+                <button type="button" class="text-slate-500 hover:text-slate-800 focus:outline-none bg-slate-50 hover:bg-slate-100 p-2 rounded-xl border border-slate-200 transition" onclick="toggleSidebar()" title="Toggle Sidebar">
                     <span class="sr-only">Toggle Sidebar</span>
                     <!-- Hamburger / Sidebar Toggle Icon -->
                     <svg class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -219,13 +219,13 @@
                 </button>
 
                 <!-- Breadcrumbs -->
-                <div class="hidden sm:block text-white">
-                    <div class="flex items-center gap-1.5 text-xs text-white/75 font-semibold">
+                <div class="hidden sm:block text-slate-800">
+                    <div class="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
                         <span>Pages</span>
                         <span>/</span>
                         <span class="capitalize">{{ str_replace(['admin.', '-'], ['', ' '], $currentRoute ?: 'Dashboard') }}</span>
                     </div>
-                    <h2 class="text-sm font-bold capitalize mt-0.5 tracking-wide">{{ str_replace(['admin.', '-'], ['', ' '], $currentRoute ?: 'Dashboard') }}</h2>
+                    <h2 class="text-sm font-bold capitalize mt-0.5 tracking-wide text-slate-800">{{ str_replace(['admin.', '-'], ['', ' '], $currentRoute ?: 'Dashboard') }}</h2>
                 </div>
             </div>
 
@@ -234,12 +234,12 @@
 
                 <!-- User Profile actions -->
                 <div class="relative">
-                    <button type="button" class="flex items-center gap-2 focus:outline-none text-white font-semibold text-xs py-1.5 px-2 hover:bg-white/10 rounded-xl transition" id="user-menu-button" onclick="toggleUserDropdown(event)">
-                        <div class="h-7.5 w-7.5 rounded-full bg-white/20 text-white flex items-center justify-center font-bold uppercase ring-1 ring-white/15">
+                    <button type="button" class="flex items-center gap-2 focus:outline-none text-slate-700 font-semibold text-xs py-1.5 px-2 hover:bg-slate-50 rounded-xl transition" id="user-menu-button" onclick="toggleUserDropdown(event)">
+                        <div class="h-7.5 w-7.5 rounded-full bg-slate-100 text-[#3950a2] border border-slate-200 flex items-center justify-center font-bold uppercase ring-1 ring-slate-100">
                             {{ substr(Auth::guard('admin')->user()->name ?? 'A', 0, 1) }}
                         </div>
                         <span class="hidden md:block">{{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</span>
-                        <svg class="h-4 w-4 text-white/70" viewBox="0 0 20 20" fill="currentColor">
+                        <svg class="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>

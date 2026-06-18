@@ -76,8 +76,7 @@ class UserAuthController extends Controller
 
             if (!$user->status) {
                 Auth::guard('web')->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+                $request->session()->regenerate();
                 return back()->withErrors([
                     'email' => 'Your account has been deactivated. Please contact the administrator.',
                 ])->onlyInput('email');
@@ -106,8 +105,7 @@ class UserAuthController extends Controller
     {
         Auth::guard('web')->logout();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->session()->regenerate();
 
         return redirect()->route('user.login')
             ->with('success', 'Logged out successfully.');

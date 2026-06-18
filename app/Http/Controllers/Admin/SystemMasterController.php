@@ -16,7 +16,7 @@ class SystemMasterController extends Controller
     public function index(Request $request)
     {
         // Load registries from database
-        $registries = MasterRegistry::orderBy('title', 'asc')->get();
+        $registries = MasterRegistry::orderBy('id', 'asc')->get();
         
         // Reconstruct $allowedTypes for compatibility
         $allowedTypes = $registries->pluck('title', 'key')->toArray();

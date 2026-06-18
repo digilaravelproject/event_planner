@@ -124,8 +124,7 @@ class VendorAuthController extends Controller
     {
         Auth::guard('vendor')->logout();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->session()->regenerate();
 
         return redirect()->route('vendor.login')
             ->with('success', 'Logged out successfully!');

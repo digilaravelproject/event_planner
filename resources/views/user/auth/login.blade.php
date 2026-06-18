@@ -59,6 +59,15 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="mb-5 p-3 rounded-xl bg-rose-50 border border-rose-100 text-xs text-rose-600 font-medium flex items-center gap-1.5">
+                    <svg class="h-3.5 w-3.5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                    </svg>
+                    {{ session('error') }}
+                </div>
+            @endif
+
             @if($errors->any())
                 <div class="mb-5 p-3 rounded-xl bg-rose-50 border border-rose-100 text-xs text-rose-600 font-medium space-y-1">
                     @foreach($errors->all() as $error)

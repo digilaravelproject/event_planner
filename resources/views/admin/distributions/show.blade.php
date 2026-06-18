@@ -1,38 +1,38 @@
 @extends('admin.layout')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 mt-6 relative z-30">
     <!-- Header -->
     <div class="flex items-center gap-4">
-        <a href="{{ route('admin.distributions.index') }}" class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition">
+        <a href="{{ route('admin.distributions.index') }}" class="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 bg-white shadow-sm transition">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
         </a>
         <div>
-            <h1 class="text-2xl font-extrabold text-white tracking-tight">View Distribution for {{ $vendor->business_name }}</h1>
-            <p class="text-sm text-white mt-1">Viewing budget allocations for : <strong class="text-white">{{ $eventType ? $eventType->label : 'Global' }}</strong>.</p>
+            <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">View Distribution for {{ $vendor->business_name }}</h1>
+            <p class="text-sm text-slate-500 mt-1 font-semibold">Viewing budget allocations for: <strong class="text-[#3950a2] font-black">{{ $eventType ? $eventType->label : 'Global' }}</strong>.</p>
         </div>
     </div>
     @include('admin.partials.alerts')
 
     <!-- Interactive Budget Distribution Widget -->
-    <div class="rounded-2xl bg-white p-5 shadow-lg border border-slate-100/50 space-y-4 sticky top-4 z-40">
+    <div class="rounded-xl bg-white p-5 shadow-sm border border-slate-200/60 space-y-4 sticky top-4 z-40">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h3 class="text-xs font-bold tracking-wider text-slate-400 uppercase">Live Distribution Calculator</h3>
-                <h2 class="text-2xl font-black text-slate-700 mt-1">
+                <h2 class="text-2xl font-black text-slate-800 mt-1">
                     <span id="live-total-label">Total Share:</span> 
-                    <span id="live-total-text" class="text-blue-600">0.00%</span>
+                    <span id="live-total-text" class="text-[#3950a2]">0.00%</span>
                     <span id="live-total-max" class="text-sm text-slate-400 font-semibold ml-2 hidden">/ ₹{{ number_format($basePrice, 2) }}</span>
                 </h2>
             </div>
             
             <div class="flex items-center gap-3">
                 <span class="text-xs font-bold text-slate-500 uppercase">Distribution Mode:</span>
-                <div class="flex items-center bg-slate-100 rounded-lg p-1">
-                    <button type="button" id="btn-mode-percentage" class="px-3 py-1 text-xs font-bold rounded-md transition-all {{ $costingType == 'percentage' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700' }}" onclick="switchMode('percentage')">Percentage (%)</button>
-                    <button type="button" id="btn-mode-rupees" class="px-3 py-1 text-xs font-bold rounded-md transition-all {{ $costingType == 'rupees' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700' }}" onclick="switchMode('rupees')">Rupees (₹)</button>
+                <div class="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
+                    <button type="button" id="btn-mode-percentage" class="px-3 py-1 text-xs font-bold rounded-md transition-all cursor-pointer {{ $costingType == 'percentage' ? 'bg-white shadow text-[#3950a2]' : 'text-slate-500 hover:text-slate-700' }}" onclick="switchMode('percentage')">Percentage (%)</button>
+                    <button type="button" id="btn-mode-rupees" class="px-3 py-1 text-xs font-bold rounded-md transition-all cursor-pointer {{ $costingType == 'rupees' ? 'bg-white shadow text-[#3950a2]' : 'text-slate-500 hover:text-slate-700' }}" onclick="switchMode('rupees')">Rupees (₹)</button>
                 </div>
-                <span id="live-badge" class="inline-flex items-center rounded-md bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 ring-1 ring-inset ring-amber-600/10 uppercase tracking-wider shrink-0 select-none">
+                <span id="live-badge" class="inline-flex items-center rounded-md bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-705 border border-amber-105 uppercase tracking-wider shrink-0 select-none">
                     Under Allocated
                 </span>
             </div>
@@ -43,12 +43,12 @@
             <div id="live-progress-bar" class="h-3.5 rounded-full transition-all duration-300 bg-amber-500" style="width: 0%"></div>
         </div>
         <p id="calc-note" class="text-[10px] text-slate-400 font-semibold leading-relaxed">
-            Note: For standard algorithms, the sum of budget allocations across all enabled registry options must sum to exactly <strong class="text-slate-600">100.00%</strong>.
+            Note: For standard algorithms, the sum of budget allocations across all enabled registry options must sum to exactly <strong class="text-slate-650">100.00%</strong>.
         </p>
     </div>
 
     <!-- Main Workspace -->
-    <form action="{{ route('admin.distributions.update', $vendor->id) }}" method="POST" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 opacity-95">
+    <form action="{{ route('admin.distributions.update', $vendor->id) }}" method="POST" class="rounded-xl bg-white p-6 shadow-sm border border-slate-200/60">
         @csrf
         @method('PUT')
         <div class="space-y-8">
@@ -66,7 +66,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-base font-bold text-slate-800 tracking-tight">{{ $registry->title }}</h3>
-                                <p class="text-xs text-slate-400 font-medium mt-0.5">Enable subregistries and distribute your budget/cost allocations.</p>
+                                <p class="text-xs text-slate-400 font-semibold mt-0.5">Enable subregistries and distribute your budget/cost allocations.</p>
                             </div>
                         </div>
 
@@ -80,15 +80,15 @@
                                     $currentShareRupees = $isEnabled ? $enabledItems[$itemKey]['share_rupees'] : '0.00';
                                     $safeLabel = str_replace(' ', '_', $item->label);
                                     
-                                    $currentValue = $costingType == 'rupees' ? $currentShareRupees : $currentSharePercent;
+                                                                   $currentValue = $costingType == 'rupees' ? $currentShareRupees : $currentSharePercent;
                                 @endphp
                                 
                                 <!-- Individual Registry Item Card -->
-                                <div id="card_{{ $registry->key }}_{{ $safeLabel }}" class="rounded-xl border p-4.5 transition-all duration-200 flex flex-col justify-between space-y-4 {{ $isEnabled ? 'border-blue-500 bg-blue-50/10 shadow-sm ring-1 ring-blue-500/25' : 'border-slate-100 bg-slate-50/20' }}">
+                                <div id="card_{{ $registry->key }}_{{ $safeLabel }}" class="rounded-xl border p-4.5 transition-all duration-200 flex flex-col justify-between space-y-4 {{ $isEnabled ? 'border-[#3950a2] bg-[#3950a2]/5 shadow-sm' : 'border-slate-200 bg-slate-50/20' }}">
                                     <div class="flex items-start justify-between">
                                         <div class="flex flex-col">
                                             <span class="text-xs font-bold text-slate-700 leading-normal">{{ $item->label }}</span>
-                                            <span class="text-[10px] text-slate-400 font-semibold mt-0.5 {{ $isEnabled ? 'text-blue-500' : 'text-slate-400' }}" id="label_status_{{ $registry->key }}_{{ $safeLabel }}">{{ $isEnabled ? 'Enabled' : 'Disabled' }}</span>
+                                            <span class="text-[10px] font-semibold mt-0.5 {{ $isEnabled ? 'text-[#3950a2]' : 'text-slate-400' }}" id="label_status_{{ $registry->key }}_{{ $safeLabel }}">{{ $isEnabled ? 'Enabled' : 'Disabled' }}</span>
                                         </div>
                                         
                                         <!-- Enabled Checkbox -->
@@ -97,14 +97,14 @@
                                             id="check_{{ $registry->key }}_{{ $safeLabel }}"
                                             data-regkey="{{ $registry->key }}" data-label="{{ $safeLabel }}"
                                             onchange="toggleInput('{{ $registry->key }}', '{{ $safeLabel }}')"
-                                            class="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer budget-checkbox">
+                                            class="h-5 w-5 rounded border-slate-350 text-[#3950a2] focus:ring-2 focus:ring-[#3950a2]/20 accent-[#3950a2] cursor-pointer budget-checkbox">
                                     </div>
                                     
                                     <!-- Interactive Range Slider -->
                                     <div class="space-y-1.5">
                                         <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                                             <span>Allocation Share</span>
-                                            <span class="text-blue-600 font-black slider-value-label" id="slider_val_{{ $registry->key }}_{{ $safeLabel }}" data-percent="{{ number_format($currentSharePercent, 1) }}%" data-rupees="₹{{ number_format($currentShareRupees, 1) }}">
+                                            <span class="text-[#3950a2] font-black slider-value-label" id="slider_val_{{ $registry->key }}_{{ $safeLabel }}" data-percent="{{ number_format($currentSharePercent, 1) }}%" data-rupees="₹{{ number_format($currentShareRupees, 1) }}">
                                                 {{ $costingType == 'rupees' ? '₹'.number_format($currentShareRupees, 1) : number_format($currentSharePercent, 1).'%' }}
                                             </span>
                                         </div>
@@ -114,7 +114,7 @@
                                             value="{{ $currentValue }}"
                                             {{ $isEnabled ? '' : 'disabled' }}
                                             oninput="syncBudgetFromSlider('{{ $registry->key }}', '{{ $safeLabel }}')"
-                                            class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 disabled:opacity-40">
+                                            class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#3950a2] disabled:opacity-40">
                                     </div>
 
                                     <!-- Input with +/- controls -->
@@ -124,7 +124,7 @@
                                         <div class="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200">
                                             <!-- Decrement Button -->
                                             <button type="button" onclick="adjustValue('{{ $registry->key }}', '{{ $safeLabel }}', -1)" {{ $isEnabled ? '' : 'disabled' }}
-                                                class="adjust-btn h-6 w-6 rounded-md hover:bg-white text-slate-500 font-bold flex items-center justify-center text-xs transition disabled:opacity-50">-</button>
+                                                class="adjust-btn h-6 w-6 rounded-md hover:bg-white text-slate-500 font-bold flex items-center justify-center text-xs transition disabled:opacity-50 cursor-pointer">-</button>
                                             
                                             <!-- Numeric Input -->
                                             <input type="number" step="0.01" min="0" max="100" 
@@ -140,7 +140,7 @@
                                             
                                             <!-- Increment Button -->
                                             <button type="button" onclick="adjustValue('{{ $registry->key }}', '{{ $safeLabel }}', 1)" {{ $isEnabled ? '' : 'disabled' }}
-                                                class="adjust-btn h-6 w-6 rounded-md hover:bg-white text-slate-500 font-bold flex items-center justify-center text-xs transition disabled:opacity-50">+</button>
+                                                class="adjust-btn h-6 w-6 rounded-md hover:bg-white text-slate-500 font-bold flex items-center justify-center text-xs transition disabled:opacity-50 cursor-pointer">+</button>
                                         </div>
                                     </div>
                                 </div>
@@ -152,10 +152,10 @@
 
             <!-- Action buttons -->
             <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-6 mt-6 pointer-events-auto">
-                <a href="{{ route('admin.distributions.index') }}" class="rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-semibold px-5 py-2.5 transition">
+                <a href="{{ route('admin.distributions.index') }}" class="rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold px-5 py-2.5 transition">
                     Back to Distributions List
                 </a>
-                <button type="submit" class="rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-6 py-2.5 transition shadow-sm hover:shadow active:scale-[0.99]">
+                <button type="submit" class="rounded-xl bg-[#3950a2] hover:bg-[#2c3e80] text-white text-sm font-semibold px-6 py-2.5 transition shadow-sm hover:shadow cursor-pointer active:scale-[0.99]">
                     Save Allocations
                 </button>
             </div>
@@ -177,28 +177,28 @@
         
         if (mode === 'percentage') {
             btnPercent.classList.replace('text-slate-500', 'bg-white');
-            btnPercent.classList.add('shadow', 'text-blue-600');
+            btnPercent.classList.add('shadow', 'text-[#3950a2]');
             btnPercent.classList.remove('hover:text-slate-700');
             
-            btnRupees.classList.remove('bg-white', 'shadow', 'text-blue-600');
+            btnRupees.classList.remove('bg-white', 'shadow', 'text-[#3950a2]');
             btnRupees.classList.add('text-slate-500', 'hover:text-slate-700');
 
             document.getElementById('live-total-label').innerText = 'Total Share:';
             document.getElementById('live-total-max').classList.add('hidden');
-            document.getElementById('calc-note').innerHTML = 'Note: For standard algorithms, the sum of budget allocations across all enabled registry options must sum to exactly <strong class="text-slate-600">100.00%</strong>.';
+            document.getElementById('calc-note').innerHTML = 'Note: For standard algorithms, the sum of budget allocations across all enabled registry options must sum to exactly <strong class="text-slate-650">100.00%</strong>.';
             
             updateInputsMax(100, 1); // Max 100%, step 1 (or 0.5) for adjust value
         } else {
             btnRupees.classList.replace('text-slate-500', 'bg-white');
-            btnRupees.classList.add('shadow', 'text-blue-600');
+            btnRupees.classList.add('shadow', 'text-[#3950a2]');
             btnRupees.classList.remove('hover:text-slate-700');
             
-            btnPercent.classList.remove('bg-white', 'shadow', 'text-blue-600');
+            btnPercent.classList.remove('bg-white', 'shadow', 'text-[#3950a2]');
             btnPercent.classList.add('text-slate-500', 'hover:text-slate-700');
 
             document.getElementById('live-total-label').innerText = 'Total Allocated:';
             document.getElementById('live-total-max').classList.remove('hidden');
-            document.getElementById('calc-note').innerHTML = `Note: The sum of allocations must equal your total business costing (<strong class="text-slate-600">₹${basePrice.toFixed(2)}</strong>).`;
+            document.getElementById('calc-note').innerHTML = `Note: The sum of allocations must equal your total business costing (<strong class="text-slate-650">₹${basePrice.toFixed(2)}</strong>).`;
             
             updateInputsMax(basePrice, 500); // Max basePrice, larger step
         }
@@ -226,8 +226,6 @@
             
             const sliderValLabel = document.getElementById(`slider_val_${registryKey}_${safeLabel}`);
             sliderValLabel.innerText = currentMode === 'percentage' ? targetVal.toFixed(1) + '%' : '₹' + targetVal.toFixed(1);
-            
-            // Adjust buttons step logic could be dynamic, but handled in adjustValue
         });
     }
 
@@ -244,21 +242,21 @@
             card.querySelectorAll('.adjust-btn').forEach(btn => btn.disabled = !checkbox.checked);
             
             if (checkbox.checked) {
-                card.classList.remove('border-slate-100', 'bg-slate-50/20');
-                card.classList.add('border-blue-500', 'bg-blue-50/10', 'shadow-sm', 'ring-1', 'ring-blue-500/25');
+                card.classList.remove('border-slate-200', 'bg-slate-50/20');
+                card.classList.add('border-[#3950a2]', 'bg-[#3950a2]/5', 'shadow-sm');
                 statusLabel.innerText = 'Enabled';
                 statusLabel.classList.remove('text-slate-400');
-                statusLabel.classList.add('text-blue-500');
+                statusLabel.classList.add('text-[#3950a2]');
             } else {
                 valInput.value = '0.00';
                 slider.value = '0';
                 valInput.setAttribute('data-percent', '0');
                 valInput.setAttribute('data-rupees', '0');
                 document.getElementById(`slider_val_${registryKey}_${safeLabel}`).innerText = currentMode === 'percentage' ? '0.0%' : '₹0.0';
-                card.classList.remove('border-blue-500', 'bg-blue-50/10', 'shadow-sm', 'ring-1', 'ring-blue-500/25');
-                card.classList.add('border-slate-100', 'bg-slate-50/20');
+                card.classList.remove('border-[#3950a2]', 'bg-[#3950a2]/5', 'shadow-sm');
+                card.classList.add('border-slate-200', 'bg-slate-50/20');
                 statusLabel.innerText = 'Disabled';
-                statusLabel.classList.remove('text-blue-500');
+                statusLabel.classList.remove('text-[#3950a2]');
                 statusLabel.classList.add('text-slate-400');
             }
         }
@@ -286,6 +284,7 @@
         recalculateBudgetShares();
     }
 
+    // syncBudgetFromInput
     function syncBudgetFromInput(registryKey, safeLabel) {
         const slider = document.getElementById(`slider_${registryKey}_${safeLabel}`);
         const valInput = document.getElementById(`value_${registryKey}_${safeLabel}`);
@@ -359,20 +358,20 @@
         progressBar.style.width = visualPercentage + '%';
 
         // Clean up classes
-        progressBar.classList.remove('bg-amber-500', 'bg-emerald-500', 'bg-rose-500');
-        liveBadge.classList.remove('bg-amber-50', 'text-amber-700', 'ring-amber-600/10', 'bg-emerald-50', 'text-emerald-700', 'ring-emerald-600/10', 'bg-rose-50', 'text-rose-700', 'ring-rose-600/10');
+        progressBar.classList.remove('bg-amber-500', 'bg-[#00c689]', 'bg-red-500');
+        liveBadge.className = "inline-flex items-center rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wider shrink-0 select-none border";
 
         if (isBalanced) {
-            progressBar.classList.add('bg-emerald-500');
-            liveBadge.classList.add('bg-emerald-50', 'text-emerald-700', 'ring-emerald-600/10');
+            progressBar.classList.add('bg-[#00c689]');
+            liveBadge.classList.add('bg-emerald-50', 'text-[#00c689]', 'border-emerald-100');
             liveBadge.innerText = 'Balanced Allocation';
         } else if (isOver) {
-            progressBar.classList.add('bg-rose-500');
-            liveBadge.classList.add('bg-rose-50', 'text-rose-700', 'ring-rose-600/10');
+            progressBar.classList.add('bg-red-500');
+            liveBadge.classList.add('bg-rose-50', 'text-red-700', 'border-red-100');
             liveBadge.innerText = 'Over Allocated';
         } else {
             progressBar.classList.add('bg-amber-500');
-            liveBadge.classList.add('bg-amber-50', 'text-amber-700', 'ring-amber-600/10');
+            liveBadge.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-100');
             liveBadge.innerText = 'Under Allocated';
         }
     }
