@@ -90,7 +90,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
                     </svg>
                 </span>
-                <span class="text-sm font-bold text-slate-800 tracking-tight">Argon Admin</span>
+                <span class="text-sm font-bold text-slate-800 tracking-tight">Event Panner Admin</span>
             </a>
             
             <!-- Hide Sidebar Button (inside sidebar, mobile only) -->
@@ -175,6 +175,16 @@
                     </svg>
                 </span>
                 Manage Area
+            </a>
+
+            <!-- Manage Users -->
+            <a href="{{ route('admin.users.index') }}" class="flex items-center gap-x-3.5 rounded-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-indigo-500 text-white' : 'bg-indigo-50 text-indigo-500' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0 1 8.625 21 11.357 11.357 0 0 1 3 19.5v-.109v-.003c0-1.113.285-2.16.786-3.07M15 7.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-6 0a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Zm4.5 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                    </svg>
+                </span>
+                Manage Users
             </a>
         </nav>
 

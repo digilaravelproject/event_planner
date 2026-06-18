@@ -77,6 +77,10 @@ Route::prefix('admin')->group(function () {
 
         // Manage Distributions
         Route::resource('/distributions', \App\Http\Controllers\Admin\DistributionController::class)->only(['index', 'show', 'update', 'destroy'])->names('admin.distributions');
+
+        // User Management CRUD
+        Route::post('/users/{id}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+        Route::resource('/users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show', 'store'])->names('admin.users');
     });
 });
 
@@ -119,6 +123,46 @@ Route::prefix('vendor')->group(function () {
         // Registries & Budget Distribution
         Route::get('/budget', [VendorDashboardController::class, 'editBudget'])->name('vendor.budget.edit');
         Route::post('/budget', [VendorDashboardController::class, 'updateBudget'])->name('vendor.budget.update');
+    });
+});
+
+use App\Http\Controllers\User\UserAuthController;
+use App\Http\Controllers\User\UserSubscriptionController;
+use App\Http\Controllers\User\UserWizardController;
+use App\Http\Controllers\User\UserDashboardController;
+
+// User Portal Routes
+Route::prefix('user')->group(function () {
+    // Guest User Routes
+    Route::middleware('guest:web')->group(function () {
+        Route::get('/register', [UserAuthController::class, 'showRegister'])->name('user.register');
+        Route::post('/register', [UserAuthController::class, 'register'])->name('user.register.submit');
+        Route::get('/login', [UserAuthController::class, 'showLogin'])->name('user.login');
+        Route::post('/login', [UserAuthController::class, 'login'])->name('user.login.submit');
+    });
+
+    // Authenticated User Routes
+    Route::middleware('auth:web')->group(function () {
+        Route::post('/logout', [UserAuthController::class, 'logout'])->name('user.logout');
+
+        // Subscription tier choosing & payment verification
+        Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('user.subscription');
+        Route::post('/subscribe/verify', [UserSubscriptionController::class, 'verifyPayment'])->name('user.subscribe.verify');
+
+        // Wizard & Event Planner & Dashboard (Subscribed users only)
+        Route::middleware('subscribed')->group(function () {
+            Route::get('/dashboard', [UserDashboardController::class, 'dashboard'])->name('user.dashboard');
+            Route::get('/plans', [UserDashboardController::class, 'plans'])->name('user.plans');
+            Route::post('/plans/{id}/duplicate', [UserDashboardController::class, 'duplicatePlan'])->name('user.plans.duplicate');
+            Route::delete('/plans/{id}', [UserDashboardController::class, 'deletePlan'])->name('user.plans.delete');
+            Route::get('/profile', [UserDashboardController::class, 'profile'])->name('user.profile');
+            Route::put('/profile/update', [UserDashboardController::class, 'updateProfile'])->name('user.profile.update');
+            Route::put('/profile/password', [UserDashboardController::class, 'updatePassword'])->name('user.password.update');
+            
+            Route::get('/wizard', [UserWizardController::class, 'index'])->name('user.wizard');
+            Route::post('/wizard/generate', [UserWizardController::class, 'generatePlan'])->name('user.wizard.generate');
+            Route::get('/summary/{id}', [UserWizardController::class, 'showSummary'])->name('user.summary');
+        });
     });
 });
 

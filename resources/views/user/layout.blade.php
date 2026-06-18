@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Shaadi Sense - User Panel')</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FAF8F5;
+        }
+        .serif-title {
+            font-family: 'Instrument Serif', Georgia, serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex bg-[#FAF8F5]">
+
+    <!-- Sidebar Layout -->
+    <aside class="w-64 border-r border-slate-200/50 bg-white flex flex-col justify-between shrink-0 select-none">
+        <div class="p-6 space-y-8">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-2.5">
+                <span class="h-9 w-9 rounded-full bg-[#850625] flex items-center justify-center shadow-md shadow-[#850625]/10">
+                    <svg class="h-4.5 w-4.5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2c-.1 3.2-2.8 5.9-6 6 3.2.1 5.9 2.8 6 6 .1-3.2 2.8-5.9 6-6-3.2-.1-5.9-2.8-6-6z"/>
+                    </svg>
+                </span>
+                <span class="text-lg font-bold text-slate-850 tracking-wide serif-title">Shaadi Sense</span>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="space-y-1">
+                @php
+                    $route = Route::currentRouteName();
+                @endphp
+                
+                <a href="{{ route('user.dashboard') }}" 
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
+                    {{ $route === 'user.dashboard' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
+                    </svg>
+                    Dashboard
+                </a>
+
+                <a href="{{ route('user.plans') }}" 
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
+                    {{ $route === 'user.plans' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                    Saved Plans
+                </a>
+
+                <a href="{{ route('user.subscription') }}" 
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
+                    {{ $route === 'user.subscription' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-5.25-6h16.5a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5H3.75a1.5 1.5 0 0 1-1.5-1.5v-3a1.5 1.5 0 0 1 1.5-1.5Zm10.875-12h1.5a1.5 1.5 0 0 1 1.5 1.5v.75m0 .001v.003h.008v-.004H15v.001Z" />
+                    </svg>
+                    Subscription
+                </a>
+
+                <a href="{{ route('user.profile') }}" 
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
+                    {{ $route === 'user.profile' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                    My Profile
+                </a>
+            </nav>
+        </div>
+
+        <!-- Sidebar User Footer -->
+        @auth
+            <div class="p-6 border-t border-slate-150 space-y-4">
+                <div class="flex items-center gap-3">
+                    @php
+                        $initials = collect(explode(' ', Auth::user()->name))->map(fn($n) => strtoupper($n[0] ?? ''))->take(2)->join('');
+                    @endphp
+                    <span class="h-10 w-10 rounded-full bg-slate-100 border border-slate-200/50 flex items-center justify-center text-xs font-bold text-slate-700">
+                        {{ $initials }}
+                    </span>
+                    <div class="text-xs">
+                        <span class="font-bold text-slate-800 block truncate max-w-[130px]">{{ Auth::user()->name }}</span>
+                        <span class="text-slate-400 font-light block truncate max-w-[130px]">{{ Auth::user()->email }}</span>
+                    </div>
+                </div>
+                <form action="{{ route('user.logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="w-full py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition duration-150">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                        </svg>
+                        Sign Out
+                    </button>
+                </form>
+            </div>
+        @endauth
+    </aside>
+
+    <!-- Main Content wrapper -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- Top bar -->
+        <header class="bg-white border-b border-slate-200/50 px-8 py-4 flex items-center justify-between shrink-0">
+            <div class="relative max-w-sm w-full">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.636Z" />
+                    </svg>
+                </span>
+                <input type="text" placeholder="Search plans, vendors..." 
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#850625] focus:border-[#850625] transition duration-150">
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Notifications icon -->
+                <button type="button" class="h-9 w-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition duration-150 focus:outline-none relative">
+                    <svg class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                    </svg>
+                    <span class="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-[#850625]"></span>
+                </button>
+
+                <!-- Plan Event button -->
+                <a href="{{ route('user.wizard') }}" 
+                    class="px-4 py-2.5 bg-[#850625] hover:bg-[#6b041e] text-white text-xs font-semibold rounded-xl tracking-wide shadow-md shadow-[#850625]/10 hover:shadow-[#850625]/25 transition duration-150 flex items-center gap-1.5">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Plan Event
+                </a>
+            </div>
+        </header>
+
+        <!-- Dynamic Content -->
+        <main class="flex-1 overflow-y-auto p-8">
+            <!-- Alert Notifications -->
+            @if(session('success'))
+                <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-xs text-emerald-700 font-semibold flex items-center gap-1.5">
+                    <svg class="h-4 w-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 text-xs text-rose-600 font-semibold space-y-1">
+                    @foreach($errors->all() as $error)
+                        <div class="flex items-center gap-1.5">
+                            <svg class="h-3.5 w-3.5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                            </svg>
+                            {{ $error }}
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            @yield('content')
+        </main>
+    </div>
+
+</body>
+</html>

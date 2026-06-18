@@ -21,7 +21,13 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'mobile_number',
+        'subscription_id',
+        'subscription_ends_at',
+        'razorpay_payment_id',
+        'razorpay_order_id',
         'password',
+        'status',
     ];
 
     /**
@@ -43,7 +49,17 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'subscription_ends_at' => 'datetime',
             'password' => 'hashed',
+            'status' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the user's subscription details.
+     */
+    public function subscription()
+    {
+        return $this->belongsTo(Subscription::class);
     }
 }
