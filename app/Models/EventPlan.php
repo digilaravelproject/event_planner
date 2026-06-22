@@ -15,12 +15,17 @@ class EventPlan extends Model
         'budget',
         'guests',
         'location',
+        'state_id',
+        'city_id',
+        'area_id',
+        'subarea_id',
         'date',
         'venue_type',
         'food_type',
         'style',
         'decoration_type',
         'entertainment_type',
+        'dynamic_selections',
         'budget_shares',
     ];
 
@@ -28,8 +33,29 @@ class EventPlan extends Model
     {
         return [
             'date' => 'date',
+            'dynamic_selections' => 'array',
             'budget_shares' => 'array',
         ];
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+
+    public function cityRelation()
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
+
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
+    }
+
+    public function subarea()
+    {
+        return $this->belongsTo(Subarea::class);
     }
 
     /**

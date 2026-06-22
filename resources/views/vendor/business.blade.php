@@ -1,7 +1,7 @@
 @extends('vendor.layout')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-6 -mt-16 relative z-30">
+<div class="max-w-4xl mx-auto space-y-6 mt-8 relative z-30">
     <!-- Header -->
     <div>
         <h1 class="text-3xl font-extrabold text-white tracking-tight font-serif-display">Manage Business Details</h1>

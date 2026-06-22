@@ -123,6 +123,10 @@ Route::prefix('vendor')->group(function () {
         // Registries & Budget Distribution
         Route::get('/budget', [VendorDashboardController::class, 'editBudget'])->name('vendor.budget.edit');
         Route::post('/budget', [VendorDashboardController::class, 'updateBudget'])->name('vendor.budget.update');
+
+        // Quote Requests
+        Route::get('/quote-requests', [\App\Http\Controllers\Vendor\QuoteRequestController::class, 'index'])->name('vendor.quote-requests.index');
+        Route::delete('/quote-requests/{id}', [\App\Http\Controllers\Vendor\QuoteRequestController::class, 'destroy'])->name('vendor.quote-requests.destroy');
     });
 });
 
@@ -148,6 +152,9 @@ Route::prefix('user')->group(function () {
         // Subscription tier choosing & payment verification
         Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('user.subscription');
         Route::post('/subscribe/verify', [UserSubscriptionController::class, 'verifyPayment'])->name('user.subscribe.verify');
+
+        // Quote Requests
+        Route::post('/quote-requests', [\App\Http\Controllers\User\QuoteRequestController::class, 'store'])->name('user.quote-requests.store');
 
         // Wizard & Event Planner & Dashboard (Subscribed users only)
         Route::middleware('subscribed')->group(function () {

@@ -65,7 +65,7 @@
                 <div class="space-y-1">
                     <span class="text-xs text-white/50 font-medium uppercase tracking-wider block">Estimated Budget</span>
                     <span class="text-2xl font-bold serif-title">
-                        ₹{{ number_format(array_sum(array_column($plan->budget_shares, 'amount')), 0) }}
+                        ₹{{ number_format($primaryCosting['total_rupees'], 0) }}
                     </span>
                 </div>
                 <div class="space-y-1">
@@ -90,7 +90,13 @@
             <div class="bg-white border border-slate-200/60 shadow-lg shadow-slate-100/50 rounded-3xl p-6 lg:col-span-5 space-y-6">
                 <div class="space-y-1">
                     <h2 class="text-lg font-bold text-slate-800">Budget Breakdown</h2>
-                    <p class="text-slate-400 text-xs font-light">Cost distribution calculations</p>
+                    <p class="text-slate-400 text-xs font-light">
+                        @if($primaryVendor)
+                            Based on vendor <strong>{{ $primaryVendor->business_name }}</strong> costing
+                        @else
+                            Cost distribution calculations (fallback)
+                        @endif
+                    </p>
                 </div>
                 
                 <!-- Chart area -->
@@ -106,7 +112,7 @@
                         $colors = ['#850625', '#b3153c', '#d94165', '#f06e8d', '#f79ebb', '#fccde2'];
                         $index = 0;
                     @endphp
-                    @foreach($plan->budget_shares as $category => $details)
+                    @foreach($primaryCosting['breakdown'] as $category => $details)
                         <div class="flex items-center justify-between text-xs">
                             <div class="flex items-center gap-2 text-slate-600 font-medium">
                                 <span class="h-3 w-3 rounded-full shrink-0" style="background-color: {{ $colors[$index % count($colors)] }}"></span>
@@ -114,12 +120,36 @@
                             </div>
                             <div class="text-right">
                                 <span class="font-bold text-slate-900">₹{{ number_format($details['amount'], 0) }}</span>
-                                <span class="text-slate-400 font-light ml-1">({{ $details['percentage'] }}%)</span>
+                                <span class="text-slate-400 font-light ml-1">({{ round($details['percentage'], 1) }}%)</span>
                             </div>
                         </div>
                         @php $index++; @endphp
                     @endforeach
                 </div>
+
+                @if($primaryVendor)
+                    <div class="pt-4 border-t border-slate-100 flex gap-2">
+                        <button type="button" 
+                                data-vendor-name="{{ $primaryVendor->business_name }}" 
+                                data-costing="{{ json_encode($primaryCosting['breakdown']) }}"
+                                onclick="openVendorDetailsModal(this)"
+                                class="flex-1 py-2 text-center rounded-lg border border-slate-200 text-slate-600 font-semibold text-[11px] hover:bg-slate-50 transition duration-150">
+                            View Details
+                        </button>
+                        @if(in_array($primaryVendor->id, $requestedVendorIds))
+                            <button type="button" disabled
+                                    class="flex-1 py-2 text-center rounded-lg bg-slate-100 text-slate-400 font-semibold text-[11px] cursor-not-allowed">
+                                Requested
+                            </button>
+                        @else
+                            <button type="button" 
+                                    onclick="requestQuote({{ $primaryVendor->id }}, {{ $plan->id }}, this)"
+                                    class="flex-1 py-2 text-center rounded-lg bg-[#850625] hover:bg-[#6b041e] text-white font-semibold text-[11px] transition duration-150">
+                                Request Quote
+                            </button>
+                        @endif
+                    </div>
+                @endif
             </div>
 
             <!-- Right Column: Timeline & Checklist -->
@@ -250,12 +280,40 @@
                             </div>
 
                             <div class="flex gap-2 pt-2 border-t border-slate-100">
-                                <button type="button" class="flex-1 py-2 text-center rounded-lg border border-slate-200 text-slate-600 font-semibold text-[11px] hover:bg-slate-50 transition duration-150">
-                                    View Details
-                                </button>
-                                <button type="button" class="flex-1 py-2 text-center rounded-lg bg-[#850625] hover:bg-[#6b041e] text-white font-semibold text-[11px] transition duration-150">
-                                    Request Quote
-                                </button>
+                                @if($venue->vendor && $venue->costing_details)
+                                    <button type="button" 
+                                            data-vendor-name="{{ $venue->vendor->business_name }}" 
+                                            data-costing="{{ json_encode($venue->costing_details['breakdown']) }}"
+                                            onclick="openVendorDetailsModal(this)"
+                                            class="flex-1 py-2 text-center rounded-lg border border-slate-200 text-slate-600 font-semibold text-[11px] hover:bg-slate-50 transition duration-150">
+                                        View Details
+                                    </button>
+                                @else
+                                    <button type="button" disabled
+                                            class="flex-1 py-2 text-center rounded-lg border border-slate-200 text-slate-450 font-semibold text-[11px] cursor-not-allowed opacity-50">
+                                        View Details
+                                    </button>
+                                @endif
+
+                                @if($venue->vendor)
+                                    @if(in_array($venue->vendor->id, $requestedVendorIds))
+                                        <button type="button" disabled
+                                                class="flex-1 py-2 text-center rounded-lg bg-slate-100 text-slate-400 font-semibold text-[11px] cursor-not-allowed">
+                                            Requested
+                                        </button>
+                                    @else
+                                        <button type="button" 
+                                                onclick="requestQuote({{ $venue->vendor->id }}, {{ $plan->id }}, this)"
+                                                class="flex-1 py-2 text-center rounded-lg bg-[#850625] hover:bg-[#6b041e] text-white font-semibold text-[11px] transition duration-150">
+                                            Request Quote
+                                        </button>
+                                    @endif
+                                @else
+                                    <button type="button" disabled
+                                            class="flex-1 py-2 text-center rounded-lg bg-slate-100 text-slate-400 font-semibold text-[11px] cursor-not-allowed">
+                                        Request Quote
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -275,7 +333,7 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 pt-2">
-                @forelse($vendors as $vendor)
+                @forelse($recommendedVendors as $vendor)
                     <!-- Card -->
                     <div class="bg-white border border-slate-200/50 shadow-md shadow-slate-100 rounded-2xl p-5 flex flex-col justify-between">
                         <div class="space-y-3">
@@ -292,20 +350,37 @@
                                 <h3 class="font-bold text-slate-800 text-sm leading-snug">{{ $vendor->business_name }}</h3>
                                 <p class="text-slate-400 text-[11px] font-light truncate">{{ $vendor->name }}</p>
                             </div>
-                            <div class="text-[11px] font-semibold text-slate-600">
-                                Base Price: <strong class="text-slate-900">₹{{ number_format($vendor->base_price, 0) }}</strong>
+                            <div class="text-[11px] font-semibold text-slate-500 pt-1 space-y-1">
+                                <div>Capacity: <strong class="text-slate-900">{{ $vendor->venue?->capacity ?? 'N/A' }} guests</strong></div>
+                                <div>Costing: <strong class="text-slate-900">₹{{ number_format($vendor->costing_details['total_rupees'], 0) }} ({{ round($vendor->costing_details['total_percentage'], 1) }}%)</strong></div>
                             </div>
                         </div>
 
-                        <div class="pt-4 mt-4 border-t border-slate-100">
-                            <button type="button" class="w-full py-2 text-center rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/50 font-semibold text-[11px] transition duration-150">
-                                Request Quote
+                        <div class="pt-4 mt-4 border-t border-slate-100 flex gap-2">
+                            <button type="button" 
+                                    data-vendor-name="{{ $vendor->business_name }}" 
+                                    data-costing="{{ json_encode($vendor->costing_details['breakdown']) }}"
+                                    onclick="openVendorDetailsModal(this)"
+                                    class="flex-1 py-2 text-center rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/50 font-semibold text-[11px] transition duration-150">
+                                View Details
                             </button>
+                            @if(in_array($vendor->id, $requestedVendorIds))
+                                <button type="button" disabled
+                                        class="flex-1 py-2 text-center rounded-lg bg-slate-100 text-slate-400 font-semibold text-[11px] cursor-not-allowed">
+                                    Requested
+                                </button>
+                            @else
+                                <button type="button" 
+                                        onclick="requestQuote({{ $vendor->id }}, {{ $plan->id }}, this)"
+                                        class="flex-1 py-2 text-center rounded-lg bg-[#850625] hover:bg-[#6b041e] text-white font-semibold text-[11px] transition duration-150">
+                                    Request Quote
+                                </button>
+                            @endif
                         </div>
                     </div>
                 @empty
                     <div class="col-span-4 text-center py-8 text-xs text-slate-400 font-light">
-                        No vendor recommendations found.
+                        No additional vendor recommendations found in this area.
                     </div>
                 @endforelse
             </div>
@@ -331,6 +406,115 @@
         &copy; 2026 Shaadi Sense. All rights reserved.
     </div>
 
+    <!-- Vendor Details Modal -->
+    <div id="vendorDetailsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl relative border border-slate-100">
+            <button onclick="closeVendorDetailsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition focus:outline-none">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="space-y-1">
+                <h2 id="modalVendorName" class="text-2xl font-normal serif-title text-slate-900">Vendor Business Name</h2>
+                <p class="text-slate-400 text-xs font-light">Budget distribution for matching services</p>
+            </div>
+
+            <!-- Costing List -->
+            <div id="modalCostingList" class="space-y-3 pt-2">
+                <!-- Populated via Javascript -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex justify-end">
+                <button onclick="closeVendorDetailsModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition focus:outline-none">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Popup Modal -->
+    <div id="successPopup" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl border border-slate-100">
+            <div class="mx-auto h-12 w-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                ✓
+            </div>
+            <div class="space-y-1">
+                <h3 class="text-lg font-bold text-slate-900">Quote Request Sent!</h3>
+                <p id="successPopupMessage" class="text-slate-500 text-xs font-light">The vendor has been notified and will contact you shortly.</p>
+            </div>
+            <button onclick="closeSuccessPopup()" class="w-full py-2.5 rounded-xl text-xs font-semibold text-white bg-[#850625] hover:bg-[#6b041e] transition focus:outline-none">
+                Great!
+            </button>
+        </div>
+    </div>
+
+    <!-- Axios library for sending request quotes -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        // Modal functions
+        function openVendorDetailsModal(button) {
+            const vendorName = button.getAttribute('data-vendor-name');
+            const costing = JSON.parse(button.getAttribute('data-costing'));
+            
+            document.getElementById('modalVendorName').innerText = vendorName;
+            
+            const listContainer = document.getElementById('modalCostingList');
+            listContainer.innerHTML = "";
+            
+            for (const [service, details] of Object.entries(costing)) {
+                const amountFormatted = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(details.amount);
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "flex items-center justify-between text-xs py-2 border-b border-slate-50";
+                itemDiv.innerHTML = `
+                    <span class="font-medium text-slate-600">${service}</span>
+                    <div class="text-right">
+                        <span class="font-bold text-slate-900">${amountFormatted}</span>
+                        <span class="text-slate-400 font-light ml-1">(${parseFloat(details.percentage).toFixed(1)}%)</span>
+                    </div>
+                `;
+                listContainer.appendChild(itemDiv);
+            }
+            
+            document.getElementById('vendorDetailsModal').classList.remove('hidden');
+        }
+
+        function closeVendorDetailsModal() {
+            document.getElementById('vendorDetailsModal').classList.add('hidden');
+        }
+
+        function closeSuccessPopup() {
+            document.getElementById('successPopup').classList.add('hidden');
+        }
+
+        function requestQuote(vendorId, planId, buttonEl) {
+            axios.post('/user/quote-requests', {
+                vendor_id: vendorId,
+                event_plan_id: planId
+            })
+            .then(response => {
+                if (response.data.success) {
+                    document.getElementById('successPopupMessage').innerText = response.data.message;
+                    document.getElementById('successPopup').classList.remove('hidden');
+                    if (buttonEl) {
+                        buttonEl.disabled = true;
+                        buttonEl.innerText = "Requested";
+                        buttonEl.classList.remove('bg-[#850625]', 'hover:bg-[#6b041e]', 'text-white', 'bg-slate-50', 'hover:bg-slate-100', 'text-slate-700');
+                        buttonEl.classList.add('bg-slate-100', 'text-slate-400', 'cursor-not-allowed');
+                        buttonEl.removeAttribute('onclick');
+                    }
+                } else {
+                    alert(response.data.message || 'Something went wrong.');
+                }
+            })
+            .catch(err => {
+                alert('Failed to send request. Please try again.');
+            });
+        }
+    </script>
+
     <!-- Chart Script -->
     <script>
         const ctx = document.getElementById('budgetChart').getContext('2d');
@@ -339,7 +523,7 @@
         const labels = [];
         const dataValues = [];
         
-        @foreach($plan->budget_shares as $category => $details)
+        @foreach($primaryCosting['breakdown'] as $category => $details)
             labels.push("{{ $category }}");
             dataValues.push({{ $details['percentage'] }});
         @endforeach

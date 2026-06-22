@@ -168,6 +168,9 @@
         <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 border-b border-slate-100/50 select-none scrollbar-none">
             @php
                 $stepLabels = ['type', 'budget', 'guests', 'location', 'date', 'venue', 'food', 'style', 'decoration', 'entertainment'];
+                foreach($dynamic_registries as $dynReg) {
+                    $stepLabels[] = strtolower($dynReg->title);
+                }
             @endphp
             @foreach($stepLabels as $index => $label)
                 <div id="subnav-{{ $index + 1 }}" class="flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-full border text-xs font-semibold transition duration-150 
@@ -273,25 +276,25 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl pt-2">
                             <div class="space-y-2">
                                 <label for="state_select" class="block text-xs font-semibold text-slate-700">State</label>
-                                <select id="state_select" onchange="loadCities()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-805 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150">
+                                <select id="state_select" name="state_id" onchange="loadCities()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-805 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150">
                                     <option value="">Select State</option>
                                 </select>
                             </div>
                             <div class="space-y-2">
                                 <label for="city_select" class="block text-xs font-semibold text-slate-700">City</label>
-                                <select id="city_select" onchange="loadAreas()" disabled class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-805 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150">
+                                <select id="city_select" name="city_id" onchange="loadAreas()" disabled class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-805 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150">
                                     <option value="">Select City</option>
                                 </select>
                             </div>
                             <div class="space-y-2">
                                 <label for="area_select" class="block text-xs font-semibold text-slate-700">Area</label>
-                                <select id="area_select" onchange="loadSubareas()" disabled class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-805 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150">
+                                <select id="area_select" name="area_id" onchange="loadSubareas()" disabled class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-805 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150">
                                     <option value="">Select Area</option>
                                 </select>
                             </div>
                             <div class="space-y-2">
                                 <label for="subarea_select" class="block text-xs font-semibold text-slate-700">Subarea</label>
-                                <select id="subarea_select" onchange="setLocationValue()" disabled class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-805 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150">
+                                <select id="subarea_select" name="subarea_id" onchange="setLocationValue()" disabled class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-805 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150">
                                     <option value="">Select Subarea</option>
                                 </select>
                             </div>
@@ -457,6 +460,30 @@
                     </div>
                 </div>
 
+                <!-- DYNAMIC STEPS -->
+                @foreach($dynamic_registries as $dynIdx => $dynReg)
+                    <div class="step-content" id="step-{{ 11 + $dynIdx }}">
+                        <div class="space-y-6">
+                            <div class="space-y-1">
+                                <h2 class="text-4xl font-normal serif-title text-slate-900 tracking-wide">Select your {{ $dynReg->title }} preference</h2>
+                                <p class="text-slate-500 text-sm font-light">Choose your preferred option</p>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                @foreach($dynReg->items as $item)
+                                    <label class="relative border border-slate-200/80 rounded-2xl p-6 flex flex-col items-center text-center gap-3 cursor-pointer hover:border-slate-400/60 transition duration-150 bg-white">
+                                        <input type="radio" name="{{ $dynReg->key }}" value="{{ $item->label }}" class="sr-only" required onchange="selectOption(this)">
+                                        <div class="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-[#850625]">
+                                            <svg class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 12.481A3.97 3.97 0 0 1 8.625 15V9.75M9 5.25H3A2.25 2.25 0 0 0 .75 7.5v11.25A2.25 2.25 0 0 0 3 21h12a2.25 2.25 0 0 0 2.25-2.25V15m-3 0h3" /></svg>
+                                        </div>
+                                        <span class="text-sm font-semibold text-slate-800">{{ $item->label }}</span>
+                                        <div class="checked-badge absolute top-2 right-2 hidden h-4 w-4 bg-[#850625] text-white rounded-full flex items-center justify-center text-[8px] font-bold">✓</div>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+
             </div>
 
             <!-- Footer navigation -->
@@ -482,7 +509,7 @@
     <!-- Javascript Actions -->
     <script>
         let currentStep = 1;
-        const totalSteps = 10;
+        const totalSteps = {{ 10 + count($dynamic_registries) }};
 
         function updateProgress() {
             // Update step text
@@ -594,7 +621,7 @@
             if (badge) badge.classList.remove('hidden');
 
             // Auto advance steps 1, 2, 3, 4, 6, 7, 8, 9
-            if (currentStep !== 5 && currentStep !== 10) {
+            if (currentStep !== 5 && currentStep !== totalSteps) {
                 setTimeout(() => {
                     navigateStep(1);
                 }, 300);
