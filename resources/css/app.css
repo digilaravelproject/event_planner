@@ -6,11 +6,27 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
     
-    --color-primary: #3950a2;
-    --color-secondary: #00c689;
-    --color-brand-blue: #3950a2;
-    --color-brand-green: #00c689;
+    --color-primary: #850625;
+    --color-primary-dark: #6b041e;
+    --color-primary-light: #a31236;
+    --color-secondary: #D4AF37;
+    --color-gold: #D4AF37;
+    --color-cream: #FAF8F5;
+    --color-luxury-dark: #120307;
+}
+
+@keyframes spinSlow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spinSlow 15s linear infinite;
 }
