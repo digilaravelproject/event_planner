@@ -25,7 +25,8 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #FAF8F5;
+            background-color: #FFFDF9;
+            color: #1e293b;
         }
         h1, h2, h3, h4, h5, h6, .font-serif-luxury {
             font-family: 'Playfair Display', Georgia, serif;
@@ -33,20 +34,20 @@
         .font-instrument {
             font-family: 'Instrument Serif', Georgia, serif;
         }
-        .glassmorphism {
-            background: rgba(255, 255, 255, 0.85);
+        .glassmorphism-light {
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(133, 6, 37, 0.08);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
     </style>
     @stack('styles')
 </head>
 <body 
-    class="bg-[#FAF8F5] text-slate-800 min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-[#850625]/20 selection:text-[#850625]" 
+    class="bg-[#FFFDF9] text-slate-800 min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-[#850625]/20 selection:text-[#850625]" 
     x-data="{ isLoaded: false, scrolled: false }" 
     @scroll.window="scrolled = (window.pageYOffset > 40) ? true : false" 
-    x-init="setTimeout(() => isLoaded = true, 1200)"
+    x-init="setTimeout(() => isLoaded = true, 1000)"
 >
 
     <!-- Grand Entrance Loader -->
