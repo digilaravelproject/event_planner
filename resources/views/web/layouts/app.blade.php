@@ -8,16 +8,30 @@
     <title>@yield('title', 'Shaadi Sense | Luxury Event Planning & Management')</title>
     <meta name="description" content="@yield('meta_description', 'Experience magnificent luxury event planning with Shaadi Sense. From royal weddings to grand celebrations.')">
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Luxury Typography Palette -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Vite Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Force Scroll to Top on Refresh / Hard Refresh -->
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+        window.addEventListener('beforeunload', function() {
+            window.scrollTo(0, 0);
+        });
+    </script>
+
+    <!-- Three.js CDN for WebGL Shader Canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -29,7 +43,19 @@
             color: #1e293b;
         }
         h1, h2, h3, h4, h5, h6, .font-serif-luxury {
+            font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+        }
+        .font-cinzel {
+            font-family: 'Cinzel', Georgia, serif;
+        }
+        .font-cormorant {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+        }
+        .font-playfair {
             font-family: 'Playfair Display', Georgia, serif;
+        }
+        .font-sans-ui {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
         }
         .font-instrument {
             font-family: 'Instrument Serif', Georgia, serif;
@@ -48,7 +74,7 @@
     :class="{ 'overflow-hidden max-h-screen': !pageReady }"
     x-data="{ isLoaded: false, pageReady: false, scrolled: false }" 
     @scroll.window="scrolled = (window.pageYOffset > 40) ? true : false" 
-    x-init="window.scrollTo(0, 0); setTimeout(() => isLoaded = true, 400); setTimeout(() => pageReady = true, 1800)"
+    x-init="window.scrollTo(0, 0); setTimeout(() => isLoaded = true, 400); setTimeout(() => { pageReady = true; window.scrollTo(0, 0); }, 1800)"
 >
 
     <!-- Grand Entrance Loader -->
