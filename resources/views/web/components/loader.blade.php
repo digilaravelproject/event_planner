@@ -1,14 +1,26 @@
 <div 
     x-data="{ hideComplete: false }" 
     x-show="!hideComplete" 
-    x-init="setTimeout(() => hideComplete = true, 3800)"
-    class="fixed inset-0 z-[100] flex overflow-hidden select-none pointer-events-none [perspective:1200px]"
+    x-init="setTimeout(() => hideComplete = true, 2000)"
+    class="fixed inset-0 z-[100] flex overflow-hidden select-none pointer-events-none [perspective:1400px]"
 >
-    <!-- Left 3D Door: Solid Opaque Royal Door Swinging INWARDS (rotateY 85deg) -->
+    <!-- Center Vertical Golden Light Seam Flare -->
+    <div 
+        class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-4 z-[105] pointer-events-none transition-opacity duration-700 bg-gradient-to-r from-transparent via-[#FFEAA5] to-transparent shadow-[0_0_50px_#FFEAA5]"
+        :class="isLoaded ? 'opacity-100 animate-light-seam' : 'opacity-0'"
+    ></div>
+
+    <!-- Left 3D Door: Solid Opaque Royal Door Swinging INWARDS -->
     <div 
         :class="isLoaded ? 'door-left-inward-open pointer-events-none' : 'door-left-closed'" 
-        class="door-left w-1/2 h-full bg-[#6E0720] border-r-4 border-[#D4AF37] shadow-[30px_0_60px_rgba(0,0,0,0.8)] flex items-center justify-end pr-8 md:pr-20 lg:pr-28 pointer-events-auto relative overflow-hidden"
+        class="door-left w-1/2 h-full bg-[#6E0720] border-r-4 border-[#D4AF37] shadow-[35px_0_80px_rgba(0,0,0,0.95)] flex items-center justify-end pr-8 md:pr-20 lg:pr-28 pointer-events-auto relative overflow-hidden"
     >
+        <!-- Dynamic Inner Door Shadow Shift (Fades out as door opens inward) -->
+        <div 
+            class="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/20 pointer-events-none transition-opacity duration-1000"
+            :class="isLoaded ? 'opacity-0' : 'opacity-100'"
+        ></div>
+
         <!-- Festive Doodles & Ornaments -->
         <div class="absolute inset-0 opacity-15 pointer-events-none">
             <!-- Sparkles & Confetti Doodles -->
@@ -36,7 +48,7 @@
         <!-- Left Door Content -->
         <div 
             class="text-right space-y-3 transition-all duration-1000 max-w-xs md:max-w-md relative z-10" 
-            :class="isLoaded ? 'opacity-0 translate-x-[-60px] scale-90' : 'opacity-100 translate-x-0 scale-100'"
+            :class="isLoaded ? 'opacity-0 translate-x-[-80px] scale-85' : 'opacity-100 translate-x-0 scale-100'"
         >
             <div class="inline-flex items-center space-x-2 text-[#D4AF37] mb-1">
                 <span class="w-10 h-0.5 bg-[#D4AF37]"></span>
@@ -49,7 +61,7 @@
         </div>
     </div>
 
-    <!-- Center Royal Crest Handle Seal with Unsealing Zoom FX -->
+    <!-- Center Royal Crest Handle Seal with Unsealing Zoom & Burst FX -->
     <div 
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[110] flex flex-col items-center justify-center transition-all duration-1000 ease-out pointer-events-auto"
         :class="isLoaded ? 'opacity-0 scale-50 rotate-45 pointer-events-none' : 'opacity-100 scale-100 rotate-0'"
@@ -57,7 +69,7 @@
         <!-- Golden Handle Badge -->
         <div class="relative w-28 h-28 md:w-36 md:h-36 flex items-center justify-center">
             <!-- Rotating Dashed Gold Ring -->
-            <div class="absolute inset-0 rounded-full border-2 border-dashed border-[#D4AF37] animate-spin-slow shadow-[0_0_40px_rgba(212,175,55,0.7)]"></div>
+            <div class="absolute inset-0 rounded-full border-2 border-dashed border-[#D4AF37] animate-spin-slow shadow-[0_0_50px_rgba(212,175,55,0.8)]"></div>
             <!-- Inner Beaded Ring -->
             <div class="absolute inset-2 rounded-full border border-dotted border-white/80 animate-[spin_25s_linear_infinite_reverse]"></div>
 
@@ -72,11 +84,17 @@
         </div>
     </div>
 
-    <!-- Right 3D Door: Solid Opaque Royal Door Swinging INWARDS (rotateY -85deg) -->
+    <!-- Right 3D Door: Solid Opaque Royal Door Swinging INWARDS -->
     <div 
         :class="isLoaded ? 'door-right-inward-open pointer-events-none' : 'door-right-closed'" 
-        class="door-right w-1/2 h-full bg-[#6E0720] border-l-4 border-[#D4AF37] shadow-[-30px_0_60px_rgba(0,0,0,0.8)] flex items-center justify-start pl-8 md:pl-20 lg:pl-28 pointer-events-auto relative overflow-hidden"
+        class="door-right w-1/2 h-full bg-[#6E0720] border-l-4 border-[#D4AF37] shadow-[-35px_0_80px_rgba(0,0,0,0.95)] flex items-center justify-start pl-8 md:pl-20 lg:pl-28 pointer-events-auto relative overflow-hidden"
     >
+        <!-- Dynamic Inner Door Shadow Shift (Fades out as door opens inward) -->
+        <div 
+            class="absolute inset-0 bg-gradient-to-l from-black/60 via-transparent to-black/20 pointer-events-none transition-opacity duration-1000"
+            :class="isLoaded ? 'opacity-0' : 'opacity-100'"
+        ></div>
+
         <!-- Festive Doodles & Ornaments -->
         <div class="absolute inset-0 opacity-15 pointer-events-none">
             <!-- Sparkles & Confetti Doodles -->
@@ -104,7 +122,7 @@
         <!-- Right Door Content -->
         <div 
             class="text-left space-y-3 transition-all duration-1000 max-w-xs md:max-w-md relative z-10" 
-            :class="isLoaded ? 'opacity-0 translate-x-[60px] scale-90' : 'opacity-100 translate-x-0 scale-100'"
+            :class="isLoaded ? 'opacity-0 translate-x-[80px] scale-85' : 'opacity-100 translate-x-0 scale-100'"
         >
             <div class="inline-flex items-center space-x-2 text-[#D4AF37] mb-1">
                 <span class="font-serif-luxury italic text-sm md:text-lg tracking-[0.3em] uppercase font-bold">Unveiling</span>

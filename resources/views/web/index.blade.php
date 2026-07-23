@@ -3,10 +3,9 @@
 @section('title', 'Shaadi Sense | Royal Event Planning & Luxury Celebrations')
 
 @section('content')
-<!-- Hero Section with Smooth 3D Entrance Zoom Effect -->
+<!-- Hero Section -->
 <section 
-    class="relative min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF3EC] to-[#FAF8F5] flex items-center justify-center pt-28 pb-20 px-6 md:px-12 overflow-hidden transition-all duration-[2500ms] ease-out transform"
-    :class="isLoaded ? 'scale-100 opacity-100' : 'scale-110 opacity-90'"
+    class="relative min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF3EC] to-[#FAF8F5] flex items-center justify-center pt-36 md:pt-44 lg:pt-48 pb-20 px-6 md:px-12 overflow-hidden"
 >
     <!-- Festive Glow Lighting Effect Backgrounds -->
     <div class="absolute top-1/3 left-1/4 w-[32rem] h-[32rem] bg-rose-200/40 rounded-full blur-[100px] animate-pulse"></div>

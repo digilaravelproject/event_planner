@@ -45,24 +45,42 @@
 </head>
 <body 
     class="bg-[#FFFDF9] text-slate-800 min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-[#850625]/20 selection:text-[#850625]" 
-    x-data="{ isLoaded: false, scrolled: false }" 
+    :class="{ 'overflow-hidden max-h-screen': !pageReady }"
+    x-data="{ isLoaded: false, pageReady: false, scrolled: false }" 
     @scroll.window="scrolled = (window.pageYOffset > 40) ? true : false" 
-    x-init="setTimeout(() => isLoaded = true, 1000)"
+    x-init="window.scrollTo(0, 0); setTimeout(() => isLoaded = true, 400); setTimeout(() => pageReady = true, 1800)"
 >
 
     <!-- Grand Entrance Loader -->
     @include('web.components.loader')
 
-    <!-- Navigation Header -->
+    <!-- Room Entry Dark Brightness Fade Overlay -->
+    <div 
+        class="fixed inset-0 z-30 pointer-events-none transition-opacity duration-[2200ms] ease-out bg-black/35"
+        :class="isLoaded ? 'opacity-0' : 'opacity-100'"
+    ></div>
+
+    <!-- Navigation Header (Fixed Viewport Root) -->
     @include('web.partials.header')
 
-    <!-- Main Content Area -->
-    <main class="flex-grow">
-        @yield('content')
-    </main>
+    <!-- 3D Room-Entry Illusion Stage Wrapper -->
+    <div 
+        class="flex-grow flex flex-col w-full page-3d-stage"
+        :class="{
+            'perspective-stage': !pageReady,
+            'page-3d-initial': !isLoaded,
+            'page-3d-zoomed': isLoaded && !pageReady,
+            'page-3d-complete': pageReady
+        }"
+    >
+        <!-- Main Content Area -->
+        <main class="flex-grow">
+            @yield('content')
+        </main>
 
-    <!-- Footer -->
-    @include('web.partials.footer')
+        <!-- Footer -->
+        @include('web.partials.footer')
+    </div>
 
     @stack('scripts')
 </body>

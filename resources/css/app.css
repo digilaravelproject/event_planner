@@ -30,37 +30,98 @@
     animation: spinSlow 15s linear infinite;
 }
 
-/* 3D Inward Real Door Swing Transformations (Matching Drawing) */
+/* 3D Inward Real Door Swing Transformations with Calibrated Hardware Acceleration */
 .door-left {
     transform-origin: left center;
     transform-style: preserve-3d;
-    transition: transform 2500ms cubic-bezier(0.25, 1, 0.5, 1), opacity 2200ms ease-in-out;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform, opacity;
+    transition: transform 1200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 1000ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .door-left-closed {
-    transform: perspective(1200px) rotateY(0deg);
+    transform: translate3d(0, 0, 0) perspective(1200px) rotateY(0deg);
     opacity: 1;
 }
 
 .door-left-inward-open {
-    transform: perspective(1200px) rotateY(85deg);
+    transform: translate3d(0, 0, 0) perspective(1200px) rotateY(95deg);
     opacity: 0;
 }
 
 .door-right {
     transform-origin: right center;
     transform-style: preserve-3d;
-    transition: transform 2500ms cubic-bezier(0.25, 1, 0.5, 1), opacity 2200ms ease-in-out;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform, opacity;
+    transition: transform 1200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 1000ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .door-right-closed {
-    transform: perspective(1200px) rotateY(0deg);
+    transform: translate3d(0, 0, 0) perspective(1200px) rotateY(0deg);
     opacity: 1;
 }
 
 .door-right-inward-open {
-    transform: perspective(1200px) rotateY(-85deg);
+    transform: translate3d(0, 0, 0) perspective(1200px) rotateY(-95deg);
     opacity: 0;
+}
+
+/* Light Seam Burst from Seam Gap */
+@keyframes lightSeamBurst {
+    0% {
+        opacity: 0;
+        transform: scale3d(0.2, 1, 1);
+    }
+    40% {
+        opacity: 1;
+        transform: scale3d(2.5, 1, 1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale3d(5, 1, 1);
+    }
+}
+
+.animate-light-seam {
+    animation: lightSeamBurst 1200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 3D Room-Entry Illusion Stage (60fps Calibrated Depth Zoom) */
+.perspective-stage {
+    perspective: 1200px;
+    perspective-origin: center center;
+}
+
+.page-3d-stage {
+    transform-origin: center center;
+    will-change: transform, opacity, filter;
+    transition: transform 1200ms cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 1000ms cubic-bezier(0.16, 1, 0.3, 1), 
+                filter 1000ms ease-out;
+}
+
+.page-3d-initial {
+    transform: translate3d(0, 0, 0) scale3d(0.88, 0.88, 1);
+    opacity: 0.35;
+    filter: brightness(0.75);
+}
+
+.page-3d-zoomed {
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+    opacity: 1;
+    filter: brightness(1);
+}
+
+/* Cleanup after entrance animation completes: Release GPU layers & restore layout */
+.page-3d-complete {
+    transform: none !important;
+    filter: none !important;
+    perspective: none !important;
+    will-change: auto !important;
+    transform-origin: initial !important;
 }
 
 /* Golden Foil Sparkle Float */
@@ -78,3 +139,4 @@
 .animate-sparkle {
     animation: floatSparkle 4s ease-in-out infinite;
 }
+
