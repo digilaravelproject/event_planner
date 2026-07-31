@@ -42,7 +42,7 @@
         </div>
 
         <!-- Metric Card: Total Vendors (Kapella White with Orange Accent Bottom Border) -->
-        <div class="rounded-xl bg-white p-5 shadow-sm border border-slate-200/60 border-b-4 border-b-amber-500 flex items-center justify-between transition duration-200 hover:shadow-md">
+        <?php /*<div class="rounded-xl bg-white p-5 shadow-sm border border-slate-200/60 border-b-4 border-b-amber-500 flex items-center justify-between transition duration-200 hover:shadow-md">
             <div class="min-w-0">
                 <p class="text-[11px] font-extrabold tracking-wider text-slate-400 uppercase">Total Vendors</p>
                 <h3 class="text-2xl font-black text-slate-800 mt-1.5 leading-none tracking-tight">{{ number_format($totalVendors) }}</h3>
@@ -56,7 +56,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615 3.001 3.001 0 0 0 3.75.615 3.001 3.001 0 0 0 3.75-.615 3.001 3.001 0 0 0 3.75.615m-15 0h18m-18 0v-3.75A2.25 2.25 0 0 1 3.75 6h16.5a2.25 2.25 0 0 1 2.25 2.25v3.75" />
                 </svg>
             </span>
-        </div>
+        </div> */?>
 
         <!-- Metric Card: Total Revenue (Kapella Bandwidth Usage Card style: Solid Blue Card) -->
         <div class="rounded-xl bg-gradient-to-r from-[#3950a2] to-[#4962b3] p-5 shadow-sm flex flex-col justify-between text-white transition duration-200 hover:shadow-md border border-[#3950a2]">
