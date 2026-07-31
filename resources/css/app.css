@@ -4,6 +4,7 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../../app/Modules/DynamicVendors/resources/views/**/*.blade.php';
 
 @theme {
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
@@ -139,4 +140,3 @@
 .animate-sparkle {
     animation: floatSparkle 4s ease-in-out infinite;
 }
-
