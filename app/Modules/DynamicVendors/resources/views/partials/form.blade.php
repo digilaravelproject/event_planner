@@ -4,7 +4,7 @@
     $blankAttribute = [[
         'id' => '', 'label' => '', 'type' => 'text', 'value' => '', 'required' => false,
         'min_length' => '', 'max_length' => '', 'min_value' => '', 'max_value' => '',
-        'allowed_values' => '', 'placeholder' => '', 'help_text' => '', 'default_value' => '',
+        'allowed_values' => '', 'default_value' => '',
     ]];
     $formAttributes = old('attributes', collect($savedAttributes)->map(function ($attribute) {
         $validation = $attribute['validation'] ?? [];
@@ -19,16 +19,16 @@
     $existingImages = old('existing_images', data_get($document, 'media.images', []));
 @endphp
 
-<div class="py-8">
+<div class="admin-page">
     @include('admin.partials.alerts')
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-            <a href="{{ route('admin.dynamic-vendors.index') }}" class="text-xs font-bold text-[#3950a2] hover:underline">← Dynamic Vendors</a>
-            <h1 class="mt-2 text-2xl font-extrabold text-slate-900">{{ $title }}</h1>
-            <p class="mt-1 text-sm text-slate-500">{{ $subtitle }}</p>
+    <div class="admin-hero mb-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div class="relative z-10">
+            <a href="{{ route('admin.dynamic-vendors.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-100 transition hover:text-white">← Dynamic Vendors</a>
+            <h1 class="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{{ $title }}</h1>
+            <p class="mt-1 text-sm text-blue-100">{{ $subtitle }}</p>
         </div>
         @if($vendor)
-            <a href="{{ route('admin.dynamic-vendors.show', $vendor) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700">View record</a>
+            <a href="{{ route('admin.dynamic-vendors.show', $vendor) }}" class="relative z-10 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">View record</a>
         @endif
     </div>
 
@@ -43,13 +43,13 @@
         @csrf
         @if($method !== 'POST') @method($method) @endif
 
-        <div class="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-sm" role="tablist">
+        <div class="admin-card flex gap-2 overflow-x-auto p-2" role="tablist">
             @foreach(['details' => 'Vendor Details', 'attributes' => 'Dynamic Attributes', 'media' => 'Images', 'seo' => 'SEO'] as $tab => $label)
                 <button type="button" data-tab-button="{{ $tab }}" class="tab-button whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-bold {{ $loop->first ? 'bg-[#3950a2] text-white' : 'text-slate-600 hover:bg-slate-50' }}">{{ $label }}</button>
             @endforeach
         </div>
 
-        <section data-tab-panel="details" class="tab-panel rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section data-tab-panel="details" class="admin-card tab-panel p-6">
             <div class="mb-5"><h2 class="text-lg font-extrabold text-slate-900">Vendor details</h2><p class="text-sm text-slate-500">Name and category are also stored only inside the JSON document.</p></div>
             <div class="grid gap-5 md:grid-cols-3">
                 <label class="block md:col-span-1"><span class="mb-2 block text-xs font-bold text-slate-700">Vendor name *</span><input name="name" required maxlength="255" value="{{ old('name', data_get($document, 'identity.name')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-[#3950a2] focus:outline-none focus:ring-2 focus:ring-[#3950a2]/10"></label>
@@ -58,10 +58,10 @@
             </div>
         </section>
 
-        <section data-tab-panel="attributes" class="tab-panel hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section data-tab-panel="attributes" class="admin-card tab-panel hidden p-6">
             <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div><h2 class="text-lg font-extrabold text-slate-900">Dynamic attributes</h2><p class="text-sm text-slate-500">Drag rows to reorder. Names are unrestricted.</p></div>
-                <div class="flex gap-2"><input id="attribute-search" type="search" placeholder="Search attributes" class="w-44 rounded-xl border border-slate-200 px-3 py-2 text-sm"><button type="button" id="add-attribute" class="rounded-xl bg-[#00a875] px-4 py-2 text-sm font-bold text-white">+ Add Attribute</button></div>
+                <div class="flex gap-2"><input id="attribute-search" type="search" placeholder="Search attributes" class="w-44 rounded-xl border border-slate-200 px-3 py-2 text-sm"><button type="button" id="add-attribute" class="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5">+ Add Attribute</button></div>
             </div>
             <datalist id="attribute-suggestions">@foreach($attributeSuggestions as $suggestion)<option value="{{ $suggestion }}">@endforeach</datalist>
             <div id="attribute-list" class="space-y-4">
@@ -72,7 +72,7 @@
             <div id="empty-attributes" class="hidden rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">No attributes yet. Add one whenever you are ready.</div>
         </section>
 
-        <section data-tab-panel="media" class="tab-panel hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section data-tab-panel="media" class="admin-card tab-panel hidden p-6">
             <h2 class="text-lg font-extrabold text-slate-900">Vendor images</h2>
             <p class="mb-5 text-sm text-slate-500">Upload multiple images. Their public storage paths are recorded in JSON.</p>
             @if(count($existingImages))
@@ -88,7 +88,7 @@
             <label class="block rounded-xl border-2 border-dashed border-slate-300 p-8 text-center"><span class="block text-sm font-bold text-slate-700">Choose images</span><span class="mt-1 block text-xs text-slate-500">JPG, PNG, GIF or WebP · up to 10 MB each</span><input type="file" name="images[]" accept="image/*" multiple class="mt-4 text-sm"></label>
         </section>
 
-        <section data-tab-panel="seo" class="tab-panel hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section data-tab-panel="seo" class="admin-card tab-panel hidden p-6">
             <h2 class="text-lg font-extrabold text-slate-900">Descriptions & discovery</h2>
             <div class="mt-5 grid gap-5 md:grid-cols-2">
                 <label class="block md:col-span-2"><span class="mb-2 block text-xs font-bold text-slate-700">Short description</span><textarea name="short_description" rows="2" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">{{ old('short_description', data_get($document, 'seo.short_description')) }}</textarea></label>
@@ -100,7 +100,7 @@
 
         <div class="flex items-center justify-end gap-3 pt-2">
             <a href="{{ route('admin.dynamic-vendors.index') }}" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700">Cancel</a>
-            <button class="rounded-xl bg-[#3950a2] px-6 py-2.5 text-sm font-bold text-white shadow-sm">{{ $vendor ? 'Save New Version' : 'Create Vendor' }}</button>
+            <button class="admin-primary-button rounded-xl px-6 py-2.5 text-sm font-bold text-white">{{ $vendor ? 'Save New Version' : 'Create Vendor' }}</button>
         </div>
     </form>
 </div>

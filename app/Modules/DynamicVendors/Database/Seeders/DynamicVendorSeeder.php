@@ -61,7 +61,7 @@ class DynamicVendorSeeder extends Seeder
                 if ($existing === null) {
                     $service->create($payload, [], $adminId);
                     $created++;
-                } elseif ($this->needsGuidanceUpdate($existing, $payload)) {
+                } elseif ($this->needsSchemaUpdate($existing, $payload)) {
                     $service->update($existing, $payload, [], $adminId);
                     $updated++;
                 } else {
@@ -182,8 +182,6 @@ class DynamicVendorSeeder extends Seeder
             'max_length' => $isTextual ? ($isLongText ? 2000 : ($type === 'phone' ? 20 : 255)) : null,
             'min_value' => $isNumeric ? ($minValue ?? 0) : null,
             'max_value' => $isNumeric ? $this->maximumFor($label, $value) : null,
-            'placeholder' => $this->placeholderFor($label, $type),
-            'help_text' => $this->explanationFor($label, $category),
             'default_value' => $this->defaultFor($type, $allowedValues),
         ];
     }
@@ -213,26 +211,6 @@ class DynamicVendorSeeder extends Seeder
             'Artist Count' => 50,
             'Minimum Quantity' => 10000,
             default => max(100, (float) $value * 5),
-        };
-    }
-
-    private function placeholderFor(string $label, string $type): string
-    {
-        return match ($type) {
-            'dropdown' => "Select $label",
-            'multi_select' => "Select one or more $label",
-            'boolean', 'checkbox' => "Choose yes or no for $label",
-            'currency' => "Enter $label in INR",
-            'number' => "Enter numeric $label",
-            'date' => 'Select date',
-            'time' => 'Select time',
-            'email' => 'name@example.com',
-            'phone' => '+91 98765 43210',
-            'url' => 'https://example.com',
-            'gps' => '18.5204, 73.8567',
-            'color' => '#d4af37',
-            'json' => '{"key":"value"}',
-            default => "Enter $label",
         };
     }
 
@@ -307,7 +285,7 @@ class DynamicVendorSeeder extends Seeder
         return $specific[$label] ?? "Provides essential $category information used for comparison, filtering, and accurate event planning.";
     }
 
-    private function needsGuidanceUpdate(DynamicVendor $vendor, array $payload): bool
+    private function needsSchemaUpdate(DynamicVendor $vendor, array $payload): bool
     {
         if ($vendor->status !== $payload['status'] || count(data_get($vendor->vendor_json, 'attributes', [])) !== count($payload['attributes'])) {
             return true;
@@ -317,9 +295,9 @@ class DynamicVendorSeeder extends Seeder
         foreach ($payload['attributes'] as $attribute) {
             $saved = $current->get($attribute['label']);
             if ($saved === null
-                || data_get($saved, 'validation.help_text') !== $attribute['help_text']
-                || data_get($saved, 'validation.placeholder') !== $attribute['placeholder']
-                || data_get($saved, 'validation.default_value') !== $attribute['default_value']) {
+                || data_get($saved, 'validation.default_value') !== $attribute['default_value']
+                || array_key_exists('ai', $saved)
+                || array_key_exists('costing', $saved)) {
                 return true;
             }
         }

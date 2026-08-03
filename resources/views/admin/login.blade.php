@@ -18,7 +18,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen py-12 flex flex-col justify-center items-center px-4 relative bg-[#f4f5f8]">
+<body class="admin-login-shell min-h-screen py-12 flex flex-col justify-center items-center px-4 relative">
 
     <!-- Top Blue background block (matches admin layout) -->
     <div class="absolute top-0 left-0 w-full bg-[#f4f5f8] h-0 z-0 hidden"></div>
@@ -26,19 +26,19 @@
     <div class="w-full max-w-md z-10 space-y-6">
         <!-- Brand Identity -->
         <div class="text-center mb-4">
-            <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#00c689] text-white shadow-md mb-3 ring-4 ring-[#00c689]/10">
+            <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#00c689] text-white shadow-xl shadow-emerald-950/30 mb-3 ring-4 ring-white/10">
                 <!-- Brand Icon -->
                 <svg class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
                 </svg>
             </span>
-            <h2 class="text-2xl font-black text-[#3950a2] tracking-tight">Event<span class="text-[#00c689]">Planner</span> Admin</h2>
-            <p class="text-slate-400 text-xs mt-1 font-semibold">Configure algorithms, moderate listings, adjust subscriptions</p>
+            <h2 class="text-2xl font-black text-white tracking-tight">Event<span class="text-emerald-300">Planner</span> Admin</h2>
+            <p class="text-blue-100 text-xs mt-1 font-semibold">Your event planning operations, all in one place</p>
         </div>
 
         <!-- Floating White Card (Argon style) -->
-        <div class="bg-white border border-slate-200 shadow-md rounded-2xl p-8 ring-1 ring-slate-100/50 transition duration-200">
+        <div class="bg-white/95 border border-white/80 shadow-2xl shadow-slate-950/25 rounded-3xl p-8 ring-1 ring-white/40 backdrop-blur-xl transition duration-200">
             <!-- Alert Notifications -->
             @if(session('success'))
                 <div class="mb-4 text-xs font-semibold text-[#00c689] bg-emerald-50 p-3 rounded-xl border border-emerald-100">
@@ -87,7 +87,7 @@
 
                 <!-- Login Button (Kapella blue) -->
                 <button type="submit" 
-                    class="w-full py-3 px-4 rounded-xl bg-[#3950a2] hover:bg-[#2c3e80] text-white text-xs font-bold uppercase tracking-wider transition duration-150 shadow-sm hover:shadow-md active:scale-[0.99] focus:outline-none cursor-pointer">
+                    class="admin-primary-button w-full py-3 px-4 rounded-xl text-white text-xs font-bold uppercase tracking-wider transition duration-150 active:scale-[0.99] focus:outline-none cursor-pointer">
                     Log In to Dashboard
                 </button>
             </form>

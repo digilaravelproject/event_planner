@@ -4,6 +4,21 @@
 <div class="space-y-6" style="margin-top: 1.5rem !important;">
     @include('admin.partials.alerts')
 
+    <section class="admin-dashboard-welcome relative overflow-hidden rounded-3xl border border-white/10 p-6 text-white sm:p-8">
+        <div class="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-xs font-extrabold uppercase tracking-[.22em] text-emerald-300">Admin command centre</p>
+                <h1 class="mt-2 !text-white text-2xl font-extrabold tracking-tight sm:text-3xl">Welcome back, {{ Auth::guard('admin')->user()->name ?? 'Administrator' }}</h1>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-blue-100">Monitor activity, manage vendors and keep every part of the event planning platform running smoothly.</p>
+            </div>
+            <div class="shrink-0 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-right backdrop-blur-sm">
+                <p class="text-[10px] font-extrabold uppercase tracking-widest text-blue-200">Today</p>
+                <p class="mt-1 text-sm font-bold text-white">{{ now()->format('d M Y') }}</p>
+            </div>
+        </div>
+        <div class="absolute -right-12 -top-20 h-56 w-56 rounded-full border-[2.5rem] border-white/5"></div>
+    </section>
+
     <!-- Metrics Grid -->
     <div class="relative z-30 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5 mt-4">
         

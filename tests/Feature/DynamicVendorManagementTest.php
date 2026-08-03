@@ -36,7 +36,7 @@ class DynamicVendorManagementTest extends TestCase
         $this->assertDatabaseCount('vendors_dynamic', 0);
     }
 
-    public function test_admin_can_create_an_ai_ready_dynamic_vendor_with_an_image(): void
+    public function test_admin_can_create_a_clean_dynamic_vendor_with_an_image(): void
     {
         Storage::fake('public');
 
@@ -54,6 +54,11 @@ class DynamicVendorManagementTest extends TestCase
         $this->assertSame('Wedding Hall', $vendor->category);
         $this->assertEquals(250000, data_get($vendor->vendor_json, 'attributes.0.value'));
         $this->assertSame('currency', data_get($vendor->vendor_json, 'attributes.0.type'));
+        $this->assertSame(1, data_get($vendor->vendor_json, 'schema_version'));
+        $this->assertArrayNotHasKey('ai', data_get($vendor->vendor_json, 'attributes.0'));
+        $this->assertArrayNotHasKey('costing', data_get($vendor->vendor_json, 'attributes.0'));
+        $this->assertArrayNotHasKey('help_text', data_get($vendor->vendor_json, 'attributes.0.validation'));
+        $this->assertArrayNotHasKey('placeholder', data_get($vendor->vendor_json, 'attributes.0.validation'));
         $this->assertSame(['Pune', 'Mumbai'], data_get($vendor->vendor_json, 'attributes.2.validation.allowed_values'));
         $this->assertCount(1, data_get($vendor->vendor_json, 'media.images'));
         Storage::disk('public')->assertExists(data_get($vendor->vendor_json, 'media.images.0'));
@@ -122,6 +127,20 @@ class DynamicVendorManagementTest extends TestCase
         $this->assertDatabaseCount('vendors_dynamic', 0);
     }
 
+    public function test_attribute_editor_stays_simple_without_ai_or_costing_configuration(): void
+    {
+        $this->actingAs($this->admin, 'admin')
+            ->get(route('admin.dynamic-vendors.create'))
+            ->assertOk()
+            ->assertSee('Optional validation', false)
+            ->assertDontSee('AI matching & costing configuration', false)
+            ->assertDontSee('Semantic role')
+            ->assertDontSee('Preference match')
+            ->assertDontSee('Include in costing')
+            ->assertDontSee('Help text')
+            ->assertDontSee('Optional validation & guidance', false);
+    }
+
     private function payload(): array
     {
         return [
@@ -139,7 +158,7 @@ class DynamicVendorManagementTest extends TestCase
                 ],
                 [
                     'label' => 'Area', 'type' => 'dropdown', 'value' => 'Pune',
-                    'allowed_values' => 'Pune, Mumbai', 'help_text' => 'Primary service area',
+                    'allowed_values' => 'Pune, Mumbai',
                 ],
                 [
                     'label' => 'Parking', 'type' => 'boolean', 'value' => '1',

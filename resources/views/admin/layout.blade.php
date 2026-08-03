@@ -17,7 +17,10 @@
     <style>
         body {
             font-family: 'Open Sans', 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8f9fe;
+            background:
+                radial-gradient(circle at 88% 6%, rgba(0, 198, 137, 0.07), transparent 24rem),
+                radial-gradient(circle at 24% -5%, rgba(57, 80, 162, 0.09), transparent 28rem),
+                #f5f7fb;
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -39,6 +42,29 @@
         #admin-sidebar {
             transition: transform 0.25s ease-in-out;
             transform: translateX(-18rem); /* Hidden by default on mobile */
+            box-shadow: 0 28px 70px -42px rgba(30, 41, 59, 0.58);
+        }
+        #admin-sidebar nav a {
+            border-radius: 0.9rem;
+        }
+        #admin-sidebar nav a:hover { transform: translateX(2px); }
+        #admin-sidebar nav a[class*="border-[#3950a2]"] {
+            border-left-color: transparent;
+            color: #fff;
+            background: linear-gradient(135deg, #4058b0, #2f438f);
+            box-shadow: 0 14px 28px -18px rgba(47, 67, 143, 0.95);
+        }
+        #admin-sidebar nav a[class*="border-[#3950a2]"] > span {
+            color: #6ee7b7;
+            background: rgba(255, 255, 255, 0.12);
+        }
+        #admin-sidebar > div:first-child {
+            background: linear-gradient(145deg, rgba(238, 242, 255, 0.72), rgba(236, 253, 245, 0.35));
+        }
+        #main-content-area > header {
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 12px 35px -30px rgba(15, 23, 42, 0.6);
         }
         #main-content-area {
             transition: padding-left 0.25s ease-in-out;
@@ -71,7 +97,7 @@
         }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden text-slate-600 antialiased bg-[#f4f5f8] flex relative">
+<body class="h-screen w-screen overflow-hidden text-slate-600 antialiased flex relative">
 
     <!-- Top Blue background block (Argon style) -->
     <div class="absolute top-0 left-0 w-full bg-[#f4f5f8] h-0 z-0 transition-all hidden"></div>
@@ -80,7 +106,7 @@
     <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden" onclick="toggleSidebar()" style="z-index: 55;"></div>
 
     <!-- Floating Sidebar Wrapper (Argon 2 Style) -->
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-4 my-4 flex w-64 flex-col rounded-2xl bg-white border border-slate-200/80 shadow-md" style="z-index: 60;">
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-4 my-4 flex w-64 flex-col overflow-hidden rounded-3xl border border-white/80 bg-white/95" style="z-index: 60;">
         <!-- Sidebar Brand / Logo -->
         <div class="flex h-20 items-center justify-between px-6 border-b border-slate-100 shrink-0">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
@@ -148,7 +174,7 @@
             </a> */?>
 
             <!-- Master Management -->
-            <a href="{{ route('admin.system-masters.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+            <?php /*<a href="{{ route('admin.system-masters.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75m-16.5-3.75v3.75" />
@@ -158,7 +184,7 @@
             </a>
 
             <!-- Manage Distribution -->
-            <?php /*<a href="{{ route('admin.distributions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+            <a href="{{ route('admin.distributions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -178,14 +204,14 @@
             </a>
 
             <!-- Manage Area -->
-            <a href="{{ route('admin.areas.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+            <?php /*<a href="{{ route('admin.areas.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm0 0V21m0-10.5H18M9 10.5H6m3 0V21m3-10.5V21" />
                     </svg>
                 </span>
                 Manage Area
-            </a>
+            </a> */?>
 
             <!-- Manage AI -->
             <a href="{{ route('admin.ai.manage') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
@@ -216,7 +242,7 @@
     <div id="main-content-area" class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
         
         <!-- Top Horizontal Header (Navbar sits ON TOP with relative z-40) -->
-        <header class="flex h-20 items-center justify-between px-6 sm:px-8 lg:px-10 shrink-0 relative bg-white border-b border-slate-150" style="z-index: 50;">
+        <header class="mx-3 mt-3 flex h-[4.5rem] items-center justify-between rounded-2xl border border-white/80 bg-white/85 px-5 sm:px-7 lg:px-8 shrink-0 relative" style="z-index: 50;">
             <!-- Left Header elements (Breadcrumbs & Hide/Show button) -->
             <div class="flex items-center gap-4">
                 <!-- Hamburger Hide/Show toggle button -->
@@ -271,7 +297,7 @@
         </header>
 
         <!-- Main content area (Independently scrollable with relative z-10) -->
-        <main class="flex-1 overflow-y-auto px-6 sm:px-8 lg:px-10 pb-8 relative" style="z-index: 10;">
+        <main class="admin-content flex-1 overflow-y-auto px-5 sm:px-7 lg:px-8 pb-8 relative" style="z-index: 10;">
             @yield('content')
         </main>
     </div>

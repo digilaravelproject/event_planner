@@ -102,33 +102,33 @@ Route::get('/locations/areas/{area}/subareas', function($areaId) {
 Route::redirect('/vendor', '/vendor/dashboard');
 
 // Vendor Portal Routes
-Route::prefix('vendor')->group(function () {
-    // Guest Vendor Routes
-    Route::middleware('guest:vendor')->group(function () {
-        Route::get('/register', [VendorAuthController::class, 'showRegister'])->name('vendor.register');
-        Route::post('/register', [VendorAuthController::class, 'register'])->name('vendor.register.submit');
-        Route::get('/login', [VendorAuthController::class, 'showLogin'])->name('vendor.login');
-        Route::post('/login', [VendorAuthController::class, 'login'])->name('vendor.login.submit');
-        Route::get('/check-email', [VendorAuthController::class, 'checkEmail'])->name('vendor.check-email');
-    });
+// Route::prefix('vendor')->group(function () {
+//     // Guest Vendor Routes
+//     Route::middleware('guest:vendor')->group(function () {
+//         Route::get('/register', [VendorAuthController::class, 'showRegister'])->name('vendor.register');
+//         Route::post('/register', [VendorAuthController::class, 'register'])->name('vendor.register.submit');
+//         Route::get('/login', [VendorAuthController::class, 'showLogin'])->name('vendor.login');
+//         Route::post('/login', [VendorAuthController::class, 'login'])->name('vendor.login.submit');
+//         Route::get('/check-email', [VendorAuthController::class, 'checkEmail'])->name('vendor.check-email');
+//     });
 
-    // Authenticated Vendor Routes
-    Route::middleware('auth:vendor')->group(function () {
-        Route::post('/logout', [VendorAuthController::class, 'logout'])->name('vendor.logout');
+//     // Authenticated Vendor Routes
+//     Route::middleware('auth:vendor')->group(function () {
+//         Route::post('/logout', [VendorAuthController::class, 'logout'])->name('vendor.logout');
         
-        Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('vendor.dashboard');
-        Route::get('/business', [VendorDashboardController::class, 'editBusiness'])->name('vendor.business.edit');
-        Route::post('/business', [VendorDashboardController::class, 'updateBusiness'])->name('vendor.business.update');
+//         Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('vendor.dashboard');
+//         Route::get('/business', [VendorDashboardController::class, 'editBusiness'])->name('vendor.business.edit');
+//         Route::post('/business', [VendorDashboardController::class, 'updateBusiness'])->name('vendor.business.update');
 
-        // Registries & Budget Distribution
-        Route::get('/budget', [VendorDashboardController::class, 'editBudget'])->name('vendor.budget.edit');
-        Route::post('/budget', [VendorDashboardController::class, 'updateBudget'])->name('vendor.budget.update');
+//         // Registries & Budget Distribution
+//         Route::get('/budget', [VendorDashboardController::class, 'editBudget'])->name('vendor.budget.edit');
+//         Route::post('/budget', [VendorDashboardController::class, 'updateBudget'])->name('vendor.budget.update');
 
-        // Quote Requests
-        Route::get('/quote-requests', [\App\Http\Controllers\Vendor\QuoteRequestController::class, 'index'])->name('vendor.quote-requests.index');
-        Route::delete('/quote-requests/{id}', [\App\Http\Controllers\Vendor\QuoteRequestController::class, 'destroy'])->name('vendor.quote-requests.destroy');
-    });
-});
+//         // Quote Requests
+//         Route::get('/quote-requests', [\App\Http\Controllers\Vendor\QuoteRequestController::class, 'index'])->name('vendor.quote-requests.index');
+//         Route::delete('/quote-requests/{id}', [\App\Http\Controllers\Vendor\QuoteRequestController::class, 'destroy'])->name('vendor.quote-requests.destroy');
+//     });
+// });
 
 use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserSubscriptionController;

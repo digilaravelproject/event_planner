@@ -128,8 +128,6 @@ class DynamicVendorService
                     'min_value' => $this->nullableNumber($attribute['min_value'] ?? null),
                     'max_value' => $this->nullableNumber($attribute['max_value'] ?? null),
                     'allowed_values' => $this->csv($attribute['allowed_values'] ?? null),
-                    'placeholder' => $attribute['placeholder'] ?? null,
-                    'help_text' => $attribute['help_text'] ?? null,
                     'default_value' => $attribute['default_value'] ?? null,
                 ], fn ($value) => $value !== null && $value !== [] && $value !== ''),
                 'position' => $position,

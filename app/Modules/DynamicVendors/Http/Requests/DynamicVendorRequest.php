@@ -37,8 +37,6 @@ abstract class DynamicVendorRequest extends FormRequest
             'attributes.*.min_value' => ['nullable', 'numeric'],
             'attributes.*.max_value' => ['nullable', 'numeric'],
             'attributes.*.allowed_values' => ['nullable', 'string'],
-            'attributes.*.placeholder' => ['nullable', 'string', 'max:500'],
-            'attributes.*.help_text' => ['nullable', 'string', 'max:1000'],
             'attributes.*.default_value' => ['nullable'],
             'attribute_uploads' => ['nullable', 'array'],
             'attribute_uploads.*' => ['nullable', 'file', 'max:51200'],

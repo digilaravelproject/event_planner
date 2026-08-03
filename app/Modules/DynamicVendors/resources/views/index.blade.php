@@ -1,17 +1,22 @@
 @extends('admin.layout')
 
 @section('content')
-<div class="py-8 space-y-6">
+<div class="admin-page space-y-6">
     @include('admin.partials.alerts')
 
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <p class="text-xs font-bold uppercase tracking-[.2em] text-[#00a875]">Independent module</p>
-            <h1 class="mt-1 text-2xl font-extrabold text-slate-900">Dynamic Vendors</h1>
-            <p class="mt-1 text-sm text-slate-500">Schema-free vendor records, ready for future semantic retrieval.</p>
+    <div class="admin-hero flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div class="relative z-10 flex items-center gap-4">
+            <span class="hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white shadow-inner sm:flex">
+                <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-1.5-1.5V6.75a1.5 1.5 0 0 1 1.5-1.5h7.5a1.5 1.5 0 0 1 1.5 1.5v10.5a1.5 1.5 0 0 1-1.5 1.5h-7.5ZM9 9.75h6M9 13.5h4.5" /></svg>
+            </span>
+            <div>
+            <p class="text-xs font-extrabold uppercase tracking-[.22em] text-emerald-300">Vendor workspace</p>
+            <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Dynamic Vendors</h1>
+            <p class="mt-1 text-sm text-blue-100">Manage flexible vendor records from one clear workspace.</p>
+            </div>
         </div>
-        <a href="{{ route('admin.dynamic-vendors.create') }}" class="inline-flex items-center justify-center rounded-xl bg-[#3950a2] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#30448b]">
-            + Add Vendor
+        <a href="{{ route('admin.dynamic-vendors.create') }}" class="relative z-10 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-[#30448b] shadow-lg shadow-slate-950/15 transition hover:-translate-y-0.5 hover:bg-emerald-50">
+            <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke-width="2.3" stroke="currentColor"><path stroke-linecap="round" d="M12 5v14M5 12h14" /></svg> Add Vendor
         </a>
     </div>
 
@@ -22,7 +27,7 @@
             $filters['status'] ?? null,
         ])->filter(fn ($value) => filled($value))->count();
     @endphp
-    <form method="GET" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <form method="GET" class="admin-card overflow-hidden">
         <div class="flex flex-col gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-3">
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3950a2]/10 text-[#3950a2]">
@@ -41,31 +46,31 @@
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-12">
                 <label class="block xl:col-span-4">
                     <span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Search vendors</span>
-                    <span class="relative block"><svg class="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m1.1-5.15a6.25 6.25 0 1 1-12.5 0 6.25 6.25 0 0 1 12.5 0Z" /></svg><input id="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Name, area, service or any value" class="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-[#3950a2] focus:ring-3 focus:ring-[#3950a2]/10"></span>
+                    <span class="relative block"><svg class="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m1.1-5.15a6.25 6.25 0 1 1-12.5 0 6.25 6.25 0 0 1 12.5 0Z" /></svg><input id="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Name, area, service or any value" class="admin-control w-full py-3 pl-10 pr-4 text-sm"></span>
                 </label>
-                <label class="block xl:col-span-2"><span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Category</span><select name="category" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#3950a2]">
+                <label class="block xl:col-span-2"><span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Category</span><select name="category" class="admin-control w-full px-3 py-3 text-sm">
                     <option value="">All categories</option>@foreach($categories as $category)<option value="{{ $category }}" @selected(($filters['category'] ?? '') === $category)>{{ $category }}</option>@endforeach
                 </select></label>
-                <label class="block xl:col-span-2"><span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Status</span><select name="status" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#3950a2]">
+                <label class="block xl:col-span-2"><span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Status</span><select name="status" class="admin-control w-full px-3 py-3 text-sm">
                     <option value="">All statuses</option>@foreach(['active', 'inactive', 'draft', 'archived'] as $status)<option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ ucfirst($status) }}</option>@endforeach
                 </select></label>
-                <label class="block xl:col-span-2"><span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Sort by</span><select name="sort" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#3950a2]">
+                <label class="block xl:col-span-2"><span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Sort by</span><select name="sort" class="admin-control w-full px-3 py-3 text-sm">
                     @foreach(['created_at' => 'Created date', 'name' => 'Vendor name', 'category' => 'Category', 'status' => 'Status'] as $value => $label)<option value="{{ $value }}" @selected(($filters['sort'] ?? 'created_at') === $value)>{{ $label }}</option>@endforeach
                 </select></label>
-                <label class="block xl:col-span-2"><span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Order</span><select name="direction" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#3950a2]">
+                <label class="block xl:col-span-2"><span class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Order</span><select name="direction" class="admin-control w-full px-3 py-3 text-sm">
                     <option value="asc" @selected(($filters['direction'] ?? 'desc') === 'asc')>Ascending</option><option value="desc" @selected(($filters['direction'] ?? 'desc') === 'desc')>Descending</option>
                 </select></label>
             </div>
             <div class="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-xs font-semibold text-slate-500">Showing <span class="font-extrabold text-slate-800">{{ $vendors->firstItem() ?? 0 }}–{{ $vendors->lastItem() ?? 0 }}</span> of <span class="font-extrabold text-slate-800">{{ $vendors->total() }}</span> vendors</p>
-                <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#3950a2] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#30448b]">
+                <button class="admin-primary-button inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white">
                     <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.53.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.012L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.387-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg> Apply filters
                 </button>
             </div>
         </div>
     </form>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="admin-card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
@@ -79,7 +84,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($vendors as $vendor)
-                        <tr class="hover:bg-slate-50/70">
+                        <tr class="transition-colors hover:bg-indigo-50/45">
                             <td class="px-5 py-4 font-bold text-slate-900">{{ $vendor->name }}</td>
                             <td class="px-5 py-4 text-sm text-slate-600">{{ $vendor->category }}</td>
                             <td class="px-5 py-4"><x-dynamic-vendors::status-badge :status="$vendor->status" /></td>
