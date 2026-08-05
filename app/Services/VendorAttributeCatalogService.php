@@ -8,7 +8,7 @@ use Illuminate\Validation\ValidationException;
 
 class VendorAttributeCatalogService
 {
-    private const UNSUPPORTED_TYPES = ['image', 'file', 'video', 'gps', 'rich_text', 'json'];
+    private const UNSUPPORTED_TYPES = ['image', 'file', 'video', 'gps', 'rich_text', 'json', 'phone', 'email', 'url'];
 
     public function catalog(?EventRequirementQuestion $question = null): array
     {

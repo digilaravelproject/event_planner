@@ -54,7 +54,7 @@
             background: linear-gradient(135deg, #4058b0, #2f438f);
             box-shadow: 0 14px 28px -18px rgba(47, 67, 143, 0.95);
         }
-        #admin-sidebar nav a[class*="border-[#3950a2]"] > span {
+        #admin-sidebar nav a[class*="border-[#3950a2]"] > span:first-child {
             color: #6ee7b7;
             background: rgba(255, 255, 255, 0.12);
         }
@@ -178,6 +178,7 @@
                 ['admin.vendor-analytics.index', 'admin.vendor-analytics', 'Vendor Analytics', 'VA'],
                 ['admin.event-questions.index', 'admin.event-questions', 'Event Requirement Questions', 'EQ'],
                 ['admin.notifications.index', 'admin.notifications', 'Notification Management', 'NM'],
+                ['admin.pages.index', 'admin.pages', 'Manage Pages', 'MP'],
                 ['admin.feedback.index', 'admin.feedback', 'User Feedback', 'UF'],
             ] as [$menuRoute, $routePrefix, $menuLabel, $menuIcon])
                 <a href="{{ route($menuRoute) }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, $routePrefix) ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">

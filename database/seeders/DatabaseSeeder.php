@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Modules\DynamicVendors\Database\Seeders\DynamicVendorSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -23,6 +24,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(AdminSeeder::class);
+        $this->call(DynamicVendorSeeder::class);
         $this->call(AdminModulesSeeder::class);
     }
 }

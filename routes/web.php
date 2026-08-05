@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AiSettingController;
 use App\Http\Controllers\Admin\EventRequirementQuestionController;
 use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\VendorAnalyticsController;
 use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserSubscriptionController;
@@ -48,6 +49,7 @@ Route::prefix('admin')->group(function () {
             ->names('admin.event-questions');
         Route::post('/notifications/{notification}/send', [NotificationController::class, 'send'])->name('admin.notifications.send');
         Route::resource('/notifications', NotificationController::class)->names('admin.notifications');
+        Route::resource('/pages', PageController::class)->names('admin.pages');
         Route::resource('/feedback', FeedbackController::class)->only(['index', 'show', 'update', 'destroy'])->names('admin.feedback');
 
         // User Management CRUD

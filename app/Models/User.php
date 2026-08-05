@@ -70,7 +70,7 @@ class User extends Authenticatable
 
     public function adminNotifications()
     {
-        return $this->belongsToMany(AdminNotification::class, 'notification_users')
+        return $this->belongsToMany(AdminNotification::class, 'notification_users', 'user_id', 'notification_id')
             ->withPivot(['is_read', 'read_at'])->withTimestamps();
     }
 }
