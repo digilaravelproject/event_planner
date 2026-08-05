@@ -9,10 +9,13 @@ use App\Modules\DynamicVendors\Http\Requests\UpdateDynamicVendorRequest;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Modules\DynamicVendors\Models\DynamicVendorVersion;
 use App\Modules\DynamicVendors\Repositories\DynamicVendorRepositoryInterface;
+use App\Modules\DynamicVendors\Services\AttributeSheetService;
 use App\Modules\DynamicVendors\Services\DynamicVendorService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DynamicVendorController extends Controller
 {
@@ -30,7 +33,27 @@ class DynamicVendorController extends Controller
     public function __construct(
         private readonly DynamicVendorRepositoryInterface $vendors,
         private readonly DynamicVendorService $service,
+        private readonly AttributeSheetService $attributeSheets,
     ) {}
+
+    public function downloadAttributeSample(): BinaryFileResponse
+    {
+        return response()->download(
+            __DIR__.'/../../resources/samples/sample_attribute.xlsx',
+            'sample_attribute.xlsx',
+        );
+    }
+
+    public function importAttributes(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'attribute_sheet' => ['required', 'file', 'max:2048', 'extensions:xlsx'],
+        ]);
+
+        return response()->json([
+            'attributes' => $this->attributeSheets->import($validated['attribute_sheet']),
+        ]);
+    }
 
     public function index(Request $request): View
     {

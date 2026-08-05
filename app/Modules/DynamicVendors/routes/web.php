@@ -7,6 +7,8 @@ Route::middleware(['web', 'auth:admin'])
     ->prefix('admin/dynamic-vendors')
     ->name('admin.dynamic-vendors.')
     ->group(function (): void {
+        Route::get('attribute-sheet/sample', [DynamicVendorController::class, 'downloadAttributeSample'])->name('attribute-sheet.sample');
+        Route::post('attribute-sheet/import', [DynamicVendorController::class, 'importAttributes'])->name('attribute-sheet.import');
         Route::post('{dynamic_vendor}/duplicate', [DynamicVendorController::class, 'duplicate'])->name('duplicate');
         Route::patch('{dynamic_vendor}/status', [DynamicVendorController::class, 'status'])->name('status');
         Route::post('{dynamic_vendor}/versions/{version}/rollback', [DynamicVendorController::class, 'rollback'])->name('rollback');

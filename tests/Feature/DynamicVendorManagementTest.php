@@ -142,6 +142,36 @@ class DynamicVendorManagementTest extends TestCase
             ->assertDontSee('Optional validation & guidance', false);
     }
 
+    public function test_admin_can_download_and_import_the_sample_attribute_sheet(): void
+    {
+        $sample = base_path('app/Modules/DynamicVendors/resources/samples/sample_attribute.xlsx');
+
+        $this->actingAs($this->admin, 'admin')
+            ->get(route('admin.dynamic-vendors.attribute-sheet.sample'))
+            ->assertOk()
+            ->assertDownload('sample_attribute.xlsx');
+
+        $this->post(route('admin.dynamic-vendors.attribute-sheet.import'), [
+            'attribute_sheet' => UploadedFile::fake()->createWithContent('attributes.xlsx', file_get_contents($sample)),
+        ])->assertOk()->assertJson([
+            'attributes' => [[
+                'label' => 'Price',
+                'value' => '1000',
+                'type' => 'number',
+            ]],
+        ]);
+    }
+
+    public function test_attribute_sheet_import_rejects_an_invalid_excel_file(): void
+    {
+        $this->actingAs($this->admin, 'admin')
+            ->postJson(route('admin.dynamic-vendors.attribute-sheet.import'), [
+                'attribute_sheet' => UploadedFile::fake()->createWithContent('attributes.xlsx', 'not an Excel workbook'),
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('attribute_sheet');
+    }
+
     private function payload(): array
     {
         return [

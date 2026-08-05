@@ -61,8 +61,15 @@
         <section data-tab-panel="attributes" class="admin-card tab-panel hidden p-6">
             <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div><h2 class="text-lg font-extrabold text-slate-900">Dynamic attributes</h2><p class="text-sm text-slate-500">Drag rows to reorder. Names are unrestricted.</p></div>
-                <div class="flex gap-2"><input id="attribute-search" type="search" placeholder="Search attributes" class="w-44 rounded-xl border border-slate-200 px-3 py-2 text-sm"><button type="button" id="add-attribute" class="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5">+ Add Attribute</button></div>
+                <div class="flex flex-wrap gap-2">
+                    <input id="attribute-search" type="search" placeholder="Search attributes" class="w-44 rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                    <a href="{{ route('admin.dynamic-vendors.attribute-sheet.sample') }}" class="inline-flex items-center rounded-xl border border-[#3950a2]/20 bg-indigo-50 px-4 py-2 text-sm font-bold text-[#3950a2] transition hover:bg-indigo-100">Download Sample Sheet</a>
+                    <button type="button" id="upload-attribute-sheet" data-import-url="{{ route('admin.dynamic-vendors.attribute-sheet.import') }}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100">Upload Attribute Sheet</button>
+                    <input id="attribute-sheet-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden">
+                    <button type="button" id="add-attribute" class="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5">+ Add Attribute</button>
+                </div>
             </div>
+            <div id="attribute-sheet-message" class="mb-4 hidden rounded-xl border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
             <datalist id="attribute-suggestions">@foreach($attributeSuggestions as $suggestion)<option value="{{ $suggestion }}">@endforeach</datalist>
             <div id="attribute-list" class="space-y-4">
                 @foreach($formAttributes as $index => $attribute)
@@ -114,6 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const list = document.getElementById('attribute-list');
     const template = document.getElementById('attribute-template');
     const empty = document.getElementById('empty-attributes');
+    const sheetButton = document.getElementById('upload-attribute-sheet');
+    const sheetInput = document.getElementById('attribute-sheet-file');
+    const sheetMessage = document.getElementById('attribute-sheet-message');
     let dragged = null;
 
     const reindex = () => {
@@ -146,11 +156,59 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     [...list.querySelectorAll('.attribute-row')].forEach(bindRow);
-    document.getElementById('add-attribute').addEventListener('click', () => {
+    const appendAttribute = attribute => {
         const wrapper = document.createElement('div');
         wrapper.innerHTML = template.innerHTML.replaceAll('__INDEX__', list.children.length).trim();
-        const row = wrapper.firstElementChild; list.appendChild(row); bindRow(row); reindex();
+        const row = wrapper.firstElementChild;
+        row.querySelector('.attribute-name').value = attribute.label ?? '';
+        row.querySelector('.attribute-type').value = attribute.type ?? 'text';
+        row.querySelector('.attribute-value textarea').value = attribute.value ?? '';
+        list.appendChild(row);
+        bindRow(row);
+        row.querySelector('.attribute-type').dispatchEvent(new Event('change'));
+        return row;
+    };
+    document.getElementById('add-attribute').addEventListener('click', () => {
+        const row = appendAttribute({}); reindex();
         row.querySelector('.attribute-name').focus();
+    });
+    sheetButton.addEventListener('click', () => sheetInput.click());
+    sheetInput.addEventListener('change', async () => {
+        const file = sheetInput.files[0];
+        if (!file) return;
+
+        sheetButton.disabled = true;
+        sheetButton.textContent = 'Importing...';
+        sheetMessage.className = 'mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700';
+        sheetMessage.textContent = 'Reading the attribute sheet...';
+
+        try {
+            const data = new FormData();
+            data.append('attribute_sheet', file);
+            const response = await fetch(sheetButton.dataset.importUrl, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
+                body: data,
+            });
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload.message || Object.values(payload.errors || {}).flat()[0] || 'The attribute sheet could not be imported.');
+
+            const currentRows = [...list.querySelectorAll('.attribute-row')];
+            if (currentRows.length === 1 && currentRows[0].querySelector('.attribute-name').value.trim() === '' && currentRows[0].querySelector('.attribute-value textarea').value.trim() === '') {
+                currentRows[0].remove();
+            }
+            payload.attributes.forEach(appendAttribute);
+            reindex();
+            sheetMessage.className = 'mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700';
+            sheetMessage.textContent = `${payload.attributes.length} attribute${payload.attributes.length === 1 ? '' : 's'} imported. Review them, then save the vendor.`;
+        } catch (error) {
+            sheetMessage.className = 'mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700';
+            sheetMessage.textContent = error.message;
+        } finally {
+            sheetButton.disabled = false;
+            sheetButton.textContent = 'Upload Attribute Sheet';
+            sheetInput.value = '';
+        }
     });
     document.getElementById('attribute-search').addEventListener('input', event => {
         const term = event.target.value.toLowerCase();
