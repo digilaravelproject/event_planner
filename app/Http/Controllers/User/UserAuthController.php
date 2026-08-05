@@ -16,7 +16,7 @@ class UserAuthController extends Controller
     public function showRegister()
     {
         if (Auth::guard('web')->check()) {
-            return redirect()->route('user.wizard');
+            return redirect()->route('user.profile');
         }
         return view('user.auth.register');
     }
@@ -54,7 +54,7 @@ class UserAuthController extends Controller
     public function showLogin()
     {
         if (Auth::guard('web')->check()) {
-            return redirect()->route('user.wizard');
+            return redirect()->route('user.profile');
         }
         return view('user.auth.login');
     }
@@ -85,7 +85,7 @@ class UserAuthController extends Controller
             $request->session()->regenerate();
 
             if ($user->subscription_id && (!$user->subscription_ends_at || $user->subscription_ends_at->isFuture())) {
-                return redirect()->route('user.wizard')
+                return redirect()->route('user.profile')
                     ->with('success', 'Welcome back!');
             }
 

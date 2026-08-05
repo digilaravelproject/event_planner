@@ -27,4 +27,5 @@ class AiSetting extends Model
     {
         return self::updateOrCreate(['key' => $key], ['value' => $value]);
     }
+
 }

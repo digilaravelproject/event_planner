@@ -38,7 +38,7 @@
     <!-- Right Side CTA / Auth Actions -->
     <div class="hidden md:flex items-center space-x-4">
         @auth('web')
-            <a href="{{ route('user.dashboard') }}" class="px-5 py-2.5 rounded-xl text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md shadow-[#850625]/20 transition-all hover:scale-[1.02]">
+            <a href="{{ route('user.profile') }}" class="px-5 py-2.5 rounded-xl text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md shadow-[#850625]/20 transition-all hover:scale-[1.02]">
                 <i class="fa-solid fa-gauge mr-1.5"></i> Dashboard
             </a>
             <form action="{{ route('user.logout') }}" method="POST" class="inline">
@@ -89,7 +89,7 @@
         
         <div class="pt-4 flex flex-col space-y-3">
             @auth('web')
-                <a @click="mobileMenuOpen = false" href="{{ route('user.dashboard') }}" class="w-full text-center px-5 py-2.5 rounded-xl text-white bg-[#850625] text-xs font-bold shadow-md">
+                <a @click="mobileMenuOpen = false" href="{{ route('user.profile') }}" class="w-full text-center px-5 py-2.5 rounded-xl text-white bg-[#850625] text-xs font-bold shadow-md">
                     Dashboard
                 </a>
             @else

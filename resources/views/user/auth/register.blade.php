@@ -44,7 +44,7 @@
                 </svg>
             </span>
             <h2 class="text-4xl font-normal serif-title text-slate-900 tracking-wide">Create Your Account</h2>
-            <p class="text-slate-500 text-sm mt-2 font-light">Get started with custom templates and vendors.</p>
+            <p class="text-slate-500 text-sm mt-2 font-light">Get started with custom event plans.</p>
         </div>
 
         <!-- Registration Card -->

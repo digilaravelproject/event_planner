@@ -62,4 +62,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Subscription::class);
     }
+
+    public function feedback()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
+    public function adminNotifications()
+    {
+        return $this->belongsToMany(AdminNotification::class, 'notification_users')
+            ->withPivot(['is_read', 'read_at'])->withTimestamps();
+    }
 }

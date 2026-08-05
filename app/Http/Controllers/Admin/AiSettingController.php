@@ -3,36 +3,39 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\UpdateAiConfigurationRequest;
+use App\Models\AdminModuleOption;
 use App\Models\AiSetting;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class AiSettingController extends Controller
 {
-    /**
-     * Display the AI configuration page.
-     */
     public function index()
     {
-        $apiKey = AiSetting::getValue('openai_api_key', '');
-        $model = AiSetting::getValue('openai_model', 'gpt-4o');
+        $storedKey = AiSetting::getValue('openai_api_key', '');
+        try { $apiKey = $storedKey ? Crypt::decryptString($storedKey) : ''; } catch (\Throwable) { $apiKey = $storedKey; }
 
-        return view('admin.ai.manage', compact('apiKey', 'model'));
+        return view('admin.ai.manage', [
+            'apiKey' => $apiKey,
+            'model' => AiSetting::getValue('openai_model', 'gpt-4o'),
+            'promptTemplate' => AiSetting::getValue('ai_prompt_template', ''),
+            'status' => (bool) AiSetting::getValue('status', true),
+            'updatedBy' => AiSetting::getValue('updated_by_name', 'Not updated yet'),
+            'lastUpdated' => AiSetting::query()->latest('updated_at')->value('updated_at'),
+            'models' => AdminModuleOption::forGroup('ai_model')->get(),
+        ]);
     }
 
-    /**
-     * Store or update AI credentials.
-     */
-    public function store(Request $request)
+    public function store(UpdateAiConfigurationRequest $request)
     {
-        $validated = $request->validate([
-            'openai_api_key' => ['nullable', 'string', 'max:255'],
-            'openai_model' => ['required', 'string', 'max:100'],
-        ]);
-
-        AiSetting::setValue('openai_api_key', $validated['openai_api_key'] ?? '');
+        $validated = $request->validated();
+        AiSetting::setValue('openai_api_key', empty($validated['openai_api_key']) ? '' : Crypt::encryptString($validated['openai_api_key']));
         AiSetting::setValue('openai_model', $validated['openai_model']);
+        AiSetting::setValue('ai_prompt_template', $validated['ai_prompt_template'] ?? '');
+        AiSetting::setValue('status', $validated['status']);
+        AiSetting::setValue('updated_by', auth('admin')->id());
+        AiSetting::setValue('updated_by_name', auth('admin')->user()->name);
 
-        return redirect()->route('admin.ai.manage')
-            ->with('success', 'OpenAI credentials updated successfully!');
+        return to_route('admin.ai.manage')->with('success', 'AI configuration updated successfully.');
     }
 }

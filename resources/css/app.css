@@ -182,6 +182,10 @@
         pointer-events: none;
     }
 
+    .admin-hero h1 {
+        color: #fff;
+    }
+
     .admin-card {
         border: 1px solid rgb(226 232 240 / 0.9);
         border-radius: 1.25rem;
@@ -272,6 +276,10 @@
 .admin-content h1 {
     color: #17213b;
     letter-spacing: -0.035em;
+}
+
+.admin-content .admin-hero h1 {
+    color: #fff;
 }
 
 .admin-content h2,

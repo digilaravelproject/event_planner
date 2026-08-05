@@ -48,7 +48,7 @@ class UserSubscriptionController extends Controller
 
         return response()->json([
             'success' => true,
-            'redirect' => route('user.wizard'),
+            'redirect' => route('user.profile'),
             'message' => 'Subscription activated successfully!',
         ]);
     }

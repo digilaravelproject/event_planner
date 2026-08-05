@@ -11,9 +11,6 @@
     
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
@@ -47,24 +44,6 @@
                     $route = Route::currentRouteName();
                 @endphp
                 
-                <a href="{{ route('user.dashboard') }}" 
-                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
-                    {{ $route === 'user.dashboard' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
-                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
-                    </svg>
-                    Dashboard
-                </a>
-
-                <a href="{{ route('user.plans') }}" 
-                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
-                    {{ $route === 'user.plans' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
-                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                    </svg>
-                    Saved Plans
-                </a>
-
                 <a href="{{ route('user.subscription') }}" 
                     class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
                     {{ $route === 'user.subscription' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
@@ -117,16 +96,6 @@
     <div class="flex-1 flex flex-col min-w-0">
         <!-- Top bar -->
         <header class="bg-white border-b border-slate-200/50 px-8 py-4 flex items-center justify-between shrink-0">
-            <div class="relative max-w-sm w-full">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.637 10.636Z" />
-                    </svg>
-                </span>
-                <input type="text" placeholder="Search plans, vendors..." 
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#850625] focus:border-[#850625] transition duration-150">
-            </div>
-
             <div class="flex items-center gap-4">
                 <!-- Notifications icon -->
                 <button type="button" class="h-9 w-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition duration-150 focus:outline-none relative">
@@ -136,14 +105,6 @@
                     <span class="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-[#850625]"></span>
                 </button>
 
-                <!-- Plan Event button -->
-                <a href="{{ route('user.wizard') }}" 
-                    class="px-4 py-2.5 bg-[#850625] hover:bg-[#6b041e] text-white text-xs font-semibold rounded-xl tracking-wide shadow-md shadow-[#850625]/10 hover:shadow-[#850625]/25 transition duration-150 flex items-center gap-1.5">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    Plan Event
-                </a>
             </div>
         </header>
 

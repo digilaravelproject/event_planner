@@ -163,36 +163,6 @@
                 Dynamic Vendors
             </a>
 
-            <!-- Vendor CRUD -->
-            <?php /*<a href="{{ route('admin.vendors.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.vendors') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.vendors') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m0 0a8.967 8.967 0 0 1-3.741-.479 3 3 0 0 1 4.682-2.72m.94 3.198.002.031c0 .225.012.447.037.666A11.944 11.944 0 0 0 12 21c2.17 0 4.207-.576 5.963-1.584A6.062 6.062 0 0 0 18 18.72m-12 0a9 9 0 0 0-9 9m9-9a9 9 0 0 1 9-9" />
-                    </svg>
-                </span>
-                Manage Vendor
-            </a> */?>
-
-            <!-- Master Management -->
-            <?php /*<a href="{{ route('admin.system-masters.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.system-masters') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75m-16.5-3.75v3.75" />
-                    </svg>
-                </span>
-                Master Management
-            </a>
-
-            <!-- Manage Distribution -->
-            <a href="{{ route('admin.distributions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.distributions') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                </span>
-                Manage Distribution
-            </a> */?>
-
             <!-- Subscription Manager -->
             <a href="{{ route('admin.subscriptions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
@@ -203,24 +173,26 @@
                 Subscription Manager
             </a>
 
-            <!-- Manage Area -->
-            <?php /*<a href="{{ route('admin.areas.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.areas') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm0 0V21m0-10.5H18M9 10.5H6m3 0V21m3-10.5V21" />
-                    </svg>
-                </span>
-                Manage Area
-            </a> */?>
-
             <!-- Manage AI -->
-            <a href="{{ route('admin.ai.manage') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.ai') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
+            @foreach([
+                ['admin.vendor-analytics.index', 'admin.vendor-analytics', 'Vendor Analytics', 'VA'],
+                ['admin.event-questions.index', 'admin.event-questions', 'Event Requirement Questions', 'EQ'],
+                ['admin.notifications.index', 'admin.notifications', 'Notification Management', 'NM'],
+                ['admin.feedback.index', 'admin.feedback', 'User Feedback', 'UF'],
+            ] as [$menuRoute, $routePrefix, $menuLabel, $menuIcon])
+                <a href="{{ route($menuRoute) }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, $routePrefix) ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ str_starts_with($currentRoute, $routePrefix) ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">{{ $menuIcon }}</span>
+                    <span>{{ $menuLabel }}</span>
+                </a>
+            @endforeach
+
+            <a href="{{ route('admin.ai.manage') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.ai.manage') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.ai.manage') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 21l-.813-5.096L3 15l5.096-.813L9 9l.813 5.096L15 15l-5.187.904ZM18 9l.4-.6L19 8l-.6-.4L18 7l-.4.6-.6.4.6.4.4.6ZM13 4l.3-.45.45-.3-.45-.3L13 2.5l-.3.45-.45.3.45.3.3.45Z" />
                     </svg>
                 </span>
-                Manage AI
+                AI Configuration
             </a>
         </nav>
 
@@ -303,6 +275,7 @@
     </div>
 
     <!-- Scripting for Dynamic Components (Argon Collapsible Sidebar) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Toggle Sidebar state
         function toggleSidebar() {
@@ -337,6 +310,20 @@
         window.addEventListener('click', function(e) {
             closeUserDropdown();
         });
+
+        document.addEventListener('submit', function (event) {
+            const form = event.target.closest('form[data-confirm]');
+            if (!form || form.dataset.confirmed === 'true') return;
+            event.preventDefault();
+            const submit = () => { form.dataset.confirmed = 'true'; form.submit(); };
+            if (window.Swal) Swal.fire({title: form.dataset.confirm || 'Are you sure?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#3950a2', confirmButtonText: 'Yes, continue'}).then(result => result.isConfirmed && submit());
+            else if (confirm(form.dataset.confirm || 'Are you sure?')) submit();
+        });
+
+        @if(session('success'))
+            if (window.Swal) Swal.fire({toast:true,position:'top-end',icon:'success',title:@json(session('success')),showConfirmButton:false,timer:2600,timerProgressBar:true});
+        @endif
     </script>
+    @stack('scripts')
 </body>
 </html>

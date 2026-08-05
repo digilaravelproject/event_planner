@@ -34,12 +34,10 @@
             </ul>
         </div>
 
-        <!-- Partner Portals -->
+        <!-- Administration -->
         <div>
-            <h4 class="text-[#D4AF37] font-serif-luxury font-extrabold text-lg mb-4">Partner Portals</h4>
+            <h4 class="text-[#D4AF37] font-serif-luxury font-extrabold text-lg mb-4">Administration</h4>
             <ul class="space-y-2.5 text-sm text-rose-100 font-medium">
-                <li><a href="{{ route('vendor.login') }}" class="hover:text-white transition-colors"><i class="fa-solid fa-store mr-1.5 text-xs text-[#D4AF37]"></i> Vendor Portal</a></li>
-                <li><a href="{{ route('vendor.register') }}" class="hover:text-white transition-colors"><i class="fa-solid fa-user-plus mr-1.5 text-xs text-[#D4AF37]"></i> Join as Vendor</a></li>
                 <li><a href="{{ route('admin.login') }}" class="hover:text-white transition-colors"><i class="fa-solid fa-lock mr-1.5 text-xs text-[#D4AF37]"></i> Admin Login</a></li>
             </ul>
         </div>

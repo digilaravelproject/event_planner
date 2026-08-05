@@ -27,4 +27,9 @@ class Admin extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function createdNotifications()
+    {
+        return $this->hasMany(AdminNotification::class, 'created_by');
+    }
 }

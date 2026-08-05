@@ -1,52 +1,20 @@
 @extends('admin.layout')
 
 @section('content')
-<div class="max-w-xl mx-auto space-y-6 mt-6 relative z-30">
-    <!-- Header -->
-    <div>
-        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Manage AI Credentials</h1>
-        <p class="text-sm text-slate-500 mt-1 font-semibold">Configure OpenAI API keys and parameters to integrate AI capabilities into the frontend planner.</p>
-        @include('admin.partials.alerts')
-    </div>
-
-    <!-- Form Panel -->
-    <div class="rounded-xl bg-white p-6 sm:p-8 shadow-sm border border-slate-200/60">
-        <form action="{{ route('admin.ai.manage.save') }}" method="POST" class="space-y-5">
-            @csrf
-
-            <!-- OpenAI API Key -->
-            <div>
-                <label for="openai_api_key" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">OpenAI API Key</label>
-                <input type="password" name="openai_api_key" id="openai_api_key" value="{{ old('openai_api_key', $apiKey) }}" placeholder="sk-proj-..."
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all font-mono">
-                <p class="text-[10px] text-slate-400 mt-1.5 font-semibold">Your API key is stored securely in the database settings matrix.</p>
-                @error('openai_api_key') <p class="text-xs text-red-500 mt-1.5 font-medium">{{ $message }}</p> @enderror
-            </div>
-
-            <!-- Model Selection -->
-            <div>
-                <label for="openai_model" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Preferred AI Model</label>
-                <select name="openai_model" id="openai_model" required
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
-                    <option value="gpt-4o" {{ old('openai_model', $model) == 'gpt-4o' ? 'selected' : '' }}>gpt-4o (Recommended - Faster & Smarter)</option>
-                    <option value="gpt-4o-mini" {{ old('openai_model', $model) == 'gpt-4o-mini' ? 'selected' : '' }}>gpt-4o-mini (Lightweight & Cost-effective)</option>
-                    <option value="gpt-4" {{ old('openai_model', $model) == 'gpt-4' ? 'selected' : '' }}>gpt-4 (Standard legacy model)</option>
-                    <option value="o1-mini" {{ old('openai_model', $model) == 'o1-mini' ? 'selected' : '' }}>o1-mini (Reasoning focused model)</option>
-                </select>
-                @error('openai_model') <p class="text-xs text-red-500 mt-1.5 font-medium">{{ $message }}</p> @enderror
-            </div>
-
-            <!-- Action buttons -->
-            <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-6 mt-6">
-                <a href="{{ route('admin.dashboard') }}" class="rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold px-5 py-2.5 transition">
-                    Back to Dashboard
-                </a>
-                <button type="submit" class="rounded-xl bg-[#3950a2] hover:bg-[#2c3e80] text-white text-sm font-semibold px-6 py-2.5 transition shadow-sm hover:shadow cursor-pointer active:scale-[0.99]">
-                    Save AI Configuration
-                </button>
-            </div>
-
-        </form>
-    </div>
+<div class="admin-page max-w-5xl mx-auto">
+    @include('admin.partials.module-header',['title'=>'AI Configuration','subtitle'=>'Securely configure the AI model and global instruction template.'])
+    @include('admin.partials.alerts')
+    @if($errors->any())<div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{{ $errors->first() }}</div>@endif
+    <form action="{{ route('admin.ai.manage.save') }}" method="POST" class="admin-card p-6 sm:p-8 space-y-6">@csrf
+        <div class="grid gap-6 md:grid-cols-2">
+            <label class="block md:col-span-2"><span class="mb-2 block text-xs font-extrabold text-slate-700">OpenAI API Key</span><div class="relative"><input type="password" name="openai_api_key" id="openai_api_key" value="{{ old('openai_api_key',$apiKey) }}" autocomplete="off" class="admin-control w-full px-4 py-3 pr-20 font-mono text-sm"><button type="button" id="toggle-key" class="absolute right-2 top-2 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">Show</button></div><span class="mt-1 block text-xs text-slate-400">Encrypted before database storage.</span></label>
+            <label><span class="mb-2 block text-xs font-extrabold text-slate-700">Preferred AI Model</span><select name="openai_model" class="admin-control w-full px-4 py-3 text-sm">@foreach($models as $option)<option value="{{ $option->value }}" @selected(old('openai_model',$model)===$option->value)>{{ $option->label }}</option>@endforeach</select></label>
+            <label class="md:col-span-2"><span class="mb-2 block text-xs font-extrabold text-slate-700">AI Prompt Template</span><textarea name="ai_prompt_template" rows="8" class="admin-control w-full px-4 py-3 text-sm" placeholder="Optional global instruction for AI requests">{{ old('ai_prompt_template',$promptTemplate) }}</textarea></label>
+            <label><span class="mb-2 block text-xs font-extrabold text-slate-700">Status</span><select name="status" class="admin-control w-full px-4 py-3 text-sm"><option value="1" @selected(old('status',$status)==1)>Enabled</option><option value="0" @selected(old('status',$status)==0)>Disabled</option></select></label>
+            <div class="rounded-xl bg-slate-50 p-4 text-xs text-slate-500"><p><strong class="text-slate-700">Last Updated:</strong> {{ $lastUpdated?->format('d M Y, h:i A') ?? 'Never' }}</p><p class="mt-2"><strong class="text-slate-700">Updated By:</strong> {{ $updatedBy }}</p></div>
+        </div>
+        <div class="flex justify-end gap-3 border-t border-slate-100 pt-5"><button type="reset" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-600">Reset</button><button class="admin-primary-button rounded-xl px-6 py-2.5 text-sm font-bold text-white">Save Configuration</button></div>
+    </form>
 </div>
 @endsection
+@push('scripts')<script>document.getElementById('toggle-key')?.addEventListener('click',function(){const input=document.getElementById('openai_api_key');input.type=input.type==='password'?'text':'password';this.textContent=input.type==='password'?'Show':'Hide';});</script>@endpush

@@ -7,6 +7,7 @@ use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Modules\DynamicVendors\Models\DynamicVendorVersion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -32,7 +33,7 @@ class DynamicVendorManagementTest extends TestCase
         $this->get(route('admin.dynamic-vendors.index'))
             ->assertRedirect(route('admin.login'));
 
-        $this->assertDatabaseCount('vendors', 0);
+        $this->assertFalse(Schema::hasTable('vendors'));
         $this->assertDatabaseCount('vendors_dynamic', 0);
     }
 
@@ -63,7 +64,7 @@ class DynamicVendorManagementTest extends TestCase
         $this->assertCount(1, data_get($vendor->vendor_json, 'media.images'));
         Storage::disk('public')->assertExists(data_get($vendor->vendor_json, 'media.images.0'));
         $this->assertDatabaseHas('dynamic_vendor_versions', ['dynamic_vendor_id' => $vendor->id, 'version' => 1]);
-        $this->assertDatabaseCount('vendors', 0);
+        $this->assertFalse(Schema::hasTable('vendors'));
     }
 
     public function test_update_duplicate_status_and_rollback_each_preserve_version_history(): void

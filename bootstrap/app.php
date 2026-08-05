@@ -21,10 +21,6 @@ return Application::configure(basePath: dirname(__DIR__))
                     session()->flash('error', 'Kindly login first.');
                     return route('admin.login');
                 }
-                if ($request->is('vendor') || $request->is('vendor/*')) {
-                    session()->flash('error', 'Kindly login first.');
-                    return route('vendor.login');
-                }
                 session()->flash('error', 'Kindly login first.');
                 return route('user.login');
             }
