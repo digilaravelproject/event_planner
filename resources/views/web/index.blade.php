@@ -3,7 +3,7 @@
 @section('title', 'Shaadi Sense | Royal Event Planning & Luxury Celebrations')
 
 @section('content')
-<!-- Hero Section -->
+<!-- SECTION 1: HERO SECTION -->
 <section 
     id="hero-section"
     class="relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-4 sm:px-6 md:px-12 overflow-hidden"
@@ -57,8 +57,8 @@
                     <i class="fa-solid fa-calculator text-[#D4AF37] text-xs transition-transform group-hover:rotate-12"></i>
                     <span>Calculate Event Estimate</span>
                 </a>
-                <a href="#categories" class="px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 hover:text-[#850625] font-sans-ui font-semibold text-sm border border-slate-200/90 hover:border-[#850625]/30 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 inline-flex items-center gap-2 backdrop-blur-sm">
-                    <span>Explore Services</span>
+                <a href="#how-it-works" class="px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 hover:text-[#850625] font-sans-ui font-semibold text-sm border border-slate-200/90 hover:border-[#850625]/30 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 inline-flex items-center gap-2 backdrop-blur-sm">
+                    <span>How It Works</span>
                     <i class="fa-solid fa-arrow-right text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
                 </a>
             </div>
@@ -197,86 +197,127 @@
     </div>
 </section>
 
-<!-- Event Categories Section -->
-<section id="categories" class="py-24 bg-white px-6 md:px-12 border-t border-rose-100/60">
-    <div class="max-w-7xl mx-auto">
-        <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span class="text-[#850625] font-extrabold uppercase tracking-widest text-xs">Royal Offerings</span>
-            <h2 class="text-slate-900 text-3xl md:text-5xl font-extrabold font-serif-luxury leading-tight">Tailored Event Categories</h2>
-            <div class="w-16 h-1 bg-[#850625] mx-auto rounded-full"></div>
-            <p class="text-slate-600 font-medium">Select an event category to explore details, curate vendors, and build customizable planning schedules in real time.</p>
+<!-- SECTION 2: HOW IT WORKS (SHUBH AARAMBH PROCESS) -->
+<section id="how-it-works" class="py-14 md:py-16 bg-[#FAF7F2] px-6 md:px-12 border-t border-b border-rose-100/60 relative overflow-hidden">
+    <div class="max-w-6xl mx-auto relative z-10 space-y-10">
+        <!-- Compact Header -->
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+            <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-[#850625] bg-rose-100/60 px-3 py-1 rounded-full border border-rose-200/50">
+                How It Works
+            </span>
+            <h2 class="text-slate-900 text-2xl md:text-3xl font-extrabold font-serif-luxury leading-tight">
+                Three steps. <span class="italic text-[#850625] font-serif">शुभ आरंभ</span> — an auspicious start.
+            </h2>
+            <p class="text-slate-600 font-medium text-xs md:text-sm max-w-xl mx-auto">
+                Tell our AI about your wedding. We'll do the math, match the vendors, and hand you a plan you can actually book.
+            </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <!-- Weddings Card -->
-            <div class="group bg-[#FFFDF9] rounded-2xl overflow-hidden border border-rose-100 shadow-lg shadow-rose-950/5 hover:shadow-2xl hover:shadow-[#850625]/15 hover:-translate-y-2 transition-all duration-300">
-                <div class="h-52 bg-gradient-to-br from-[#850625] to-[#6b041e] relative flex items-center justify-center text-white p-6">
-                    <div class="w-20 h-20 rounded-full bg-white/10 border border-[#D4AF37]/50 flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-ring text-4xl text-[#D4AF37]"></i>
-                    </div>
-                </div>
-                <div class="p-6 space-y-3">
-                    <h3 class="font-serif-luxury font-extrabold text-xl text-slate-900 group-hover:text-[#850625] transition-colors">Grand Weddings</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed font-medium">Opulent decor arrangements, mandap designs, and seamless vendor coordination.</p>
-                    <a href="{{ route('user.register') }}" class="inline-flex items-center text-xs font-bold text-[#850625] group-hover:text-[#6b041e] transition-colors pt-2">
-                        Explore Category <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                </div>
-            </div>
+        <!-- Compact Connected Horizontal Process Grid -->
+        <div class="relative">
+            <!-- Connecting Line (Desktop) -->
+            <div class="hidden md:block absolute top-7 left-[15%] right-[15%] h-[2px] bg-gradient-to-r from-rose-200 via-[#D4AF37]/60 to-rose-200 z-0"></div>
 
-            <!-- Birthday Bashes Card -->
-            <div class="group bg-[#FFFDF9] rounded-2xl overflow-hidden border border-rose-100 shadow-lg shadow-rose-950/5 hover:shadow-2xl hover:shadow-[#850625]/15 hover:-translate-y-2 transition-all duration-300">
-                <div class="h-52 bg-gradient-to-br from-amber-500 to-rose-600 relative flex items-center justify-center text-white p-6">
-                    <div class="w-20 h-20 rounded-full bg-white/10 border border-white/40 flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-cake-candles text-4xl text-white"></i>
-                    </div>
-                </div>
-                <div class="p-6 space-y-3">
-                    <h3 class="font-serif-luxury font-extrabold text-xl text-slate-900 group-hover:text-[#850625] transition-colors">Birthday Bashes</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed font-medium">Unique themes, dynamic staging, premium catering setups, and live performances.</p>
-                    <a href="{{ route('user.register') }}" class="inline-flex items-center text-xs font-bold text-[#850625] group-hover:text-[#6b041e] transition-colors pt-2">
-                        Explore Category <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6 relative z-10">
+                <!-- Step 1 -->
+                <div class="group bg-white rounded-2xl p-6 border border-rose-100/80 shadow-md shadow-rose-950/[0.02] hover:shadow-xl hover:shadow-[#850625]/10 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between relative">
+                    <div>
+                        <!-- Header & Step Number Pill -->
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-full bg-[#850625] text-white font-mono text-xs font-bold flex items-center justify-center shadow-xs">
+                                    01
+                                </span>
+                                <span class="text-[10px] font-semibold text-rose-800 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
+                                    Two minutes
+                                </span>
+                            </div>
+                            <i class="fa-solid fa-sliders text-base text-[#D4AF37] group-hover:text-[#850625] transition-colors"></i>
+                        </div>
 
-            <!-- Anniversaries Card -->
-            <div class="group bg-[#FFFDF9] rounded-2xl overflow-hidden border border-rose-100 shadow-lg shadow-rose-950/5 hover:shadow-2xl hover:shadow-[#850625]/15 hover:-translate-y-2 transition-all duration-300">
-                <div class="h-52 bg-gradient-to-br from-purple-700 to-rose-800 relative flex items-center justify-center text-white p-6">
-                    <div class="w-20 h-20 rounded-full bg-white/10 border border-[#D4AF37]/50 flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-champagne-glasses text-4xl text-[#D4AF37]"></i>
+                        <!-- Content -->
+                        <h3 class="font-serif-luxury font-bold text-lg text-slate-900 mb-1 group-hover:text-[#850625] transition-colors">
+                            Tell us about your shaadi
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Budget, guest count, area, dates, food preference, indoor or outdoor. We ask only what we need.
+                        </p>
                     </div>
-                </div>
-                <div class="p-6 space-y-3">
-                    <h3 class="font-serif-luxury font-extrabold text-xl text-slate-900 group-hover:text-[#850625] transition-colors">Anniversaries</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed font-medium">Milestone celebrations, romantic candlelit setups, and memorable family galas.</p>
-                    <a href="{{ route('user.register') }}" class="inline-flex items-center text-xs font-bold text-[#850625] group-hover:text-[#6b041e] transition-colors pt-2">
-                        Explore Category <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                    </a>
-                </div>
-            </div>
 
-            <!-- Corporate Events Card -->
-            <div class="group bg-[#FFFDF9] rounded-2xl overflow-hidden border border-rose-100 shadow-lg shadow-rose-950/5 hover:shadow-2xl hover:shadow-[#850625]/15 hover:-translate-y-2 transition-all duration-300">
-                <div class="h-52 bg-gradient-to-br from-slate-800 to-[#850625] relative flex items-center justify-center text-white p-6">
-                    <div class="w-20 h-20 rounded-full bg-white/10 border border-white/40 flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-briefcase text-4xl text-white"></i>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-medium text-slate-400 group-hover:text-[#850625] transition-colors">
+                        <span>Guided Input</span>
+                        <i class="fa-solid fa-arrow-right text-[10px] text-rose-300 group-hover:translate-x-1 group-hover:text-[#850625] transition-all"></i>
                     </div>
                 </div>
-                <div class="p-6 space-y-3">
-                    <h3 class="font-serif-luxury font-extrabold text-xl text-slate-900 group-hover:text-[#850625] transition-colors">Corporate Events</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed font-medium">Conferences, award galas, corporate meets with high-end AV setups and banquets.</p>
-                    <a href="{{ route('user.register') }}" class="inline-flex items-center text-xs font-bold text-[#850625] group-hover:text-[#6b041e] transition-colors pt-2">
-                        Explore Category <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                    </a>
+
+                <!-- Step 2 -->
+                <div class="group bg-white rounded-2xl p-6 border border-rose-100/80 shadow-md shadow-rose-950/[0.02] hover:shadow-xl hover:shadow-[#850625]/10 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between relative">
+                    <div>
+                        <!-- Header & Step Number Pill -->
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-full bg-[#850625] text-white font-mono text-xs font-bold flex items-center justify-center shadow-xs">
+                                    02
+                                </span>
+                                <span class="text-[10px] font-semibold text-rose-800 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
+                                    Instant
+                                </span>
+                            </div>
+                            <i class="fa-solid fa-wand-magic-sparkles text-base text-[#D4AF37] group-hover:text-[#850625] transition-colors"></i>
+                        </div>
+
+                        <!-- Content -->
+                        <h3 class="font-serif-luxury font-bold text-lg text-slate-900 mb-1 group-hover:text-[#850625] transition-colors">
+                            AI drafts your plan
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            A full budget split with venue, catering, decor, photography, makeup and entertainment, sized to your spend.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-medium text-slate-400 group-hover:text-[#850625] transition-colors">
+                        <span>Smart Allocation</span>
+                        <i class="fa-solid fa-arrow-right text-[10px] text-rose-300 group-hover:translate-x-1 group-hover:text-[#850625] transition-all"></i>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="group bg-white rounded-2xl p-6 border border-rose-100/80 shadow-md shadow-rose-950/[0.02] hover:shadow-xl hover:shadow-[#850625]/10 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between relative">
+                    <div>
+                        <!-- Header & Step Number Pill -->
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-full bg-[#850625] text-white font-mono text-xs font-bold flex items-center justify-center shadow-xs">
+                                    03
+                                </span>
+                                <span class="text-[10px] font-semibold text-rose-800 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
+                                    Within 24 hrs
+                                </span>
+                            </div>
+                            <i class="fa-brands fa-whatsapp text-base text-emerald-600 group-hover:scale-110 transition-transform"></i>
+                        </div>
+
+                        <!-- Content -->
+                        <h3 class="font-serif-luxury font-bold text-lg text-slate-900 mb-1 group-hover:text-[#850625] transition-colors">
+                            Vendors handpicked for you
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Real Mumbai vendors matched to your budget, area and style. We connect you seamlessly over WhatsApp.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-medium text-slate-400 group-hover:text-[#850625] transition-colors">
+                        <span>WhatsApp Connect</span>
+                        <i class="fa-solid fa-check text-emerald-600 font-bold"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Why Choose Us / Unique Features -->
-<section id="why-choose-us" class="py-24 bg-[#FAF8F5] px-6 md:px-12 border-t border-rose-100/60">
+<!-- SECTION 3: WHY CHOOSE US / UNIQUE FEATURES -->
+<section id="why-choose-us" class="py-20 md:py-24 bg-[#FAF8F5] px-6 md:px-12 border-b border-rose-100/60">
     <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <!-- Left Grid Info -->
@@ -328,8 +369,8 @@
     </div>
 </section>
 
-<!-- Interactive Event Estimator -->
-<section id="estimator" class="py-24 bg-gradient-to-b from-[#FFFDF9] to-[#FAF3EC] text-slate-900 px-6 md:px-12 relative overflow-hidden border-t border-rose-100/60" 
+<!-- SECTION 4: INTERACTIVE EVENT ESTIMATOR -->
+<section id="estimator" class="py-20 md:py-24 bg-gradient-to-b from-[#FFFDF9] to-[#FAF3EC] text-slate-900 px-6 md:px-12 relative overflow-hidden border-b border-rose-100/60" 
          x-data="{ 
             eventType: 'wedding', 
             guests: 150, 
@@ -387,10 +428,10 @@
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">Event Category</label>
                         <div class="grid grid-cols-2 gap-3">
-                            <button @click="eventType = 'wedding'" :class="eventType === 'wedding' ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'" class="py-3 px-4 rounded-xl border text-xs font-bold transition-all shadow-sm">💍 Wedding</button>
-                            <button @click="eventType = 'birthday'" :class="eventType === 'birthday' ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'" class="py-3 px-4 rounded-xl border text-xs font-bold transition-all shadow-sm">🎂 Birthday</button>
-                            <button @click="eventType = 'anniversary'" :class="eventType === 'anniversary' ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'" class="py-3 px-4 rounded-xl border text-xs font-bold transition-all shadow-sm">✨ Anniversary</button>
-                            <button @click="eventType = 'corporate'" :class="eventType === 'corporate' ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'" class="py-3 px-4 rounded-xl border text-xs font-bold transition-all shadow-sm">💼 Corporate</button>
+                            <button type="button" @click="eventType = 'wedding'" :class="eventType === 'wedding' ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'" class="py-3 px-4 rounded-xl border text-xs font-bold transition-all shadow-sm">💍 Wedding</button>
+                            <button type="button" @click="eventType = 'birthday'" :class="eventType === 'birthday' ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'" class="py-3 px-4 rounded-xl border text-xs font-bold transition-all shadow-sm">🎂 Birthday</button>
+                            <button type="button" @click="eventType = 'anniversary'" :class="eventType === 'anniversary' ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'" class="py-3 px-4 rounded-xl border text-xs font-bold transition-all shadow-sm">✨ Anniversary</button>
+                            <button type="button" @click="eventType = 'corporate'" :class="eventType === 'corporate' ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'" class="py-3 px-4 rounded-xl border text-xs font-bold transition-all shadow-sm">💼 Corporate</button>
                         </div>
                     </div>
 
@@ -412,9 +453,9 @@
                                 <input type="checkbox" x-model="includeCatering" class="rounded border-slate-300 text-[#850625] focus:ring-0">
                             </div>
                             <div x-show="includeCatering" class="grid grid-cols-3 gap-2 pt-1" x-transition>
-                                <button @click="includeCateringTier = 'standard'" :class="includeCateringTier === 'standard' ? 'bg-[#850625] text-white border-[#850625]' : 'bg-white text-slate-700 border-slate-200'" class="border py-1.5 px-2 rounded-lg text-xs font-bold">Standard</button>
-                                <button @click="includeCateringTier = 'premium'" :class="includeCateringTier === 'premium' ? 'bg-[#850625] text-white border-[#850625]' : 'bg-white text-slate-700 border-slate-200'" class="border py-1.5 px-2 rounded-lg text-xs font-bold">Premium</button>
-                                <button @click="includeCateringTier = 'luxury'" :class="includeCateringTier === 'luxury' ? 'bg-[#850625] text-white border-[#850625]' : 'bg-white text-slate-700 border-slate-200'" class="border py-1.5 px-2 rounded-lg text-xs font-bold">Royal Elite</button>
+                                <button type="button" @click="includeCateringTier = 'standard'" :class="includeCateringTier === 'standard' ? 'bg-[#850625] text-white border-[#850625]' : 'bg-white text-slate-700 border-slate-200'" class="border py-1.5 px-2 rounded-lg text-xs font-bold">Standard</button>
+                                <button type="button" @click="includeCateringTier = 'premium'" :class="includeCateringTier === 'premium' ? 'bg-[#850625] text-white border-[#850625]' : 'bg-white text-slate-700 border-slate-200'" class="border py-1.5 px-2 rounded-lg text-xs font-bold">Premium</button>
+                                <button type="button" @click="includeCateringTier = 'luxury'" :class="includeCateringTier === 'luxury' ? 'bg-[#850625] text-white border-[#850625]' : 'bg-white text-slate-700 border-slate-200'" class="border py-1.5 px-2 rounded-lg text-xs font-bold">Royal Elite</button>
                             </div>
                         </div>
 
@@ -491,8 +532,8 @@
     </div>
 </section>
 
-<!-- Reviews & Testimonials -->
-<section id="testimonials" class="py-24 bg-white px-6 md:px-12 border-t border-rose-100/60" 
+<!-- SECTION 5: REVIEWS & TESTIMONIALS -->
+<section id="testimonials" class="py-20 md:py-24 bg-white px-6 md:px-12 border-b border-rose-100/60" 
          x-data="{ 
             activeSlide: 0,
             slides: [
@@ -528,7 +569,7 @@
         <div class="relative bg-[#FFFDF9] border border-rose-100 rounded-3xl p-8 md:p-12 shadow-xl shadow-rose-950/5">
             <!-- Star Count -->
             <div class="flex space-x-1 justify-center mb-6">
-                <template x-for="i in 5">
+                <template x-for="i in 5" :key="i">
                     <i class="fa-solid fa-star text-[#D4AF37]"></i>
                 </template>
             </div>
@@ -544,10 +585,10 @@
 
             <!-- Slider Navigations -->
             <div class="flex justify-between absolute top-1/2 -translate-y-1/2 left-4 right-4 md:-left-6 md:-right-6">
-                <button @click="activeSlide = (activeSlide === 0) ? slides.length - 1 : activeSlide - 1" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-slate-200 hover:bg-slate-50 shadow-md flex items-center justify-center text-slate-800 transition-colors">
+                <button type="button" @click="activeSlide = (activeSlide === 0) ? slides.length - 1 : activeSlide - 1" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-slate-200 hover:bg-slate-50 shadow-md flex items-center justify-center text-slate-800 transition-colors">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
-                <button @click="activeSlide = (activeSlide === slides.length - 1) ? 0 : activeSlide + 1" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-slate-200 hover:bg-slate-50 shadow-md flex items-center justify-center text-slate-800 transition-colors">
+                <button type="button" @click="activeSlide = (activeSlide === slides.length - 1) ? 0 : activeSlide + 1" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-slate-200 hover:bg-slate-50 shadow-md flex items-center justify-center text-slate-800 transition-colors">
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
             </div>
