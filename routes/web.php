@@ -10,6 +10,9 @@ use App\Http\Controllers\Admin\EventRequirementQuestionController;
 use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\VendorAnalyticsController;
+use App\Http\Controllers\User\UserAuthController;
+use App\Http\Controllers\User\UserSubscriptionController;
+use App\Http\Controllers\User\UserDashboardController;
 
 // Redirect /admin to /admin/dashboard
 Route::redirect('/admin', '/admin/dashboard');
@@ -53,9 +56,19 @@ Route::prefix('admin')->group(function () {
     });
 });
 
-use App\Http\Controllers\User\UserAuthController;
-use App\Http\Controllers\User\UserSubscriptionController;
-use App\Http\Controllers\User\UserDashboardController;
+// Location helper routes (Accessible publicly/by AJAX)
+Route::get('/locations/states', function() {
+    return response()->json(State::orderBy('name')->get());
+})->name('locations.states');
+Route::get('/locations/states/{state}/cities', function($stateId) {
+    return response()->json(City::where('state_id', $stateId)->orderBy('name')->get());
+})->name('locations.cities');
+Route::get('/locations/cities/{city}/areas', function($cityId) {
+    return response()->json(Area::where('city_id', $cityId)->orderBy('name')->get());
+})->name('locations.areas');
+Route::get('/locations/areas/{area}/subareas', function($areaId) {
+    return response()->json(Subarea::where('area_id', $areaId)->orderBy('name')->get());
+})->name('locations.subareas');
 
 // User Portal Routes
 Route::prefix('user')->group(function () {
