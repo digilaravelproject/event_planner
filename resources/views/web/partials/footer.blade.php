@@ -7,39 +7,74 @@
     <div class="max-w-[1600px] mx-auto relative z-10 space-y-12">
         <!-- TOP CTA / NEWSLETTER SECTION (Ref Image 2 Top Section) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-rose-100/80 pb-12">
-            <!-- Left: Headline & Email Form -->
-            <div class="lg:col-span-7 space-y-4">
-                <h2 class="text-slate-900 text-2xl md:text-4xl font-extrabold font-serif-luxury leading-tight">
+            <!-- Left: Headline & Email Form (Col 4) -->
+            <div class="lg:col-span-4 space-y-4">
+                <h2 class="text-slate-900 text-2xl md:text-3xl lg:text-4xl font-extrabold font-serif-luxury leading-tight">
                     Stay ahead with <span class="text-[#850625]">Shaadi Sense.</span>
                 </h2>
-                <p class="text-slate-600 text-xs md:text-sm max-w-lg leading-relaxed font-medium">
+                <p class="text-slate-600 text-xs md:text-sm max-w-sm leading-relaxed font-medium">
                     Join thousands of couples and planners who trust Shaadi Sense for smart, transparent, and stress-free wedding planning.
                 </p>
 
                 <!-- Email Input & Button -->
-                <form action="#" method="POST" onsubmit="event.preventDefault();" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 max-w-md">
-                    <input type="email" placeholder="Enter your email address" required class="flex-1 bg-white border border-rose-200 rounded-xl px-4 py-3 text-xs md:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] shadow-xs transition-all">
-                    <button type="submit" class="bg-[#850625] hover:bg-[#6b041e] text-white text-xs md:text-sm font-bold px-6 py-3 rounded-xl shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 shrink-0">
-                        <span>Subscribe Now</span>
+                <form action="#" method="POST" onsubmit="event.preventDefault();" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 max-w-md">
+                    <input type="email" placeholder="Enter your email" required class="flex-1 bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] shadow-xs transition-all">
+                    <button type="submit" class="bg-[#850625] hover:bg-[#6b041e] text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 shrink-0">
+                        <span>Subscribe</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </form>
             </div>
 
-            <!-- Right: Tilted Photo Preview Card (Ref Image 2 Right Image) -->
-            <div class="lg:col-span-5 flex justify-center lg:justify-end">
-                <div class="relative group">
+            <!-- Right: Trio Tilted Indian Wedding Photo Cards (Col 8 - Fills All Width) -->
+            <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5 items-center pt-4 lg:pt-0">
+                <!-- Card 1: Indian Royal Bride & Jewellery -->
+                <div class="relative group w-full">
                     <!-- Tilted Decorative Backdrop Card -->
-                    <div class="absolute inset-0 bg-gradient-to-tr from-[#850625] to-[#D4AF37] rounded-2xl transform rotate-3 group-hover:rotate-1 transition-transform duration-300 opacity-20 blur-xs"></div>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-[#850625] to-[#D4AF37] rounded-2xl transform -rotate-3 group-hover:-rotate-1 transition-transform duration-300 opacity-30 blur-xs"></div>
                     
                     <!-- Image Container -->
-                    <div class="relative bg-white p-2 rounded-2xl border-4 border-white shadow-xl shadow-rose-950/10 transform -rotate-2 group-hover:rotate-0 transition-all duration-300 overflow-hidden w-full max-w-[340px]">
-                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=600" alt="Shaadi Celebration" class="w-full h-44 object-cover rounded-xl">
-                        <div class="p-2.5 flex items-center justify-between text-[11px] font-semibold text-slate-700">
-                            <span class="flex items-center gap-1 text-[#850625]">
-                                <i class="fa-solid fa-sparkles text-[#D4AF37]"></i> Royal Weddings
+                    <div class="relative bg-white p-2 rounded-2xl border-4 border-white shadow-xl shadow-rose-950/10 transform rotate-2 group-hover:rotate-0 transition-all duration-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Indian Royal Bride & Lehenga" class="w-full h-40 object-cover rounded-xl">
+                        <div class="p-2 flex items-center justify-between text-[11px] font-semibold text-slate-700">
+                            <span class="flex items-center gap-1 text-[#850625] font-bold">
+                                <i class="fa-solid fa-gem text-[#D4AF37]"></i> Royal Lehengas
                             </span>
-                            <span class="text-slate-400">Mumbai • Udaipur</span>
+                            <span class="text-slate-400 font-medium">Jaipur</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Royal Varmala Couple Exchange -->
+                <div class="relative group w-full">
+                    <!-- Tilted Decorative Backdrop Card -->
+                    <div class="absolute inset-0 bg-gradient-to-tr from-[#850625] to-[#D4AF37] rounded-2xl transform rotate-3 group-hover:rotate-1 transition-transform duration-300 opacity-30 blur-xs"></div>
+                    
+                    <!-- Image Container -->
+                    <div class="relative bg-white p-2 rounded-2xl border-4 border-white shadow-xl shadow-rose-950/10 transform -rotate-2 group-hover:rotate-0 transition-all duration-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800" alt="Royal Varmala Couple" class="w-full h-40 object-cover rounded-xl">
+                        <div class="p-2 flex items-center justify-between text-[11px] font-semibold text-slate-700">
+                            <span class="flex items-center gap-1 text-[#850625] font-bold">
+                                <i class="fa-solid fa-crown text-[#D4AF37]"></i> Royal Varmala
+                            </span>
+                            <span class="text-slate-400 font-medium">Jodhpur</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Grand Mandap Decor & Stage -->
+                <div class="relative group w-full">
+                    <!-- Tilted Decorative Backdrop Card -->
+                    <div class="absolute inset-0 bg-gradient-to-tr from-[#850625] to-[#D4AF37] rounded-2xl transform -rotate-2 group-hover:rotate-0 transition-transform duration-300 opacity-30 blur-xs"></div>
+                    
+                    <!-- Image Container -->
+                    <div class="relative bg-white p-2 rounded-2xl border-4 border-white shadow-xl shadow-rose-950/10 transform rotate-3 group-hover:rotate-0 transition-all duration-300 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=800" alt="Grand Mandap Floral Decor" class="w-full h-40 object-cover rounded-xl">
+                        <div class="p-2 flex items-center justify-between text-[11px] font-semibold text-slate-700">
+                            <span class="flex items-center gap-1 text-[#850625] font-bold">
+                                <i class="fa-solid fa-sparkles text-[#D4AF37]"></i> Grand Mandaps
+                            </span>
+                            <span class="text-slate-400 font-medium">Udaipur</span>
                         </div>
                     </div>
                 </div>
