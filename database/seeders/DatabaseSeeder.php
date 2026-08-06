@@ -26,5 +26,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AdminSeeder::class);
         $this->call(DynamicVendorSeeder::class);
         $this->call(AdminModulesSeeder::class);
+        $this->call(AdminContentSeeder::class);
     }
 }

@@ -46,7 +46,7 @@ class AdminModulesTest extends TestCase
     public function test_question_can_map_selected_values_from_dynamic_vendor_attributes(): void
     {
         $this->createDynamicVendor('Silver Hall', [
-            ['key' => 'area', 'label' => 'Area', 'type' => 'dropdown', 'value' => 'Pune'],
+            ['key' => 'area', 'label' => 'Area', 'type' => 'dropdown', 'value' => 'Pune', 'images' => ['dynamic-vendors/areas/pune.jpg']],
             ['key' => 'parking', 'label' => 'Parking', 'type' => 'boolean', 'value' => true],
         ]);
         $this->createDynamicVendor('Gold Hall', [
@@ -58,7 +58,9 @@ class AdminModulesTest extends TestCase
             ->assertOk()
             ->assertSee('Dynamic vendor mapping')
             ->assertSee('Pune')
-            ->assertSee('Mumbai');
+            ->assertSee('Mumbai')
+            ->assertSee('Silver Hall')
+            ->assertSee('Gold Hall');
 
         $this->post(route('admin.event-questions.store'), [
             'question' => 'Which area do you prefer?',
@@ -66,6 +68,7 @@ class AdminModulesTest extends TestCase
             'question_type' => 'checkbox',
             'vendor_attribute_key' => 'area',
             'vendor_attribute_values' => ['Pune', 'Mumbai'],
+            'vendor_attribute_images' => ['dynamic-vendors/areas/pune.jpg'],
             'display_order' => 50,
             'status' => 1,
         ])->assertRedirect(route('admin.event-questions.index'));
@@ -75,6 +78,14 @@ class AdminModulesTest extends TestCase
         $this->assertSame('Area', $question->vendor_attribute_label);
         $this->assertSame(['Pune', 'Mumbai'], $question->vendor_attribute_values);
         $this->assertSame(['Pune', 'Mumbai'], $question->options);
+        $this->assertSame(['dynamic-vendors/areas/pune.jpg'], $question->vendor_attribute_images);
+
+        $this->get(route('admin.event-questions.show', $question))
+            ->assertOk()
+            ->assertSee('Question Overview')
+            ->assertSee('Which area do you prefer?')
+            ->assertSee('Pune')
+            ->assertSee('Mumbai');
     }
 
     public function test_question_mapping_rejects_a_value_not_present_in_vendor_data(): void

@@ -67,6 +67,28 @@ class DynamicVendorManagementTest extends TestCase
         $this->assertFalse(Schema::hasTable('vendors'));
     }
 
+    public function test_admin_can_attach_multiple_images_to_each_dynamic_attribute(): void
+    {
+        Storage::fake('public');
+        $payload = $this->payload();
+        $payload['attribute_images'] = [
+            0 => [
+                UploadedFile::fake()->image('price-card.jpg'),
+                UploadedFile::fake()->image('package.jpg'),
+            ],
+        ];
+
+        $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.dynamic-vendors.store'), $payload)
+            ->assertRedirect();
+
+        $images = data_get(DynamicVendor::firstOrFail()->vendor_json, 'attributes.0.images');
+        $this->assertCount(2, $images);
+        foreach ($images as $image) {
+            Storage::disk('public')->assertExists($image);
+        }
+    }
+
     public function test_update_duplicate_status_and_rollback_each_preserve_version_history(): void
     {
         $this->actingAs($this->admin, 'admin')->post(route('admin.dynamic-vendors.store'), $this->payload());

@@ -111,6 +111,22 @@ class DynamicVendorService
         foreach ($input['attributes'] ?? [] as $position => $attribute) {
             $type = $attribute['type'];
             $value = $this->normaliseValue($type, $attribute['value'] ?? null);
+            $existingAttribute = collect(data_get($existing, 'attributes', []))
+                ->firstWhere('id', $attribute['id'] ?? null);
+            $allowedExistingAttributeImages = collect($existingAttribute['images'] ?? [])
+                ->filter(fn ($path) => is_string($path));
+            $seededAttributeImages = collect($attribute['images'] ?? [])
+                ->filter(fn ($path) => is_string($path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($path));
+            $attributeImages = collect($input['existing_attribute_images'][$position] ?? [])
+                ->intersect($allowedExistingAttributeImages)->values()->all();
+            $attributeImages = array_merge($attributeImages, $seededAttributeImages->all());
+
+            foreach ($files['attribute_images'][$position] ?? [] as $image) {
+                if ($image instanceof UploadedFile) {
+                    $attributeImages[] = $image->store($folder.'/attributes/images', 'public');
+                }
+            }
+
             if (($files['attribute_uploads'][$position] ?? null) instanceof UploadedFile) {
                 $value = $files['attribute_uploads'][$position]->store($folder.'/attributes', 'public');
             }
@@ -121,6 +137,7 @@ class DynamicVendorService
                 'label' => trim((string) $attribute['label']),
                 'type' => $type,
                 'value' => $value,
+                'images' => array_values(array_unique($attributeImages)),
                 'validation' => array_filter([
                     'required' => filter_var($attribute['required'] ?? false, FILTER_VALIDATE_BOOL),
                     'min_length' => $this->nullableInteger($attribute['min_length'] ?? null),

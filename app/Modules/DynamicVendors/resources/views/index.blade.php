@@ -75,6 +75,7 @@
             <table class="min-w-full divide-y divide-slate-200">
                 <thead class="bg-slate-50">
                     <tr class="text-left text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        <th class="px-5 py-4">#</th>
                         <th class="px-5 py-4">Vendor name</th>
                         <th class="px-5 py-4">Category</th>
                         <th class="px-5 py-4">Status</th>
@@ -85,6 +86,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($vendors as $vendor)
                         <tr class="transition-colors hover:bg-indigo-50/45">
+                            <td class="px-5 py-4 text-sm font-extrabold text-slate-400">{{ ($vendors->firstItem() ?? 1) + $loop->index }}</td>
                             <td class="px-5 py-4 font-bold text-slate-900">{{ $vendor->name }}</td>
                             <td class="px-5 py-4 text-sm text-slate-600">{{ $vendor->category }}</td>
                             <td class="px-5 py-4"><x-dynamic-vendors::status-badge :status="$vendor->status" /></td>
@@ -103,7 +105,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-5 py-14 text-center text-sm text-slate-500">No dynamic vendors match these filters.</td></tr>
+                        <tr><td colspan="6" class="px-5 py-14 text-center text-sm text-slate-500">No dynamic vendors match these filters.</td></tr>
                     @endforelse
                 </tbody>
             </table>

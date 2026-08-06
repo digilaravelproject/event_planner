@@ -39,7 +39,7 @@ class EventRequirementQuestionController extends Controller
 
     public function show(EventRequirementQuestion $eventQuestion)
     {
-        return redirect()->route('admin.event-questions.edit', $eventQuestion);
+        return view('admin.event-questions.show', ['question' => $eventQuestion]);
     }
 
     public function edit(EventRequirementQuestion $eventQuestion)

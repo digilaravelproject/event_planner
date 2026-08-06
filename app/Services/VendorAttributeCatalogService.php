@@ -29,7 +29,12 @@ class VendorAttributeCatalogService
                     'label' => $label,
                     'type' => $type,
                     'values' => [],
+                    'images' => [],
                 ];
+
+                foreach ($this->attributeImages($attribute) as $image) {
+                    $catalog[$key]['images'][$image] = $image;
+                }
 
                 foreach ($this->attributeValues($attribute['value'] ?? null) as $value) {
                     $canonical = $this->canonicalValue($value);
@@ -41,8 +46,13 @@ class VendorAttributeCatalogService
                         'value' => $canonical,
                         'label' => $this->displayValue($value),
                         'vendors_count' => 0,
+                        'vendor_names' => [],
                     ];
                     $catalog[$key]['values'][$canonical]['vendors_count']++;
+                    $vendorName = $vendor->name;
+                    if (! in_array($vendorName, $catalog[$key]['values'][$canonical]['vendor_names'], true)) {
+                        $catalog[$key]['values'][$canonical]['vendor_names'][] = $vendorName;
+                    }
                 }
             }
         });
@@ -51,6 +61,7 @@ class VendorAttributeCatalogService
 
         foreach ($catalog as &$attribute) {
             $attribute['values'] = array_values($attribute['values']);
+            $attribute['images'] = array_values($attribute['images']);
             usort($attribute['values'], fn (array $left, array $right): int => strnatcasecmp($left['label'], $right['label']));
         }
         unset($attribute);
@@ -67,6 +78,7 @@ class VendorAttributeCatalogService
             $data['vendor_attribute_key'] = null;
             $data['vendor_attribute_label'] = null;
             $data['vendor_attribute_values'] = null;
+            $data['vendor_attribute_images'] = null;
 
             return $data;
         }
@@ -96,6 +108,14 @@ class VendorAttributeCatalogService
         $data['vendor_attribute_key'] = $key;
         $data['vendor_attribute_label'] = $catalog[$key]['label'];
         $data['vendor_attribute_values'] = $selected;
+        $selectedImages = array_values(array_unique(array_map('strval', $data['vendor_attribute_images'] ?? [])));
+        $unknownImages = array_values(array_diff($selectedImages, $catalog[$key]['images']));
+        if ($unknownImages !== []) {
+            throw ValidationException::withMessages([
+                'vendor_attribute_images' => 'One or more selected images are no longer available for this attribute.',
+            ]);
+        }
+        $data['vendor_attribute_images'] = $selectedImages;
         $data['options'] = array_map(fn (string $value): string => $values[$value]['label'], $selected);
 
         return $data;
@@ -108,6 +128,17 @@ class VendorAttributeCatalogService
         }
 
         return is_array($value) && array_is_list($value) ? $value : [$value];
+    }
+
+    private function attributeImages(array $attribute): array
+    {
+        $images = $attribute['images'] ?? [];
+        if (($attribute['type'] ?? null) === 'image') {
+            $value = $attribute['value'] ?? [];
+            $images = array_merge((array) $images, is_array($value) ? $value : [$value]);
+        }
+
+        return array_values(array_filter($images, fn ($image): bool => is_string($image) && trim($image) !== ''));
     }
 
     private function canonicalValue(mixed $value): ?string
@@ -148,7 +179,12 @@ class VendorAttributeCatalogService
             'label' => $question->vendor_attribute_label ?: $key,
             'type' => 'text',
             'values' => [],
+            'images' => [],
         ];
+
+        foreach ($question->vendor_attribute_images ?? [] as $image) {
+            $catalog[$key]['images'][$image] = $image;
+        }
 
         foreach ($question->vendor_attribute_values ?? [] as $index => $value) {
             $canonical = (string) $value;
@@ -156,6 +192,7 @@ class VendorAttributeCatalogService
                 'value' => $canonical,
                 'label' => (string) ($question->options[$index] ?? $canonical),
                 'vendors_count' => 0,
+                'vendor_names' => [],
             ];
         }
     }

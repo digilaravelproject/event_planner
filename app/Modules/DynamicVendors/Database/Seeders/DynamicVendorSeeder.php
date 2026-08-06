@@ -6,11 +6,13 @@ use App\Models\Admin;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Modules\DynamicVendors\Services\DynamicVendorService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class DynamicVendorSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->ensureDemoImages();
         $service = app(DynamicVendorService::class);
         $adminId = Admin::query()->value('id');
         $existingVendors = DynamicVendor::query()->get()->keyBy('name');
@@ -43,6 +45,7 @@ class DynamicVendorSeeder extends Seeder
                         $profile['category'],
                         $definition['required'] ?? false,
                         $allowedValues,
+                        images: $definition['images'] ?? [],
                     );
                 }
 
@@ -58,6 +61,11 @@ class DynamicVendorSeeder extends Seeder
                 ];
 
                 $existing = $existingVendors->get($name);
+                if ($existing !== null) {
+                    $payload['existing_attribute_images'] = collect(data_get($existing->vendor_json, 'attributes', []))
+                        ->map(fn (array $attribute): array => $attribute['images'] ?? [])
+                        ->all();
+                }
                 if ($existing === null) {
                     $service->create($payload, [], $adminId);
                     $created++;
@@ -90,6 +98,7 @@ class DynamicVendorSeeder extends Seeder
             ]],
             ['category' => 'Decorator', 'suffix' => 'Decor Studio', 'price' => 65000, 'attributes' => [
                 ['label' => 'Decoration Theme', 'type' => 'dropdown', 'value' => ['Floral', 'Royal', 'Minimal', 'Bohemian'], 'allowed' => ['Floral', 'Royal', 'Minimal', 'Bohemian']],
+                ['label' => 'Decoration Type', 'type' => 'multi_select', 'value' => ['Floral Stage, Entrance Arch', 'Royal Mandap, Floral Stage', 'Minimal Stage, Entrance Arch', 'Bohemian Lounge, Floral Stage'], 'allowed' => ['Floral Stage', 'Entrance Arch', 'Royal Mandap', 'Minimal Stage', 'Bohemian Lounge'], 'images' => ['demo-vendors/decor-floral.svg', 'demo-vendors/decor-mandap.svg', 'demo-vendors/decor-arch.svg']],
                 ['label' => 'Stage Included', 'type' => 'boolean', 'value' => [true, true, true, false]],
                 ['label' => 'Primary Colour', 'type' => 'color', 'value' => ['#f4b6c2', '#d4af37', '#f5f5dc', '#c97b63']],
             ]],
@@ -100,6 +109,7 @@ class DynamicVendorSeeder extends Seeder
                 ['label' => 'Performance Start', 'type' => 'time', 'value' => ['19:00', '20:00', '18:30', '21:00']],
             ]],
             ['category' => 'Catering', 'suffix' => 'Catering Company', 'price' => 90000, 'attributes' => [
+                ['label' => 'Menu Card Items', 'type' => 'multi_select', 'value' => ['Paneer Tikka, Veg Biryani', 'Butter Chicken, Gulab Jamun', 'Masala Dosa, Veg Biryani', 'Paneer Tikka, Hakka Noodles'], 'allowed' => ['Paneer Tikka', 'Veg Biryani', 'Butter Chicken', 'Gulab Jamun', 'Masala Dosa', 'Hakka Noodles'], 'images' => ['demo-vendors/menu-paneer.svg', 'demo-vendors/menu-biryani.svg', 'demo-vendors/menu-dessert.svg', 'demo-vendors/menu-dosa.svg']],
                 ['label' => 'Food Type', 'type' => 'multi_select', 'value' => ['Veg, Jain', 'Veg, Non Veg', 'Veg', 'Veg, Non Veg, Jain']],
                 ['label' => 'Cuisine', 'type' => 'multi_select', 'value' => ['Maharashtrian, Punjabi', 'Indian, Continental', 'South Indian, Indian', 'Indian, Chinese']],
                 ['label' => 'Minimum Plates', 'type' => 'number', 'value' => [100, 200, 75, 150]],
@@ -166,6 +176,7 @@ class DynamicVendorSeeder extends Seeder
         string $category,
         bool $required = false,
         array $allowedValues = [],
+        array $images = [],
         int|float|null $minValue = null,
     ): array {
         $isNumeric = in_array($type, ['number', 'currency'], true);
@@ -176,6 +187,7 @@ class DynamicVendorSeeder extends Seeder
             'label' => $label,
             'type' => $type,
             'value' => is_array($value) ? implode(', ', $value) : $value,
+            'images' => $images,
             'required' => $required,
             'allowed_values' => implode(', ', $allowedValues),
             'min_length' => $isTextual ? ($type === 'phone' ? 10 : 2) : null,
@@ -184,6 +196,32 @@ class DynamicVendorSeeder extends Seeder
             'max_value' => $isNumeric ? $this->maximumFor($label, $value) : null,
             'default_value' => $this->defaultFor($type, $allowedValues),
         ];
+    }
+
+    private function ensureDemoImages(): void
+    {
+        $images = [
+            'decor-floral.svg' => ['#f472b6', 'Floral Stage', 'FLOWERS'],
+            'decor-mandap.svg' => ['#f59e0b', 'Royal Mandap', 'MANDAP'],
+            'decor-arch.svg' => ['#8b5cf6', 'Entrance Arch', 'ARCH'],
+            'menu-paneer.svg' => ['#f97316', 'Paneer Tikka', 'STARTER'],
+            'menu-biryani.svg' => ['#eab308', 'Veg Biryani', 'MAIN COURSE'],
+            'menu-dessert.svg' => ['#ec4899', 'Gulab Jamun', 'DESSERT'],
+            'menu-dosa.svg' => ['#14b8a6', 'Masala Dosa', 'LIVE COUNTER'],
+        ];
+
+        foreach ($images as $file => [$colour, $title, $subtitle]) {
+            $svg = <<<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420">
+  <rect width="640" height="420" rx="28" fill="$colour"/>
+  <circle cx="320" cy="170" r="105" fill="white" fill-opacity=".2"/>
+  <circle cx="320" cy="170" r="72" fill="white" fill-opacity=".3"/>
+  <text x="320" y="325" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="38" font-weight="700">$title</text>
+  <text x="320" y="365" text-anchor="middle" fill="white" fill-opacity=".85" font-family="Arial, sans-serif" font-size="18" letter-spacing="4">$subtitle</text>
+</svg>
+SVG;
+            Storage::disk('public')->put("demo-vendors/$file", $svg);
+        }
     }
 
     private function deriveAllowedValues(array $definition): array
@@ -296,6 +334,7 @@ class DynamicVendorSeeder extends Seeder
             $saved = $current->get($attribute['label']);
             if ($saved === null
                 || data_get($saved, 'validation.default_value') !== $attribute['default_value']
+                || ($attribute['images'] !== [] && array_values($saved['images'] ?? []) !== $attribute['images'])
                 || array_key_exists('ai', $saved)
                 || array_key_exists('costing', $saved)) {
                 return true;

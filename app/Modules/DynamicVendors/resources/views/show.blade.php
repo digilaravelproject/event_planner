@@ -34,6 +34,13 @@
                                     {{ $attribute['value'] === null || $attribute['value'] === '' ? '—' : $attribute['value'] }}
                                 @endif
                             </div>
+                            @if(!empty($attribute['images']))
+                                <div class="mt-3 grid grid-cols-2 gap-2">
+                                    @foreach($attribute['images'] as $image)
+                                        <a href="{{ asset('storage/'.$image) }}" target="_blank" rel="noopener"><img src="{{ asset('storage/'.$image) }}" alt="{{ $attribute['label'] }}" class="h-24 w-full rounded-lg object-cover"></a>
+                                    @endforeach
+                                </div>
+                            @endif
                             @php
                                 $displayRules = collect($attribute['validation'] ?? []);
                                 $displayRuleText = $displayRules->map(function ($value, $key) {

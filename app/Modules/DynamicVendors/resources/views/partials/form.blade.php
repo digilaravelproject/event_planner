@@ -129,7 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const reindex = () => {
         [...list.querySelectorAll('.attribute-row')].forEach((row, index) => {
             row.dataset.index = index;
-            row.querySelectorAll('[name]').forEach(input => input.name = input.name.replace(/attributes\[[^\]]+\]|attribute_uploads\[[^\]]+\]/, match => match.startsWith('attributes') ? `attributes[${index}]` : `attribute_uploads[${index}]`));
+            row.querySelectorAll('[name]').forEach(input => input.name = input.name.replace(/attributes\[[^\]]+\]|attribute_uploads\[[^\]]+\]|attribute_images\[[^\]]+\]|existing_attribute_images\[[^\]]+\]/, match => {
+                if (match.startsWith('attribute_uploads')) return `attribute_uploads[${index}]`;
+                if (match.startsWith('attribute_images')) return `attribute_images[${index}]`;
+                if (match.startsWith('existing_attribute_images')) return `existing_attribute_images[${index}]`;
+                return `attributes[${index}]`;
+            }));
             row.querySelector('.position-label').textContent = `Attribute ${index + 1}`;
         });
         empty.classList.toggle('hidden', list.children.length > 0);

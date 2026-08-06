@@ -4,6 +4,7 @@
 @php
     $selectedAttribute = old('vendor_attribute_key', $question->vendor_attribute_key);
     $selectedValues = array_map('strval', old('vendor_attribute_values', $question->vendor_attribute_values ?? []));
+    $selectedImages = array_map('strval', old('vendor_attribute_images', $question->vendor_attribute_images ?? []));
 @endphp
 <div class="admin-page mx-auto max-w-5xl">
     @include('admin.partials.module-header', [
@@ -80,6 +81,14 @@
                 <p id="vendor-values-empty" class="hidden py-5 text-center text-sm text-slate-400">No populated values exist for this attribute yet.</p>
             </div>
 
+            <div id="vendor-images-panel" class="mt-4 hidden rounded-xl border border-slate-200 bg-white p-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <p class="text-sm font-extrabold text-slate-800">Attribute images</p>
+                    <p class="text-xs text-slate-400">Select the images that should be available with this question.</p>
+                </div>
+                <div id="vendor-images" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
+            </div>
+
             @if($attributeCatalog === [])
                 <p class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">Add attributes and values to Dynamic Vendors before creating a vendor mapping.</p>
             @endif
@@ -107,6 +116,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const catalog = @json($attributeCatalog);
     const previouslySelected = @json($selectedValues);
+    const previouslySelectedImages = @json($selectedImages);
     const attributeSelect = document.getElementById('vendor-attribute');
     const panel = document.getElementById('vendor-values-panel');
     const valuesContainer = document.getElementById('vendor-values');
@@ -114,9 +124,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectAll = document.getElementById('select-all-values');
     const optionsText = document.getElementById('options-text');
     const mappedNote = document.getElementById('mapped-options-note');
+    const imagesPanel = document.getElementById('vendor-images-panel');
+    const imagesContainer = document.getElementById('vendor-images');
     let selectedByAttribute = {};
+    let selectedImagesByAttribute = {};
+    const vendorTooltip = document.createElement('div');
+    vendorTooltip.className = 'pointer-events-none fixed z-[100] hidden max-w-xs rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold leading-5 text-white shadow-xl';
+    vendorTooltip.setAttribute('role', 'tooltip');
+    document.body.appendChild(vendorTooltip);
 
-    if (attributeSelect.value) selectedByAttribute[attributeSelect.value] = previouslySelected;
+    const showVendorTooltip = target => {
+        const names = target.dataset.vendorNames;
+        if (!names) return;
+        vendorTooltip.textContent = names;
+        vendorTooltip.classList.remove('hidden');
+        const rect = target.getBoundingClientRect();
+        const left = Math.min(window.innerWidth - vendorTooltip.offsetWidth - 12, Math.max(12, rect.left + rect.width / 2 - vendorTooltip.offsetWidth / 2));
+        const top = Math.max(12, rect.top - vendorTooltip.offsetHeight - 8);
+        vendorTooltip.style.left = `${left}px`;
+        vendorTooltip.style.top = `${top}px`;
+    };
+    const hideVendorTooltip = () => vendorTooltip.classList.add('hidden');
+
+    if (attributeSelect.value) {
+        selectedByAttribute[attributeSelect.value] = previouslySelected;
+        selectedImagesByAttribute[attributeSelect.value] = previouslySelectedImages;
+    }
 
     const valueCheckboxes = () => [...valuesContainer.querySelectorAll('input[name="vendor_attribute_values[]"]')];
 
@@ -135,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const key = attributeSelect.value;
         const attribute = catalog[key];
         valuesContainer.replaceChildren();
+        imagesContainer.replaceChildren();
         panel.classList.toggle('hidden', !key);
         optionsText.readOnly = Boolean(key);
         mappedNote.classList.toggle('hidden', !key);
@@ -142,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!key || !attribute) {
             selectAll.checked = false;
             selectAll.indeterminate = false;
+            imagesPanel.classList.add('hidden');
             return;
         }
 
@@ -167,13 +202,45 @@ document.addEventListener('DOMContentLoaded', () => {
             left.append(checkbox, value);
 
             const count = document.createElement('span');
-            count.className = 'shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500';
+            count.className = 'shrink-0 cursor-help rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500 outline-none focus:ring-2 focus:ring-indigo-300';
             count.textContent = `${item.vendors_count} vendor${item.vendors_count === 1 ? '' : 's'}`;
+            const vendorNames = (item.vendor_names || []).join(', ');
+            count.title = vendorNames;
+            count.dataset.vendorNames = vendorNames;
+            count.tabIndex = 0;
+            count.setAttribute('aria-label', `${count.textContent}: ${vendorNames}`);
+            count.addEventListener('mouseenter', () => showVendorTooltip(count));
+            count.addEventListener('mouseleave', hideVendorTooltip);
+            count.addEventListener('focus', () => showVendorTooltip(count));
+            count.addEventListener('blur', hideVendorTooltip);
             label.append(left, count);
             valuesContainer.appendChild(label);
         });
 
         emptyMessage.classList.toggle('hidden', attribute.values.length > 0);
+        const selectedImages = new Set(selectedImagesByAttribute[key] || []);
+        (attribute.images || []).forEach(image => {
+            const label = document.createElement('label');
+            label.className = 'overflow-hidden rounded-xl border border-slate-200 bg-white p-2';
+            const preview = document.createElement('img');
+            preview.src = `{{ asset('storage') }}/${image}`;
+            preview.alt = `${attribute.label} image`;
+            preview.className = 'h-28 w-full rounded-lg object-cover';
+            const choice = document.createElement('span');
+            choice.className = 'mt-2 flex items-center gap-2 text-xs font-bold text-slate-600';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'vendor_attribute_images[]';
+            checkbox.value = image;
+            checkbox.checked = selectedImages.has(image);
+            checkbox.addEventListener('change', () => {
+                selectedImagesByAttribute[key] = [...imagesContainer.querySelectorAll('input:checked')].map(input => input.value);
+            });
+            choice.append(checkbox, document.createTextNode('Use image'));
+            label.append(preview, choice);
+            imagesContainer.appendChild(label);
+        });
+        imagesPanel.classList.toggle('hidden', !attribute.images || attribute.images.length === 0);
         syncOptions();
     };
 

@@ -14,6 +14,22 @@
         <label class="attribute-value {{ $isUpload ? 'hidden' : '' }} block md:col-span-5"><span class="mb-1.5 block text-xs font-bold text-slate-700">Attribute value</span><textarea name="attributes[{{ $index }}][value]" rows="1" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm">{{ $attribute['value'] ?? '' }}</textarea></label>
         <label class="attribute-upload {{ $isUpload ? '' : 'hidden' }} block md:col-span-5"><span class="mb-1.5 block text-xs font-bold text-slate-700">Upload</span><input type="file" name="attribute_uploads[{{ $index }}]" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><span class="mt-1 block truncate text-[11px] text-slate-400">{{ $isUpload && ($attribute['value'] ?? null) ? 'Current: '.$attribute['value'] : '' }}</span></label>
     </div>
+    <div class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/40 p-3">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div><p class="text-xs font-extrabold text-slate-700">Attribute images</p><p class="text-[11px] text-slate-500">Attach one or more images to this attribute.</p></div>
+            <input type="file" name="attribute_images[{{ $index }}][]" accept="image/*" multiple class="text-xs text-slate-600">
+        </div>
+        @if(!empty($attribute['images']))
+            <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                @foreach($attribute['images'] as $image)
+                    <label class="rounded-lg border border-slate-200 bg-white p-2">
+                        <img src="{{ asset('storage/'.$image) }}" alt="{{ $attribute['label'] ?? 'Attribute' }}" class="h-20 w-full rounded-md object-cover">
+                        <span class="mt-1 flex items-center gap-1 text-[10px] font-bold text-slate-500"><input type="checkbox" name="existing_attribute_images[{{ $index }}][]" value="{{ $image }}" checked> Keep</span>
+                    </label>
+                @endforeach
+            </div>
+        @endif
+    </div>
     <details class="mt-4 rounded-xl border border-slate-200 bg-white p-3">
         <summary class="cursor-pointer text-xs font-extrabold text-slate-700">Optional validation</summary>
         <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
