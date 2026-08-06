@@ -116,6 +116,16 @@
     filter: brightness(1);
 }
 
+/* Disable 3D scale transforms on mobile to prevent layout shifts */
+@media (max-width: 767px) {
+    .perspective-stage, .page-3d-stage, .page-3d-initial, .page-3d-zoomed {
+        transform: none !important;
+        perspective: none !important;
+        opacity: 1 !important;
+        filter: none !important;
+    }
+}
+
 /* Cleanup after entrance animation completes: Release GPU layers & restore layout */
 .page-3d-complete {
     transform: none !important;

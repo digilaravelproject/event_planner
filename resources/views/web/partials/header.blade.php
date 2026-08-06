@@ -3,7 +3,7 @@
     :class="scrolled ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-rose-950/[0.04] border-b border-rose-200/60 py-3 md:py-3.5' : 'bg-[#FFFDF9]/85 backdrop-blur-lg border-b border-rose-100/70 py-4 md:py-5'" 
     class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full"
 >
-    <div class="max-w-[1600px] mx-auto w-full px-6 md:px-16 flex items-center justify-between">
+    <div class="max-w-[1600px] mx-auto w-full px-4 sm:px-8 md:px-12 lg:px-16 flex items-center justify-between">
     <!-- Brand Logo with Royal Gold Ring & Sparkle Glow Animation -->
     <a href="{{ url('/') }}" class="flex items-center space-x-3 group relative z-10">
         <div class="relative flex items-center justify-center">

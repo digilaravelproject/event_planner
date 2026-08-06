@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- SECTION 1: HERO SECTION -->
-<section id="hero-section" class="relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-6 md:px-16 overflow-hidden">
+<section id="hero-section" class="relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-4 sm:px-8 md:px-12 lg:px-16 overflow-hidden">
     <!-- Three.js RevealWaveImage WebGL Canvas Background -->
     <div id="hero-wave-canvas-container" class="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply transition-opacity duration-1000"></div>
 
@@ -197,7 +197,7 @@
 </section>
 
 <!-- SECTION 2: HOW IT WORKS (SHUBH AARAMBH PROCESS) -->
-<section id="how-it-works" class="py-14 md:py-16 bg-[#FAF7F2] px-6 md:px-16 border-t border-b border-rose-100/60 relative overflow-hidden">
+<section id="how-it-works" class="py-14 md:py-16 bg-[#FAF7F2] px-4 sm:px-8 md:px-12 lg:px-16 border-t border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Glows & Shades (Matching Footer Style) -->
     <div class="absolute -top-20 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-rose-200/40 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-20 -right-20 w-[450px] h-[450px] bg-gradient-to-tl from-rose-200/50 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -364,7 +364,7 @@
 </section>
 
 <!-- SECTION 3: WHY CHOOSE US / UNIQUE FEATURES -->
-<section id="why-choose-us" class="py-20 md:py-24 bg-[#FAF8F5] px-6 md:px-16 border-b border-rose-100/60 relative overflow-hidden">
+<section id="why-choose-us" class="py-20 md:py-24 bg-[#FAF8F5] px-4 sm:px-8 md:px-12 lg:px-16 border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Glows & Shades (Matching Footer & How It Works Style) -->
     <div class="absolute -top-24 -right-24 w-[500px] h-[500px] bg-gradient-to-br from-rose-200/50 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -left-24 w-[500px] h-[500px] bg-gradient-to-tl from-rose-200/60 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -422,7 +422,7 @@
 </section>
 
 <!-- SECTION 3.5: MANUAL VS SHAADI SENSE (PROBLEM VS SOLUTION) -->
-<section id="problem-vs-solution" class="py-16 md:py-24 bg-white px-6 md:px-16 border-b border-rose-100/60 relative overflow-hidden">
+<section id="problem-vs-solution" class="py-16 md:py-24 bg-white px-4 sm:px-8 md:px-12 lg:px-16 border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Light Shades -->
     <div class="absolute -top-24 left-1/4 w-[450px] h-[450px] bg-gradient-to-br from-rose-200/40 via-amber-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 right-1/4 w-[450px] h-[450px] bg-gradient-to-tl from-rose-200/50 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -591,7 +591,7 @@
 </section>
 
 <!-- SECTION 4: AI EVENT PLANNING STUDIO TEASER -->
-<section id="estimator" class="py-14 md:py-20 bg-gradient-to-b from-[#FFFDF9] to-[#FAF3EC] text-slate-900 px-6 md:px-16 relative overflow-hidden border-b border-rose-100/60">
+<section id="estimator" class="py-14 md:py-20 bg-gradient-to-b from-[#FFFDF9] to-[#FAF3EC] text-slate-900 px-4 sm:px-8 md:px-12 lg:px-16 relative overflow-hidden border-b border-rose-100/60">
     <!-- Ambient Light Shades -->
     <div class="absolute -top-20 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-rose-200/40 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-20 -right-20 w-[450px] h-[450px] bg-gradient-to-tl from-rose-200/50 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -749,7 +749,7 @@
 </section>
 
 <!-- SECTION 5: REVIEWS & TESTIMONIALS (COMPACT 7-ITEM SLIDER) -->
-<section id="testimonials" class="py-12 md:py-16 bg-[#FAF7F2] px-6 md:px-16 border-b border-rose-100/60 relative overflow-hidden"
+<section id="testimonials" class="py-12 md:py-16 bg-[#FAF7F2] px-4 sm:px-8 md:px-12 lg:px-16 border-b border-rose-100/60 relative overflow-hidden"
          x-data="{ 
             currentIndex: 0,
             autoPlayTimer: null,
@@ -820,223 +820,237 @@
 
         <!-- Slider Viewport -->
         <div class="overflow-hidden py-1">
-            <div class="flex transition-transform duration-500 ease-out gap-4"
+            <div class="flex transition-transform duration-500 ease-out -mx-2"
                  :style="'transform: translateX(-' + (currentIndex * (100 / itemsPerPage)) + '%)'">
                 
                 <!-- Card 1 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
-                    <div class="space-y-2.5">
-                        <div class="flex items-center gap-3">
-                            <div class="relative shrink-0">
-                                <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=150" alt="Priyanka & Rahul" class="w-10 h-10 rounded-full object-cover border border-rose-200">
-                                <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
+                <div class="shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2 flex flex-col">
+                    <div class="bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3 h-full">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="relative shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=150" alt="Priyanka & Rahul" class="w-10 h-10 rounded-full object-cover border border-rose-200">
+                                    <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-xs truncate">Priyanka & Rahul</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Udaipur • Palace Wedding</p>
+                                </div>
                             </div>
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-slate-900 text-xs truncate">Priyanka & Rahul</h4>
-                                <p class="text-[10px] text-slate-500 truncate">Udaipur • Palace Wedding</p>
+
+                            <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
+
+                            <p class="text-slate-600 text-xs leading-relaxed italic">
+                                "Shaadi Sense turned our palace wedding into a royal fairytale. The AI planning dashboard made vendor budget tracking effortless!"
+                            </p>
                         </div>
 
-                        <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">₹ 2.4 Lakh Saved</span>
+                            <span class="text-[10px] font-medium text-slate-400">Nov 2025</span>
                         </div>
-
-                        <p class="text-slate-600 text-xs leading-relaxed italic">
-                            "Shaadi Sense turned our palace wedding into a royal fairytale. The AI planning dashboard made vendor budget tracking effortless!"
-                        </p>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">₹ 2.4 Lakh Saved</span>
-                        <span class="text-[10px] font-medium text-slate-400">Nov 2025</span>
                     </div>
                 </div>
 
                 <!-- Card 2 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
-                    <div class="space-y-2.5">
-                        <div class="flex items-center gap-3">
-                            <div class="relative shrink-0">
-                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="Aanya & Siddharth" class="w-10 h-10 rounded-full object-cover border border-rose-200">
-                                <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
+                <div class="shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2 flex flex-col">
+                    <div class="bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3 h-full">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="relative shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="Aanya & Siddharth" class="w-10 h-10 rounded-full object-cover border border-rose-200">
+                                    <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-xs truncate">Aanya & Siddharth</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Goa • Beach Wedding</p>
+                                </div>
                             </div>
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-slate-900 text-xs truncate">Aanya & Siddharth</h4>
-                                <p class="text-[10px] text-slate-500 truncate">Goa • Beach Wedding</p>
+
+                            <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
+
+                            <p class="text-slate-600 text-xs leading-relaxed italic">
+                                "From caterers to sunset mandap decorators, everything matched in 2 mins. We loved the zero hidden cost transparency!"
+                            </p>
                         </div>
 
-                        <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">₹ 1.8 Lakh Saved</span>
+                            <span class="text-[10px] font-medium text-slate-400">Dec 2025</span>
                         </div>
-
-                        <p class="text-slate-600 text-xs leading-relaxed italic">
-                            "From caterers to sunset mandap decorators, everything matched in 2 mins. We loved the zero hidden cost transparency!"
-                        </p>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">₹ 1.8 Lakh Saved</span>
-                        <span class="text-[10px] font-medium text-slate-400">Dec 2025</span>
                     </div>
                 </div>
 
                 <!-- Card 3 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
-                    <div class="space-y-2.5">
-                        <div class="flex items-center gap-3">
-                            <div class="relative shrink-0">
-                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150" alt="Vikas Sharma" class="w-10 h-10 rounded-full object-cover border border-rose-200">
-                                <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
+                <div class="shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2 flex flex-col">
+                    <div class="bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3 h-full">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="relative shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150" alt="Vikas Sharma" class="w-10 h-10 rounded-full object-cover border border-rose-200">
+                                    <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-xs truncate">Vikas Sharma</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Mumbai • Corporate Gala</p>
+                                </div>
                             </div>
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-slate-900 text-xs truncate">Vikas Sharma</h4>
-                                <p class="text-[10px] text-slate-500 truncate">Mumbai • Corporate Gala</p>
+
+                            <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
+
+                            <p class="text-slate-600 text-xs leading-relaxed italic">
+                                "Extremely professional execution for corporate awards. The budget distribution tool saved us weeks of back-and-forth email exchanges."
+                            </p>
                         </div>
 
-                        <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">100% On-Time</span>
+                            <span class="text-[10px] font-medium text-slate-400">Jan 2026</span>
                         </div>
-
-                        <p class="text-slate-600 text-xs leading-relaxed italic">
-                            "Extremely professional execution for corporate awards. The budget distribution tool saved us weeks of back-and-forth email exchanges."
-                        </p>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">100% On-Time</span>
-                        <span class="text-[10px] font-medium text-slate-400">Jan 2026</span>
                     </div>
                 </div>
 
                 <!-- Card 4 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
-                    <div class="space-y-2.5">
-                        <div class="flex items-center gap-3">
-                            <div class="relative shrink-0">
-                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150" alt="The Kapoor Family" class="w-10 h-10 rounded-full object-cover border border-rose-200">
-                                <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
+                <div class="shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2 flex flex-col">
+                    <div class="bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3 h-full">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="relative shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150" alt="The Kapoor Family" class="w-10 h-10 rounded-full object-cover border border-rose-200">
+                                    <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-xs truncate">The Kapoor Family</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Mumbai • 50th Anniversary</p>
+                                </div>
                             </div>
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-slate-900 text-xs truncate">The Kapoor Family</h4>
-                                <p class="text-[10px] text-slate-500 truncate">Mumbai • 50th Anniversary</p>
+
+                            <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
+
+                            <p class="text-slate-600 text-xs leading-relaxed italic">
+                                "Planned our grandparents 50th anniversary seamlessly. Transparent vendor estimates left our family completely stress-free!"
+                            </p>
                         </div>
 
-                        <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">Flawless Event</span>
+                            <span class="text-[10px] font-medium text-slate-400">Feb 2026</span>
                         </div>
-
-                        <p class="text-slate-600 text-xs leading-relaxed italic">
-                            "Planned our grandparents 50th anniversary seamlessly. Transparent vendor estimates left our family completely stress-free!"
-                        </p>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">Flawless Event</span>
-                        <span class="text-[10px] font-medium text-slate-400">Feb 2026</span>
                     </div>
                 </div>
 
                 <!-- Card 5 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
-                    <div class="space-y-2.5">
-                        <div class="flex items-center gap-3">
-                            <div class="relative shrink-0">
-                                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=150" alt="Rohan & Meera" class="w-10 h-10 rounded-full object-cover border border-rose-200">
-                                <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
+                <div class="shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2 flex flex-col">
+                    <div class="bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3 h-full">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="relative shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=150" alt="Rohan & Meera" class="w-10 h-10 rounded-full object-cover border border-rose-200">
+                                    <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-xs truncate">Rohan & Meera</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Jaipur • Heritage Sangeet</p>
+                                </div>
                             </div>
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-slate-900 text-xs truncate">Rohan & Meera</h4>
-                                <p class="text-[10px] text-slate-500 truncate">Jaipur • Heritage Sangeet</p>
+
+                            <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
+
+                            <p class="text-slate-600 text-xs leading-relaxed italic">
+                                "Finding a heritage venue and top choreographer within budget felt impossible until we used Shaadi Sense's AI matchmaker!"
+                            </p>
                         </div>
 
-                        <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">₹ 1.5 Lakh Saved</span>
+                            <span class="text-[10px] font-medium text-slate-400">Mar 2026</span>
                         </div>
-
-                        <p class="text-slate-600 text-xs leading-relaxed italic">
-                            "Finding a heritage venue and top choreographer within budget felt impossible until we used Shaadi Sense's AI matchmaker!"
-                        </p>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">₹ 1.5 Lakh Saved</span>
-                        <span class="text-[10px] font-medium text-slate-400">Mar 2026</span>
                     </div>
                 </div>
 
                 <!-- Card 6 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
-                    <div class="space-y-2.5">
-                        <div class="flex items-center gap-3">
-                            <div class="relative shrink-0">
-                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=150" alt="Ananya Deshmukh" class="w-10 h-10 rounded-full object-cover border border-rose-200">
-                                <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
+                <div class="shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2 flex flex-col">
+                    <div class="bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3 h-full">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="relative shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=150" alt="Ananya Deshmukh" class="w-10 h-10 rounded-full object-cover border border-rose-200">
+                                    <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-xs truncate">Ananya Deshmukh</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Pune • Destination Wedding</p>
+                                </div>
                             </div>
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-slate-900 text-xs truncate">Ananya Deshmukh</h4>
-                                <p class="text-[10px] text-slate-500 truncate">Pune • Destination Wedding</p>
+
+                            <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
+
+                            <p class="text-slate-600 text-xs leading-relaxed italic">
+                                "The AI vendor recommendations matched our aesthetic completely. Direct WhatsApp booking saved so much time!"
+                            </p>
                         </div>
 
-                        <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">Verified Booking</span>
+                            <span class="text-[10px] font-medium text-slate-400">Apr 2026</span>
                         </div>
-
-                        <p class="text-slate-600 text-xs leading-relaxed italic">
-                            "The AI vendor recommendations matched our aesthetic completely. Direct WhatsApp booking saved so much time!"
-                        </p>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">Verified Booking</span>
-                        <span class="text-[10px] font-medium text-slate-400">Apr 2026</span>
                     </div>
                 </div>
 
                 <!-- Card 7 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
-                    <div class="space-y-2.5">
-                        <div class="flex items-center gap-3">
-                            <div class="relative shrink-0">
-                                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=150" alt="Karan & Simran" class="w-10 h-10 rounded-full object-cover border border-rose-200">
-                                <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
+                <div class="shrink-0 w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 px-2 flex flex-col">
+                    <div class="bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3 h-full">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center gap-3">
+                                <div class="relative shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=150" alt="Karan & Simran" class="w-10 h-10 rounded-full object-cover border border-rose-200">
+                                    <span class="absolute -bottom-0.5 -right-0.5 bg-emerald-500 text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-xs truncate">Karan & Simran</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Delhi • Farmhouse Wedding</p>
+                                </div>
                             </div>
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-slate-900 text-xs truncate">Karan & Simran</h4>
-                                <p class="text-[10px] text-slate-500 truncate">Delhi • Farmhouse Wedding</p>
+
+                            <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
+
+                            <p class="text-slate-600 text-xs leading-relaxed italic">
+                                "Instant budget allocation helped us balance funds between decor and catering without overshooting our limit!"
+                            </p>
                         </div>
 
-                        <div class="flex items-center gap-0.5 text-[#D4AF37] text-[10px]">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">₹ 2.1 Lakh Saved</span>
+                            <span class="text-[10px] font-medium text-slate-400">May 2026</span>
                         </div>
-
-                        <p class="text-slate-600 text-xs leading-relaxed italic">
-                            "Instant budget allocation helped us balance funds between decor and catering without overshooting our limit!"
-                        </p>
-                    </div>
-
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">₹ 2.1 Lakh Saved</span>
-                        <span class="text-[10px] font-medium text-slate-400">May 2026</span>
                     </div>
                 </div>
 
@@ -1056,7 +1070,7 @@
 </section>
 
 <!-- SECTION 6: FINAL CTA BANNER (YOUR SHAADI, SORTED) -->
-<section id="final-cta" class="py-16 md:py-20 bg-[#FAF7F2] px-6 md:px-16 border-b border-rose-100/60 relative overflow-hidden text-center">
+<section id="final-cta" class="py-16 md:py-20 bg-[#FAF7F2] px-4 sm:px-8 md:px-12 lg:px-16 border-b border-rose-100/60 relative overflow-hidden text-center">
     <!-- Ambient Light Shades -->
     <div class="absolute -top-24 left-1/3 w-[450px] h-[450px] bg-gradient-to-br from-rose-200/40 via-amber-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 

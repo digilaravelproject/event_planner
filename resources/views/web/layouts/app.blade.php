@@ -80,13 +80,19 @@
         }
     </style>
     @stack('styles')
+
+    <!-- Immediate Scroll Restoration Reset -->
+    <script>
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        if (window.location.hash) history.replaceState(null, null, window.location.pathname);
+        window.scrollTo(0, 0);
+    </script>
 </head>
 <body 
     class="bg-[#FFFDF9] text-slate-800 min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-[#850625]/20 selection:text-[#850625]" 
-    :class="{ 'overflow-hidden max-h-screen': !pageReady }"
     x-data="{ isLoaded: false, pageReady: false, scrolled: false }" 
     @scroll.window="scrolled = (window.pageYOffset > 40) ? true : false" 
-    x-init="window.scrollTo(0, 0); setTimeout(() => isLoaded = true, 400); setTimeout(() => { pageReady = true; window.scrollTo(0, 0); }, 1800)"
+    x-init="window.scrollTo(0, 0); setTimeout(() => isLoaded = true, 100); setTimeout(() => { pageReady = true; window.scrollTo(0, 0); }, 1200)"
 >
     <!-- Top Luxury Scroll Progress Indicator Line -->
     <div id="scroll-progress-bar" class="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-[#850625] via-[#D4AF37] to-[#850625] z-[100] transition-all duration-75 w-0 pointer-events-none"></div>

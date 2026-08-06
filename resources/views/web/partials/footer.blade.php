@@ -1,4 +1,4 @@
-<footer class="w-full relative bg-gradient-to-br from-[#FFFDF9] via-white to-[#FAF7F2] py-12 md:py-16 px-6 md:px-16 border-t border-rose-200/80 shadow-2xl shadow-rose-950/[0.05] overflow-hidden">
+<footer class="w-full relative bg-gradient-to-br from-[#FFFDF9] via-white to-[#FAF7F2] py-12 md:py-16 px-4 sm:px-8 md:px-12 lg:px-16 border-t border-rose-200/80 shadow-2xl shadow-rose-950/[0.05] overflow-hidden">
     <!-- Full-bleed Ambient Corner Glows/Shades (Ref Image 1 style with Light Colors) -->
     <div class="absolute -top-24 -left-24 w-[500px] h-[500px] bg-gradient-to-br from-rose-200/50 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -right-24 w-[500px] h-[500px] bg-gradient-to-tl from-rose-200/60 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
