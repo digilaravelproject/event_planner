@@ -195,6 +195,8 @@
     </div>
 </section>
 
+@include('web.partials.how-it-works', ['items' => $howItWorks])
+@if(false)
 <!-- SECTION 2: HOW IT WORKS (SHUBH AARAMBH PROCESS) -->
 <section id="how-it-works" class="py-14 md:py-16 bg-[#FAF7F2] px-4 sm:px-8 md:px-12 lg:px-16 border-t border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Glows & Shades (Matching Footer Style) -->
@@ -362,6 +364,7 @@
     </div>
 </section>
 
+@endif
 <!-- SECTION 3: WHY CHOOSE US / UNIQUE FEATURES -->
 <section id="why-choose-us" class="py-20 md:py-24 bg-[#FAF8F5] px-4 sm:px-8 md:px-12 lg:px-16 border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Glows & Shades (Matching Footer & How It Works Style) -->
@@ -420,6 +423,8 @@
     </div>
 </section>
 
+@include('web.partials.comparisons', ['items' => $comparisons])
+@if(false)
 <!-- SECTION 3.5: MANUAL VS SHAADI SENSE (PROBLEM VS SOLUTION) -->
 <section id="problem-vs-solution" class="py-16 md:py-24 bg-white px-4 sm:px-8 md:px-12 lg:px-16 border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Light Shades -->
@@ -589,6 +594,7 @@
     </div>
 </section>
 
+@endif
 <!-- SECTION 4: AI EVENT PLANNING STUDIO TEASER -->
 <section id="estimator" class="py-14 md:py-20 bg-gradient-to-b from-[#FFFDF9] to-[#FAF3EC] text-slate-900 px-4 sm:px-8 md:px-12 lg:px-16 relative overflow-hidden border-b border-rose-100/60">
     <!-- Ambient Light Shades -->
@@ -858,6 +864,8 @@
         </svg>
     </div>
 
+    @include('web.partials.testimonials', ['items' => $testimonials])
+    @if(false)
     <!-- SUB-SECTION A: TESTIMONIALS SLIDER -->
     <div id="testimonials" class="px-4 sm:px-8 md:px-12 lg:px-16 pb-12 md:pb-16 relative z-10"
          x-data="{ 
@@ -1179,6 +1187,7 @@
         </div>
     </div>
 
+    @endif
     <!-- SUB-SECTION B: FINAL CTA BANNER (YOUR SHAADI, SORTED) -->
     <div id="final-cta" class="px-4 sm:px-8 md:px-12 lg:px-16 pt-8 md:pt-12 text-center relative z-10">
         <div class="max-w-[1600px] mx-auto space-y-8">

@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Admin;
 use App\Models\AdminNotification;
 use App\Models\EventRequirementQuestion;
+use App\Models\AiSetting;
+use App\Models\LandingContent;
 use App\Models\Page;
 use App\Models\User;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
@@ -12,6 +14,9 @@ use Database\Seeders\AdminModulesSeeder;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Http;
+use App\Services\OpenRouterService;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -32,6 +37,50 @@ class AdminModulesTest extends TestCase
         foreach (['admin.vendor-analytics.index', 'admin.ai.manage', 'admin.event-questions.index', 'admin.notifications.index', 'admin.pages.index', 'admin.feedback.index'] as $route) {
             $this->get(route($route))->assertOk();
         }
+
+        foreach (array_keys(LandingContent::TYPES) as $type) {
+            $this->get(route('admin.landing-content.index', $type))->assertOk();
+        }
+    }
+
+    public function test_admin_can_manage_database_backed_landing_content(): void
+    {
+        $this->post(route('admin.landing-content.store', 'how-it-works'), [
+            'title' => 'Share event details',
+            'body' => 'Tell us your budget and guest count.',
+            'eyebrow' => 'Two minutes',
+            'footer' => 'Guided Input',
+            'display_order' => 1,
+            'status' => 1,
+        ])->assertRedirect(route('admin.landing-content.index', 'how-it-works'));
+
+        $item = LandingContent::firstOrFail();
+        $this->get(route('home'))->assertOk()->assertSee('Share event details')->assertSee('Tell us your budget and guest count.');
+        $this->put(route('admin.landing-content.update', ['how-it-works', $item]), [
+            'title' => 'Share your celebration details',
+            'body' => 'Updated landing content.',
+            'display_order' => 2,
+            'status' => 1,
+        ])->assertRedirect();
+        $this->assertDatabaseHas('landing_contents', ['id' => $item->id, 'title' => 'Share your celebration details']);
+        $this->delete(route('admin.landing-content.destroy', ['how-it-works', $item]))->assertRedirect();
+        $this->assertDatabaseMissing('landing_contents', ['id' => $item->id]);
+    }
+
+    public function test_openrouter_configuration_and_chat_client_use_the_selected_model_and_prompt(): void
+    {
+        $this->get(route('admin.ai.manage'))->assertOk()->assertSee('OpenRouter Configuration')->assertDontSee('OpenAI API Key');
+
+        AiSetting::setValue('openrouter_api_key', Crypt::encryptString('test-key'));
+        AiSetting::setValue('openrouter_model', 'openrouter/auto');
+        AiSetting::setValue('openrouter_prompt_template', 'Use only supplied vendor data.');
+        Http::fake(['openrouter.ai/api/v1/chat/completions' => Http::response(['choices' => [['message' => ['content' => 'ok']]]])]);
+
+        app(OpenRouterService::class)->chat([['role' => 'user', 'content' => 'Plan my event.']]);
+
+        Http::assertSent(fn ($request) => $request->url() === 'https://openrouter.ai/api/v1/chat/completions'
+            && $request['model'] === 'openrouter/auto'
+            && data_get($request->data(), 'messages.0.content') === 'Use only supplied vendor data.');
     }
 
     public function test_question_resource_validates_and_persists(): void

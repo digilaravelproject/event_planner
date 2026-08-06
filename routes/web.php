@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\EventRequirementQuestionController;
 use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\VendorAnalyticsController;
 use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserSubscriptionController;
@@ -38,7 +39,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
 
-        // OpenAI Settings
+        // OpenRouter Settings
         Route::get('/ai-settings', [AiSettingController::class, 'index'])->name('admin.ai.manage');
         Route::post('/ai-settings', [AiSettingController::class, 'store'])->name('admin.ai.manage.save');
 
@@ -50,6 +51,14 @@ Route::prefix('admin')->group(function () {
         Route::post('/notifications/{notification}/send', [NotificationController::class, 'send'])->name('admin.notifications.send');
         Route::resource('/notifications', NotificationController::class)->names('admin.notifications');
         Route::resource('/pages', PageController::class)->names('admin.pages');
+        Route::prefix('/landing-content/{type}')->whereIn('type', array_keys(\App\Models\LandingContent::TYPES))->group(function () {
+            Route::get('/', [LandingContentController::class, 'index'])->name('admin.landing-content.index');
+            Route::get('/create', [LandingContentController::class, 'create'])->name('admin.landing-content.create');
+            Route::post('/', [LandingContentController::class, 'store'])->name('admin.landing-content.store');
+            Route::get('/{landingContent}/edit', [LandingContentController::class, 'edit'])->name('admin.landing-content.edit');
+            Route::put('/{landingContent}', [LandingContentController::class, 'update'])->name('admin.landing-content.update');
+            Route::delete('/{landingContent}', [LandingContentController::class, 'destroy'])->name('admin.landing-content.destroy');
+        });
         Route::resource('/feedback', FeedbackController::class)->only(['index', 'show', 'update', 'destroy'])->names('admin.feedback');
 
         // User Management CRUD
@@ -102,7 +111,15 @@ Route::prefix('user')->group(function () {
 use App\Http\Controllers\AiPlannerController;
 
 Route::get('/', function () {
-    return view('web.index');
+    $content = fn (string $type) => \Illuminate\Support\Facades\Schema::hasTable('landing_contents')
+        ? \App\Models\LandingContent::where('type', $type)->published()->get()
+        : collect();
+
+    return view('web.index', [
+        'howItWorks' => $content('how-it-works'),
+        'comparisons' => $content('comparisons'),
+        'testimonials' => $content('testimonials'),
+    ]);
 })->name('home');
 
 Route::get('/ai-planner', [AiPlannerController::class, 'index'])->name('ai-planner');

@@ -178,7 +178,6 @@
                 ['admin.vendor-analytics.index', 'admin.vendor-analytics', 'Vendor Analytics', 'VA'],
                 ['admin.event-questions.index', 'admin.event-questions', 'Event Requirement Questions', 'EQ'],
                 ['admin.notifications.index', 'admin.notifications', 'Notification Management', 'NM'],
-                ['admin.pages.index', 'admin.pages', 'Manage Pages', 'MP'],
                 ['admin.feedback.index', 'admin.feedback', 'User Feedback', 'UF'],
             ] as [$menuRoute, $routePrefix, $menuLabel, $menuIcon])
                 <a href="{{ route($menuRoute) }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, $routePrefix) ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
@@ -186,6 +185,26 @@
                     <span>{{ $menuLabel }}</span>
                 </a>
             @endforeach
+
+            @php($pagesOpen = str_starts_with($currentRoute, 'admin.pages') || str_starts_with($currentRoute, 'admin.landing-content'))
+            <details class="group" @if($pagesOpen) open @endif>
+                <summary class="flex cursor-pointer list-none items-center gap-x-3.5 rounded-r-xl border-l-4 px-4 py-3 text-xs font-bold tracking-tight transition-all {{ $pagesOpen ? 'border-[#3950a2] bg-slate-50 text-[#3950a2]' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ $pagesOpen ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">MP</span>
+                    <span class="flex-1">Manage Pages</span>
+                    <svg class="h-4 w-4 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                </summary>
+                <div class="ml-10 mt-1 space-y-1 border-l border-slate-200 pl-3" style="margin-left: 25% !important;">
+                    @foreach([
+                        [route('admin.pages.index'), 'admin.pages', 'Static Pages'],
+                        [route('admin.landing-content.index','how-it-works'), 'how-it-works', 'How It Works'],
+                        [route('admin.landing-content.index','comparisons'), 'comparisons', 'Comparison'],
+                        [route('admin.landing-content.index','testimonials'), 'testimonials', 'User Testimonials'],
+                    ] as [$url,$match,$label])
+                        @php($activeSub = $match === 'admin.pages' ? str_starts_with($currentRoute,'admin.pages') : (str_starts_with($currentRoute,'admin.landing-content') && request()->route('type') === $match))
+                        <a href="{{ $url }}" class="block rounded-lg px-3 py-2 text-[11px] font-bold {{ $activeSub ? 'bg-indigo-50 text-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">{{ $label }}</a>
+                    @endforeach
+                </div>
+            </details>
 
             <a href="{{ route('admin.ai.manage') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.ai.manage') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.ai.manage') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
