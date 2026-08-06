@@ -99,6 +99,11 @@ Route::prefix('user')->group(function () {
     });
 });
 
+use App\Http\Controllers\AiPlannerController;
+
 Route::get('/', function () {
     return view('web.index');
 })->name('home');
+
+Route::get('/ai-planner', [AiPlannerController::class, 'index'])->name('ai-planner');
+
