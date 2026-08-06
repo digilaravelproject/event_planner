@@ -612,74 +612,72 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch" x-data="{ eventType: 'wedding', guestCount: '150-300' }">
             
-            <!-- Left Side: Interactive Parameter Selection (Compact) -->
-            <div class="lg:col-span-7 bg-white/90 backdrop-blur-xl border border-rose-200/60 rounded-3xl p-6 md:p-7 shadow-lg shadow-rose-950/[0.03] space-y-6 flex flex-col justify-between">
-                <div class="space-y-5">
-                    <!-- Event Category -->
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-800 mb-2">Select Event Category</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            <button type="button" @click="eventType = 'wedding'" :class="eventType === 'wedding' ? 'border-[#850625] bg-[#850625] text-white shadow-sm' : 'border-rose-100 bg-rose-50/40 text-slate-700 hover:bg-rose-100/50'" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center">
-                                💍 Wedding
-                            </button>
-                            <button type="button" @click="eventType = 'birthday'" :class="eventType === 'birthday' ? 'border-[#850625] bg-[#850625] text-white shadow-sm' : 'border-rose-100 bg-rose-50/40 text-slate-700 hover:bg-rose-100/50'" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center">
-                                🎂 Birthday
-                            </button>
-                            <button type="button" @click="eventType = 'anniversary'" :class="eventType === 'anniversary' ? 'border-[#850625] bg-[#850625] text-white shadow-sm' : 'border-rose-100 bg-rose-50/40 text-slate-700 hover:bg-rose-100/50'" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center">
-                                ✨ Anniversary
-                            </button>
-                            <button type="button" @click="eventType = 'corporate'" :class="eventType === 'corporate' ? 'border-[#850625] bg-[#850625] text-white shadow-sm' : 'border-rose-100 bg-rose-50/40 text-slate-700 hover:bg-rose-100/50'" class="py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center">
-                                💼 Corporate
-                            </button>
-                        </div>
-                    </div>
+            <!-- Left Side: Cinematic Wedding Experience Video Card -->
+            <div class="lg:col-span-7 relative rounded-3xl overflow-hidden shadow-2xl border border-rose-200/60 min-h-[380px] md:min-h-[440px] flex items-end group"
+                 x-data="{ isPlaying: true, isMuted: true }"
+            >
+                <!-- Background Video with Multiple Fallback CDNs -->
+                <video 
+                    x-ref="weddingVideo"
+                    autoplay 
+                    loop 
+                    muted 
+                    playsinline
+                    preload="auto"
+                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    poster="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1200"
+                >
+                <source src="https://cdn.pixabay.com/video/2026/07/21/365252_large.mp4" type="video/mp4">
+                    <source src="https://cdn.pixabay.com/video/2022/10/23/136134-764371502_large.mp4" type="video/mp4">
+                    <source src="https://cdn.pixabay.com/video/2023/04/05/157657-815175893_large.mp4" type="video/mp4">
+                </video>
 
-                    <!-- Guest Range Selector -->
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-800 mb-2">Estimated Guests</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button type="button" @click="guestCount = '50-100'" :class="guestCount === '50-100' ? 'border-[#850625] bg-[#850625]/10 text-[#850625] font-extrabold' : 'border-slate-200 bg-white text-slate-700'" class="py-2 px-3 rounded-xl border text-xs font-semibold transition-all text-center">
-                                50-100
-                            </button>
-                            <button type="button" @click="guestCount = '150-300'" :class="guestCount === '150-300' ? 'border-[#850625] bg-[#850625]/10 text-[#850625] font-extrabold' : 'border-slate-200 bg-white text-slate-700'" class="py-2 px-3 rounded-xl border text-xs font-semibold transition-all text-center">
-                                150-300
-                            </button>
-                            <button type="button" @click="guestCount = '300-500'" :class="guestCount === '300-500' ? 'border-[#850625] bg-[#850625]/10 text-[#850625] font-extrabold' : 'border-slate-200 bg-white text-slate-700'" class="py-2 px-3 rounded-xl border text-xs font-semibold transition-all text-center">
-                                300-500
-                            </button>
-                            <button type="button" @click="guestCount = '500+'" :class="guestCount === '500+' ? 'border-[#850625] bg-[#850625]/10 text-[#850625] font-extrabold' : 'border-slate-200 bg-white text-slate-700'" class="py-2 px-3 rounded-xl border text-xs font-semibold transition-all text-center">
-                                500+
-                            </button>
-                        </div>
-                    </div>
+                <!-- Dark Gradient Overlay for Contrast & Readability -->
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-black/20 z-10 pointer-events-none"></div>
 
-                    <!-- Included Services Pills -->
-                    <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-800 mb-2">Required Services</label>
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <div class="p-3 bg-rose-50/50 rounded-xl border border-rose-100 flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-utensils text-[#850625] mr-1.5"></i> Catering & Menu</span>
-                                <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            </div>
-                            <div class="p-3 bg-rose-50/50 rounded-xl border border-rose-100 flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-wand-magic-sparkles text-[#850625] mr-1.5"></i> Stage & Floral Decor</span>
-                                <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            </div>
-                            <div class="p-3 bg-rose-50/50 rounded-xl border border-rose-100 flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-camera text-[#850625] mr-1.5"></i> Photography & Film</span>
-                                <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            </div>
-                            <div class="p-3 bg-rose-50/50 rounded-xl border border-rose-100 flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-music text-[#850625] mr-1.5"></i> Sound & Entertainment</span>
-                                <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></span>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Top Badge & Sound Toggle Button -->
+                <div class="absolute top-5 left-5 right-5 z-20 flex items-center justify-between">
+                    <span class="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md text-[#850625] text-[11px] font-extrabold uppercase tracking-wider px-3.5 py-1.5 rounded-full border border-rose-200 shadow-md">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-600 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-600"></span>
+                        </span>
+                        <span>Shaadi Sense In Action</span>
+                    </span>
+
+                    <button 
+                        type="button" 
+                        @click="isMuted = !isMuted; $refs.weddingVideo.muted = isMuted" 
+                        class="w-9 h-9 rounded-full bg-black/60 hover:bg-[#850625] backdrop-blur-md text-white border border-white/30 flex items-center justify-center transition-all duration-300 shadow-md"
+                        title="Toggle Sound"
+                    >
+                        <i class="fa-solid" :class="isMuted ? 'fa-volume-xmark text-xs text-rose-300' : 'fa-volume-high text-xs text-[#D4AF37]'"></i>
+                    </button>
                 </div>
 
-                <div class="pt-4 border-t border-rose-100 text-slate-500 text-[11px] font-medium flex items-center justify-between">
-                    <span>⚡ AI Matchmaking Ready</span>
-                    <span class="text-[#850625] font-bold">100% Tailored Plan</span>
+                <!-- Center Play/Pause Floating Circle Overlay -->
+                <div class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                    <button 
+                        type="button" 
+                        @click="if (isPlaying) { $refs.weddingVideo.pause(); isPlaying = false; } else { $refs.weddingVideo.play(); isPlaying = true; }" 
+                        class="pointer-events-auto w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border-2 border-[#D4AF37] text-white flex items-center justify-center hover:scale-110 hover:bg-[#850625] transition-all duration-300 shadow-2xl group/play"
+                    >
+                        <i class="fa-solid" :class="isPlaying ? 'fa-pause text-lg text-[#D4AF37]' : 'fa-play text-lg text-white ml-1'"></i>
+                    </button>
+                </div>
+
+                <!-- Bottom Caption Overlay -->
+                <div class="relative z-20 p-6 md:p-8 space-y-2 text-left w-full pointer-events-none">
+                    <div class="inline-flex items-center gap-1.5 text-[#D4AF37] text-xs font-bold font-cinzel">
+                        <i class="fa-solid fa-crown text-[10px]"></i>
+                        <span>Royal Event Showcase</span>
+                    </div>
+                    <h3 class="text-white text-xl md:text-2xl font-extrabold font-serif-luxury leading-tight drop-shadow-md">
+                        See How Royal Celebrations Unfold
+                    </h3>
+                    <p class="text-slate-200 text-xs md:text-sm max-w-md leading-relaxed font-medium drop-shadow-sm">
+                        From regal mandaps to seamless vendor execution, experience how Shaadi Sense turns dreams into reality in 2 minutes.
+                    </p>
                 </div>
             </div>
 
