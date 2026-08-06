@@ -3,7 +3,7 @@
 @section('title', 'AI Wedding Planner Studio - Shaadi Sense')
 
 @section('content')
-<div class="min-h-screen bg-[#FAF7F2] text-slate-800 pt-28 md:pt-32 pb-16 px-4 sm:px-6 lg:px-12 font-sans-ui" x-data="{
+<div class="min-h-screen bg-[#FAF7F2] text-slate-800 pt-24 md:pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans-ui relative overflow-hidden" x-data="{
     currentStep: 1,
     totalSteps: 7,
     isCalculating: false,
@@ -52,35 +52,50 @@
     }
 }">
 
-    <div class="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Subtle Ambient Animated Background Orbs -->
+    <div class="absolute top-12 left-10 w-96 h-96 bg-rose-200/35 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
+    <div class="absolute bottom-10 right-10 w-[450px] h-[450px] bg-amber-200/30 rounded-full blur-3xl animate-pulse pointer-events-none" style="animation-delay: 1.5s;"></div>
+    <div class="absolute top-1/2 left-1/3 w-80 h-80 bg-rose-300/20 rounded-full blur-3xl animate-pulse pointer-events-none" style="animation-delay: 2.5s;"></div>
+
+    <!-- Animated Floating Sparkles -->
+    <div class="absolute inset-0 opacity-30 pointer-events-none overflow-hidden">
+        <svg class="absolute top-32 left-16 w-6 h-6 text-[#D4AF37] animate-bounce" style="animation-duration: 3s;" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/>
+        </svg>
+        <svg class="absolute bottom-24 right-20 w-7 h-7 text-[#850625]/40 animate-pulse" style="animation-duration: 4s;" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/>
+        </svg>
+    </div>
+
+    <div class="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative z-10">
 
         <!-- Sidebar Navigation (Psychological Visual Progress & Steps list) -->
-        <div class="lg:col-span-4 xl:col-span-3 bg-gradient-to-b from-[#850625] to-[#63041b] text-white rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-8">
+        <div class="lg:col-span-4 xl:col-span-3 bg-gradient-to-b from-[#850625] to-[#63041b] text-white rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-hidden space-y-6">
             <!-- Background Ambient Glow -->
             <div class="absolute -top-16 -left-16 w-48 h-48 bg-[#D4AF37]/20 rounded-full blur-2xl pointer-events-none"></div>
 
-            <div class="space-y-2 relative z-10">
-                <div class="flex items-center gap-2 text-[#D4AF37] text-xs font-bold uppercase tracking-widest">
+            <div class="space-y-1.5 relative z-10">
+                <div class="flex items-center gap-2 text-[#D4AF37] text-[11px] font-bold uppercase tracking-widest">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     <span>Shaadi Sense AI</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold font-serif-luxury leading-snug">Two minutes, seven steps.</h1>
-                <p class="text-xs text-rose-100/80 leading-relaxed">Design your dream wedding seamlessly. Our AI allocates your budget dynamically.</p>
+                <h1 class="text-xl sm:text-2xl font-extrabold font-serif-luxury leading-snug">Two minutes, seven steps.</h1>
+                <p class="text-[11px] text-rose-100/80 leading-relaxed">Design your dream wedding seamlessly. Our AI allocates your budget dynamically.</p>
             </div>
 
             <!-- Dynamic Psychological Completion Bar -->
-            <div class="space-y-1.5 relative z-10 bg-white/10 p-3.5 rounded-2xl border border-white/10 backdrop-blur-md">
-                <div class="flex justify-between text-[11px] font-bold">
+            <div class="space-y-1 relative z-10 bg-white/10 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
+                <div class="flex justify-between text-[10px] font-bold">
                     <span class="text-rose-200">Plan Completeness</span>
                     <span class="text-[#D4AF37]" x-text="Math.round((currentStep > 7 ? 7 : currentStep) / 7 * 100) + '%'"></span>
                 </div>
-                <div class="w-full h-2 bg-rose-950/60 rounded-full overflow-hidden">
+                <div class="w-full h-1.5 bg-rose-950/60 rounded-full overflow-hidden">
                     <div class="h-full bg-gradient-to-r from-[#D4AF37] to-amber-300 transition-all duration-500" :style="'width: ' + ((currentStep > 7 ? 7 : currentStep) / 7 * 100) + '%'"></div>
                 </div>
             </div>
 
             <!-- Steps Progress List -->
-            <div class="space-y-2.5 relative z-10 border-t border-rose-100/15 pt-5">
+            <div class="space-y-1.5 relative z-10 border-t border-rose-100/15 pt-4">
                 <template x-for="(step, index) in [
                     { num: 1, name: 'Budget Allocation' },
                     { num: 2, name: 'Guest Capacity' },
@@ -91,43 +106,44 @@
                     { num: 7, name: 'Dates & Timeline' }
                 ]">
                     <div @click="currentStep = step.num" 
-                        class="flex items-center gap-3 p-2.5 rounded-2xl transition-all cursor-pointer"
-                        :class="currentStep === step.num ? 'bg-white/15 text-white font-bold backdrop-blur-md shadow-md border border-white/20' : (currentStep > step.num ? 'text-rose-200 hover:bg-white/5' : 'text-rose-200/60 hover:bg-white/5')">
-                        <div class="w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold transition-all shrink-0"
+                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer text-xs"
+                        :class="currentStep === step.num ? 'bg-white/15 text-white font-bold backdrop-blur-md shadow-sm border border-white/20' : (currentStep > step.num ? 'text-rose-200 hover:bg-white/5' : 'text-rose-200/60 hover:bg-white/5')">
+                        <div class="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold transition-all shrink-0"
                             :class="currentStep === step.num ? 'bg-[#D4AF37] text-slate-950 shadow-sm' : (currentStep > step.num ? 'bg-rose-900/80 text-rose-200 border border-rose-700' : 'bg-rose-950/40 text-rose-300/40')">
                             <span x-show="currentStep <= step.num" x-text="step.num"></span>
-                            <i x-show="currentStep > step.num" class="fa-solid fa-check text-[10px]"></i>
+                            <i x-show="currentStep > step.num" class="fa-solid fa-check text-[9px]"></i>
                         </div>
-                        <span class="text-xs font-medium truncate" x-text="step.name"></span>
+                        <span class="truncate" x-text="step.name"></span>
                     </div>
                 </template>
             </div>
 
             <!-- Live Personalization Preview Box -->
-            <div class="pt-4 border-t border-rose-100/15 text-xs text-rose-100/90 space-y-2 relative z-10">
-                <div class="flex items-center justify-between text-[10px] uppercase font-bold text-[#D4AF37] tracking-wider">
+            <div class="pt-3 border-t border-rose-100/15 text-xs text-rose-100/90 space-y-1.5 relative z-10">
+                <div class="flex items-center justify-between text-[9px] uppercase font-bold text-[#D4AF37] tracking-wider">
                     <span>Live Plan Preview</span>
-                    <i class="fa-solid fa-sparkles text-[10px]"></i>
+                    <i class="fa-solid fa-sparkles text-[9px]"></i>
                 </div>
-                <div class="bg-rose-950/40 p-3 rounded-2xl border border-rose-800/40 space-y-1.5 text-[11px]">
+                <div class="bg-rose-950/40 p-2.5 rounded-xl border border-rose-800/40 space-y-1 text-[11px]">
                     <div class="flex justify-between">
                         <span class="text-rose-200/80">Est. Budget:</span>
                         <span class="text-[#D4AF37] font-bold" x-text="planner.budget >= 100 ? (planner.budget / 100).toFixed(2) + ' Cr' : '₹' + planner.budget + ' Lakh'"></span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-rose-200/80">Guests:</span>
-                        <span class="font-bold text-white" x-text="planner.exactGuest ? planner.exactGuest + ' Guests (' + planner.guestCount + ')' : planner.guestCount"></span>
+                        <span class="font-bold text-white truncate max-w-[130px]" x-text="planner.exactGuest ? planner.exactGuest + ' Guests' : planner.guestCount"></span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-rose-200/80">Style:</span>
-                        <span class="font-bold text-white truncate max-w-[120px]" x-text="planner.culture"></span>
+                        <span class="font-bold text-white truncate max-w-[130px]" x-text="planner.culture"></span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Main Interactive Questionnaire & Steps Area -->
-        <div class="lg:col-span-8 xl:col-span-9 bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-10 shadow-xl border border-rose-100/80 min-h-[640px] flex flex-col justify-between relative overflow-hidden">
+        <div class="lg:col-span-8 xl:col-span-9 bg-white/90 backdrop-blur-xl rounded-3xl p-5 sm:p-7 shadow-lg border border-rose-100/80 min-h-[480px] flex flex-col justify-between relative overflow-hidden">
+
             
             <!-- AI Calculation Loader State -->
             <div x-show="isCalculating" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="absolute inset-0 bg-white/95 backdrop-blur-md z-30 flex flex-col items-center justify-center space-y-4 p-8 text-center" style="display: none;">
