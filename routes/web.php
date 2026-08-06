@@ -108,6 +108,8 @@ Route::prefix('user')->group(function () {
     });
 });
 
+use App\Http\Controllers\AiPlannerController;
+
 Route::get('/', function () {
     $content = fn (string $type) => \Illuminate\Support\Facades\Schema::hasTable('landing_contents')
         ? \App\Models\LandingContent::where('type', $type)->published()->get()
@@ -119,3 +121,6 @@ Route::get('/', function () {
         'testimonials' => $content('testimonials'),
     ]);
 })->name('home');
+
+Route::get('/ai-planner', [AiPlannerController::class, 'index'])->name('ai-planner');
+

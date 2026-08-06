@@ -95,7 +95,7 @@
                 <p class="text-xs text-slate-500 font-sans-ui font-normal">Configure basic details to initiate instant planning & vendor quotes.</p>
             </div>
             
-            <form action="{{ route('user.register') }}" method="GET" class="space-y-3.5">
+            <form action="{{ route('ai-planner') }}" method="GET" class="space-y-3.5">
                 <input type="hidden" name="type" :value="selectedType">
                 <input type="hidden" name="guests" :value="selectedGuest">
 
@@ -583,7 +583,7 @@
                     <span class="text-[11px] font-bold text-emerald-700">
                         ⚡ Done in 2 Minutes • Save 80+ Hours
                     </span>
-                    <a href="#how-it-works" class="bg-[#850625] hover:bg-[#6b041e] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 shrink-0">
+                    <a href="{{ route('ai-planner') }}" class="bg-[#850625] hover:bg-[#6b041e] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 shrink-0">
                         <span>Try AI Planner</span>
                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </a>
@@ -736,7 +736,7 @@
 
                 <!-- Redirect Action Button -->
                 <div class="pt-6 border-t border-white/15 relative z-10 space-y-3">
-                    <a href="{{ route('user.register') }}" class="w-full bg-gradient-to-r from-[#D4AF37] to-amber-300 hover:from-amber-300 hover:to-[#D4AF37] text-slate-950 font-extrabold text-xs md:text-sm py-3.5 px-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 group/btn">
+                    <a href="{{ route('ai-planner') }}" class="w-full bg-gradient-to-r from-[#D4AF37] to-amber-300 hover:from-amber-300 hover:to-[#D4AF37] text-slate-950 font-extrabold text-xs md:text-sm py-3.5 px-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 group/btn">
                         <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
                         <span>Launch Full AI Planner Page</span>
                         <i class="fa-solid fa-arrow-right text-xs group-hover/btn:translate-x-1 transition-transform"></i>
@@ -1214,12 +1214,12 @@
 
             <!-- Action Pill Buttons (Ref Image Style) -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                <a href="{{ route('user.register') }}" class="w-full sm:w-auto bg-[#850625] hover:bg-[#6b041e] text-white text-xs md:text-sm font-extrabold tracking-widest uppercase px-8 py-4 rounded-full shadow-lg shadow-[#850625]/20 hover:shadow-xl transition-all duration-300 hover:scale-[1.03] flex items-center justify-center gap-3 group">
+                <a href="{{ route('ai-planner') }}" class="w-full sm:w-auto bg-[#850625] hover:bg-[#6b041e] text-white text-xs md:text-sm font-extrabold tracking-widest uppercase px-8 py-4 rounded-full shadow-lg shadow-[#850625]/20 hover:shadow-xl transition-all duration-300 hover:scale-[1.03] flex items-center justify-center gap-3 group">
                     <span>Start Planning</span>
                     <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
                 </a>
 
-                <a href="{{ route('user.register') }}" class="w-full sm:w-auto bg-transparent border border-[#850625]/60 hover:border-[#850625] text-[#850625] hover:bg-[#850625]/5 text-xs md:text-sm font-extrabold tracking-widest uppercase px-8 py-4 rounded-full transition-all duration-300 flex items-center justify-center gap-3 group">
+                <a href="{{ route('ai-planner') }}" class="w-full sm:w-auto bg-transparent border border-[#850625]/60 hover:border-[#850625] text-[#850625] hover:bg-[#850625]/5 text-xs md:text-sm font-extrabold tracking-widest uppercase px-8 py-4 rounded-full transition-all duration-300 flex items-center justify-center gap-3 group">
                     <span>Describe Instead</span>
                     <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
                 </a>

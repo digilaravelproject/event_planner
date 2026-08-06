@@ -28,14 +28,14 @@
 
             <!-- Right: Trio Tilted Indian Wedding Photo Cards (Col 8 - Fills All Width) -->
             <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5 items-center pt-4 lg:pt-0">
-                <!-- Card 1: Indian Royal Bride & Jewellery -->
+                <!-- Card 1: Indian Royal Bridal Lehenga -->
                 <div class="relative group w-full">
                     <!-- Tilted Decorative Backdrop Card -->
                     <div class="absolute inset-0 bg-gradient-to-tr from-[#850625] to-[#D4AF37] rounded-2xl transform -rotate-3 group-hover:-rotate-1 transition-transform duration-300 opacity-30 blur-xs"></div>
                     
                     <!-- Image Container -->
                     <div class="relative bg-white p-2 rounded-2xl border-4 border-white shadow-xl shadow-rose-950/10 transform rotate-2 group-hover:rotate-0 transition-all duration-300 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800" alt="Indian Royal Bride & Lehenga" class="w-full h-40 object-cover rounded-xl">
+                        <img src="https://images.pexels.com/photos/14666125/pexels-photo-14666125.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Indian Royal Bridal Lehenga" class="w-full h-40 object-cover rounded-xl">
                         <div class="p-2 flex items-center justify-between text-[11px] font-semibold text-slate-700">
                             <span class="flex items-center gap-1 text-[#850625] font-bold">
                                 <i class="fa-solid fa-gem text-[#D4AF37]"></i> Royal Lehengas
@@ -45,14 +45,14 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Royal Varmala Couple Exchange -->
+                <!-- Card 2: Royal Varmala Jaimala Ceremony -->
                 <div class="relative group w-full">
                     <!-- Tilted Decorative Backdrop Card -->
                     <div class="absolute inset-0 bg-gradient-to-tr from-[#850625] to-[#D4AF37] rounded-2xl transform rotate-3 group-hover:rotate-1 transition-transform duration-300 opacity-30 blur-xs"></div>
                     
                     <!-- Image Container -->
                     <div class="relative bg-white p-2 rounded-2xl border-4 border-white shadow-xl shadow-rose-950/10 transform -rotate-2 group-hover:rotate-0 transition-all duration-300 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800" alt="Royal Varmala Couple" class="w-full h-40 object-cover rounded-xl">
+                        <img src="https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Royal Varmala Jaimala Ceremony" class="w-full h-40 object-cover rounded-xl">
                         <div class="p-2 flex items-center justify-between text-[11px] font-semibold text-slate-700">
                             <span class="flex items-center gap-1 text-[#850625] font-bold">
                                 <i class="fa-solid fa-crown text-[#D4AF37]"></i> Royal Varmala
@@ -62,14 +62,14 @@
                     </div>
                 </div>
 
-                <!-- Card 3: Grand Mandap Decor & Stage -->
+                <!-- Card 3: Grand Mandap Floral Decor -->
                 <div class="relative group w-full">
                     <!-- Tilted Decorative Backdrop Card -->
                     <div class="absolute inset-0 bg-gradient-to-tr from-[#850625] to-[#D4AF37] rounded-2xl transform -rotate-2 group-hover:rotate-0 transition-transform duration-300 opacity-30 blur-xs"></div>
                     
                     <!-- Image Container -->
                     <div class="relative bg-white p-2 rounded-2xl border-4 border-white shadow-xl shadow-rose-950/10 transform rotate-3 group-hover:rotate-0 transition-all duration-300 overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&q=80&w=800" alt="Grand Mandap Floral Decor" class="w-full h-40 object-cover rounded-xl">
+                        <img src="https://images.pexels.com/photos/2291462/pexels-photo-2291462.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Grand Mandap Floral Decor" class="w-full h-40 object-cover rounded-xl">
                         <div class="p-2 flex items-center justify-between text-[11px] font-semibold text-slate-700">
                             <span class="flex items-center gap-1 text-[#850625] font-bold">
                                 <i class="fa-solid fa-sparkles text-[#D4AF37]"></i> Grand Mandaps
