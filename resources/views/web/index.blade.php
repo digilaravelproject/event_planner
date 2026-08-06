@@ -4,19 +4,30 @@
 
 @section('content')
 <!-- SECTION 1: HERO SECTION -->
-<section id="hero-section" class="relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-4 sm:px-8 md:px-12 lg:px-16 overflow-hidden">
-    <!-- Three.js RevealWaveImage WebGL Canvas Background -->
-    <div id="hero-wave-canvas-container" class="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply transition-opacity duration-1000"></div>
+<section id="hero-section" class="group relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-4 sm:px-8 md:px-12 lg:px-16 overflow-hidden">
+    <!-- Full-Width Hero Background Video with Hover Scale -->
+    <video 
+        id="hero-bg-video"
+        autoplay 
+        loop 
+        muted 
+        playsinline
+        preload="auto"
+        class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none transition-transform duration-1000 ease-out scale-100 group-hover:scale-105"
+    >
+        <source src="https://cdn.pixabay.com/video/2024/05/20/212698_large.mp4" type="video/mp4">
+    </video>
 
-    <!-- Ambient Backdrop Lighting Glows -->
-    <div class="absolute -top-32 -left-32 w-[34rem] h-[34rem] bg-[#850625]/[0.06] rounded-full blur-[140px] pointer-events-none z-0"></div>
-    <div class="absolute -bottom-24 -right-24 w-[38rem] h-[38rem] bg-[#D4AF37]/[0.08] rounded-full blur-[160px] pointer-events-none z-0"></div>
-    <div class="absolute top-1/4 left-1/4 w-[28rem] h-[28rem] bg-rose-200/30 rounded-full blur-[110px] pointer-events-none animate-pulse z-0"></div>
-    <div class="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-amber-200/25 rounded-full blur-[130px] pointer-events-none z-0"></div>
+    <!-- Interactive Mouse Spotlight Radial Glow (Active on Hover) -->
+    <div id="hero-mouse-spotlight" class="absolute inset-0 z-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[radial-gradient(700px_circle_at_var(--mouse-x,50%)_var(--mouse-y,50%),rgba(212,175,55,0.22),transparent_70%)]"></div>
+
+    <!-- Dark & Elegant Royal Overlays with Reddish Wine Tint & High Video Clarity -->
+    <div class="absolute inset-0 bg-gradient-to-r from-[#2A030D]/65 via-slate-950/50 to-slate-950/22 z-0 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-tr from-[#850625]/20 via-[#A8163B]/10 to-transparent z-0 pointer-events-none mix-blend-overlay"></div>
 
     <!-- Floating Luxury Sparkle Touches -->
-    <div class="absolute inset-0 opacity-15 pointer-events-none overflow-hidden z-0">
-        <svg class="absolute top-20 left-12 md:left-1/4 w-8 h-8 text-[#850625] animate-sparkle" viewBox="0 0 24 24" fill="currentColor">
+    <div class="absolute inset-0 opacity-20 pointer-events-none overflow-hidden z-0">
+        <svg class="absolute top-20 left-12 md:left-1/4 w-8 h-8 text-[#D4AF37] animate-sparkle" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/>
         </svg>
         <svg class="absolute top-36 right-12 md:right-1/3 w-7 h-7 text-[#D4AF37] animate-sparkle" style="animation-delay: 1.5s;" viewBox="0 0 24 24" fill="currentColor">
@@ -28,37 +39,37 @@
         <!-- Hero Details (Col 7) -->
         <div class="lg:col-span-7 space-y-4 md:space-y-5 text-left">
             <!-- Premium Badge -->
-            <div class="inline-flex items-center gap-2.5 bg-white/85 border border-[#850625]/15 rounded-full px-3.5 py-1.5 shadow-sm backdrop-blur-md">
+            <div class="inline-flex items-center gap-2.5 bg-white/10 border border-white/20 rounded-full px-3.5 py-1.5 shadow-sm backdrop-blur-md">
                 <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#850625] opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#850625]"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[#D4AF37]"></span>
                 </span>
-                <span class="text-[10px] sm:text-[11px] text-[#850625] font-bold tracking-[0.2em] uppercase font-cinzel">Shaadi Sense Premium Experience</span>
+                <span class="text-[10px] sm:text-[11px] text-white font-bold tracking-[0.2em] uppercase font-cinzel">Shaadi Sense Premium Experience</span>
             </div>
             
             <!-- Headline with Fluid Typography & Luxury Serif -->
-            <h1 class="text-slate-950 text-[clamp(2.25rem,4.5vw,4.25rem)] font-serif-luxury font-bold tracking-tight leading-[1.08] text-balance">
+            <h1 class="text-white text-[clamp(2.25rem,4.5vw,4.25rem)] font-serif-luxury font-bold tracking-tight leading-[1.08] text-balance drop-shadow-md">
                 Crafting Your <br class="hidden sm:inline">
                 <span class="relative inline-block mt-0.5">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#850625] via-[#A8163B] to-[#D4AF37] font-extrabold tracking-tight">Royal Moments</span>
-                    <span class="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-[#850625]/70 via-[#D4AF37]/80 to-transparent rounded-full"></span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#F3E5AB] via-[#D4AF37] to-[#FFFDF9] font-extrabold tracking-tight">Royal Moments</span>
+                    <span class="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-[#D4AF37]/80 via-[#F3E5AB]/90 to-transparent rounded-full"></span>
                 </span>
             </h1>
 
             <!-- Subtitle -->
-            <p class="text-slate-700 text-[clamp(0.95rem,1.35vw,1.1rem)] max-w-xl leading-relaxed font-sans-ui font-normal">
+            <p class="text-slate-200 text-[clamp(0.95rem,1.35vw,1.1rem)] max-w-xl leading-relaxed font-sans-ui font-normal drop-shadow-sm">
                 Experience the pinnacle of luxury wedding & event management. From grand Indian weddings to milestone bashes, we bring elegance, lights, and flawless execution to your special occasions.
             </p>
 
             <!-- CTA Buttons -->
             <div class="flex flex-wrap items-center gap-3 pt-1">
-                <a href="#estimator" class="group px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#850625] to-[#6E0720] hover:from-[#6E0720] hover:to-[#540417] text-white font-sans-ui font-semibold text-sm shadow-[0_12px_28px_-6px_rgba(133,6,37,0.32)] hover:shadow-[0_16px_36px_-6px_rgba(133,6,37,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 inline-flex items-center gap-2.5">
+                <a href="#estimator" class="group px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#850625] to-[#6E0720] hover:from-[#6E0720] hover:to-[#540417] text-white font-sans-ui font-semibold text-sm shadow-[0_12px_28px_-6px_rgba(133,6,37,0.5)] hover:shadow-[0_16px_36px_-6px_rgba(133,6,37,0.7)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 inline-flex items-center gap-2.5 border border-[#D4AF37]/30">
                     <i class="fa-solid fa-calculator text-[#D4AF37] text-xs transition-transform group-hover:rotate-12"></i>
                     <span>Calculate Event Estimate</span>
                 </a>
-                <a href="#how-it-works" class="px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-white/90 hover:bg-white text-slate-800 hover:text-[#850625] font-sans-ui font-semibold text-sm border border-slate-200/90 hover:border-[#850625]/30 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 inline-flex items-center gap-2 backdrop-blur-sm">
+                <a href="#how-it-works" class="px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-sans-ui font-semibold text-sm border border-white/25 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 inline-flex items-center gap-2 backdrop-blur-md">
                     <span>How It Works</span>
-                    <i class="fa-solid fa-arrow-right text-xs opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
+                    <i class="fa-solid fa-arrow-right text-xs opacity-80 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></i>
                 </a>
             </div>
         </div>
@@ -1113,177 +1124,16 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const heroSection = document.getElementById('hero-section');
-    const container = document.getElementById('hero-wave-canvas-container');
-    if (!heroSection || !container || typeof THREE === 'undefined') return;
+    if (!heroSection) return;
 
-    const imageUrl = 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2070&auto=format&fit=crop';
-    
-    // Create Scene, Orthographic Camera, Renderer
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    
-    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(renderer.domElement);
-
-    let mouseActive = 0;
-    let isMouseInHero = false;
-    const targetMouse = new THREE.Vector2(-10, -10);
-    const currentMouse = new THREE.Vector2(-10, -10);
-
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(imageUrl, function(texture) {
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-
-        const uniforms = {
-            uTexture: { value: texture },
-            uTime: { value: 0 },
-            uMouse: { value: new THREE.Vector2(-10, -10) },
-            uRevealRadius: { value: 0.38 },
-            uRevealSoftness: { value: 0.60 },
-            uPixelSize: { value: 2.0 },
-            uMouseActive: { value: 0 },
-            uWaveSpeed: { value: 0.3 },
-            uWaveFrequency: { value: 1.0 },
-            uWaveAmplitude: { value: 0.3 },
-            uMouseRadius: { value: 0.3 }
-        };
-
-        const vertexShader = `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = vec4(position, 1.0);
-            }
-        `;
-
-        const fragmentShader = `
-            precision highp float;
-            uniform sampler2D uTexture;
-            uniform float uTime;
-            uniform vec2 uMouse;
-            uniform float uRevealRadius;
-            uniform float uRevealSoftness;
-            uniform float uPixelSize;
-            uniform float uMouseActive;
-            uniform float uWaveSpeed;
-            uniform float uWaveFrequency;
-            uniform float uWaveAmplitude;
-            uniform float uMouseRadius;
-            varying vec2 vUv;
-
-            float bayer4x4(vec2 pos) {
-                int x = int(mod(pos.x, 4.0));
-                int y = int(mod(pos.y, 4.0));
-                int index = x + y * 4;
-                float pattern[16];
-                pattern[0] = 0.0; pattern[1] = 8.0; pattern[2] = 2.0; pattern[3] = 10.0;
-                pattern[4] = 12.0; pattern[5] = 4.0; pattern[6] = 14.0; pattern[7] = 6.0;
-                pattern[8] = 3.0; pattern[9] = 11.0; pattern[10] = 1.0; pattern[11] = 9.0;
-                pattern[12] = 15.0; pattern[13] = 7.0; pattern[14] = 13.0; pattern[15] = 5.0;
-                for (int i = 0; i < 16; i++) {
-                    if (i == index) return pattern[i] / 16.0;
-                }
-                return 0.0;
-            }
-
-            void main() {
-                vec2 uv = vUv;
-                float time = uTime;
-                float waveStrength = uWaveAmplitude * 0.1;
-                float wave1 = sin(uv.y * uWaveFrequency + time * uWaveSpeed) * waveStrength;
-                float wave2 = sin(uv.x * uWaveFrequency * 0.7 + time * uWaveSpeed * 0.8) * waveStrength * 0.5;
-                vec2 distortedUv = uv;
-                distortedUv.x += wave1;
-                distortedUv.y += wave2;
-
-                if (uMouseActive > 0.01) {
-                    vec2 mousePos = uMouse;
-                    float dist = distance(uv, mousePos);
-                    float mouseInfluence = smoothstep(uMouseRadius, 0.0, dist);
-                    float rippleFreq = uWaveFrequency * 5.0;
-                    float rippleSpeed = uWaveSpeed * 1.0;
-                    float rippleStrength = uWaveAmplitude * 0.05;
-                    float ripple = sin(dist * rippleFreq - time * rippleSpeed) * rippleStrength * mouseInfluence * uMouseActive;
-                    distortedUv.x += ripple;
-                    distortedUv.y += ripple;
-                }
-
-                vec4 color = texture2D(uTexture, distortedUv);
-                float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-                vec2 pixelCoord = floor(gl_FragCoord.xy / uPixelSize);
-                float dither = bayer4x4(pixelCoord);
-                float quantized;
-                float adjusted = gray + (dither - 0.5) * 0.5;
-                if (adjusted < 0.33) {
-                    quantized = 0.0;
-                } else if (adjusted < 0.66) {
-                    quantized = 0.5;
-                } else {
-                    quantized = 1.0;
-                }
-                vec3 bwColor = vec3(quantized);
-
-                float revealDist = distance(uv, uMouse);
-                float innerRadius = uRevealRadius * (1.0 - uRevealSoftness);
-                float outerRadius = uRevealRadius;
-                float revealAmount = 1.0 - smoothstep(innerRadius, outerRadius, revealDist);
-                revealAmount *= uMouseActive;
-
-                vec3 finalColor = mix(bwColor, color.rgb, revealAmount);
-                gl_FragColor = vec4(finalColor, color.a);
-            }
-        `;
-
-        const material = new THREE.ShaderMaterial({
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader,
-            uniforms: uniforms,
-            transparent: true
-        });
-
-        const geometry = new THREE.PlaneGeometry(2, 2);
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-
-        // Track cursor over hero section
-        heroSection.addEventListener('mousemove', function(e) {
-            isMouseInHero = true;
-            const rect = heroSection.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width;
-            const y = 1.0 - ((e.clientY - rect.top) / rect.height);
-            targetMouse.set(x, y);
-        });
-
-        heroSection.addEventListener('mouseleave', function() {
-            isMouseInHero = false;
-        });
-
-        const clock = new THREE.Clock();
-        function animate() {
-            requestAnimationFrame(animate);
-            const elapsedTime = clock.getElapsedTime();
-            uniforms.uTime.value = elapsedTime;
-
-            const targetActive = isMouseInHero ? 1 : 0;
-            mouseActive += (targetActive - mouseActive) * 0.08;
-            uniforms.uMouseActive.value = mouseActive;
-
-            currentMouse.lerp(targetMouse, 0.1);
-            uniforms.uMouse.value.copy(currentMouse);
-
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        window.addEventListener('resize', function() {
-            if (!container) return;
-            const w = container.clientWidth;
-            const h = container.clientHeight;
-            renderer.setSize(w, h);
-        });
+    // Track mouse position over hero section for interactive gold spotlight glow on hover
+    heroSection.addEventListener('mousemove', function(e) {
+        const rect = heroSection.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        
+        heroSection.style.setProperty('--mouse-x', x + '%');
+        heroSection.style.setProperty('--mouse-y', y + '%');
     });
 });
 </script>
