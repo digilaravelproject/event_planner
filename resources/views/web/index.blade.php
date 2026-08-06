@@ -4,8 +4,7 @@
 
 @section('content')
 <!-- SECTION 1: HERO SECTION -->
-<section 
-<section id="hero-section" class="relative min-h-[92vh] flex items-center pt-24 pb-12 sm:pt-28 sm:pb-16 px-6 md:px-16 overflow-hidden bg-gradient-to-b from-[#FAF7F2] via-[#FFFDF9] to-[#FAF7F2] border-b border-rose-100/50">
+<section id="hero-section" class="relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-6 md:px-16 overflow-hidden">
     <!-- Three.js RevealWaveImage WebGL Canvas Background -->
     <div id="hero-wave-canvas-container" class="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply transition-opacity duration-1000"></div>
 

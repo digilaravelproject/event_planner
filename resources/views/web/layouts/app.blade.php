@@ -66,6 +66,18 @@
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
+
+        /* Scroll Reveal Dynamic Animation Classes */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(32px) scale(0.98);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+        .scroll-reveal.is-revealed {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     </style>
     @stack('styles')
 </head>
@@ -76,6 +88,8 @@
     @scroll.window="scrolled = (window.pageYOffset > 40) ? true : false" 
     x-init="window.scrollTo(0, 0); setTimeout(() => isLoaded = true, 400); setTimeout(() => { pageReady = true; window.scrollTo(0, 0); }, 1800)"
 >
+    <!-- Top Luxury Scroll Progress Indicator Line -->
+    <div id="scroll-progress-bar" class="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-[#850625] via-[#D4AF37] to-[#850625] z-[100] transition-all duration-75 w-0 pointer-events-none"></div>
 
     <!-- Grand Entrance Loader -->
     @include('web.components.loader')
@@ -108,12 +122,59 @@
         @include('web.partials.footer')
     </div>
 
+    <!-- Floating Scroll-To-Top Quick Button -->
+    <button 
+        x-show="scrolled" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-4 scale-90"
+        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+        x-transition:leave-end="opacity-0 translate-y-4 scale-90"
+        @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+        class="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-[#850625] text-white border-2 border-[#D4AF37] shadow-xl shadow-[#850625]/30 flex items-center justify-center hover:bg-[#6b041e] hover:scale-110 active:scale-95 transition-all duration-300 group"
+        title="Scroll to Top"
+        style="display: none;"
+    >
+        <i class="fa-solid fa-arrow-up text-xs text-[#D4AF37] group-hover:-translate-y-0.5 transition-transform"></i>
+    </button>
+
     <!-- Custom Royal Shaadi Theme Mouse Cursor -->
     <div id="custom-cursor-dot" class="hidden md:block fixed top-0 left-0 w-3.5 h-3.5 rounded-full bg-[#850625] border-2 border-[#D4AF37] shadow-md shadow-[#850625]/40 pointer-events-none z-[9999] transition-transform duration-75"></div>
     <div id="custom-cursor-ring" class="hidden md:block fixed top-0 left-0 w-9 h-9 rounded-full border-2 border-[#850625]/35 bg-[#850625]/[0.04] backdrop-blur-[1px] pointer-events-none z-[9998] transition-all duration-200"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 1. Top Scroll Progress Indicator Bar
+            const progressBar = document.getElementById('scroll-progress-bar');
+            window.addEventListener('scroll', function() {
+                if (!progressBar) return;
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                progressBar.style.width = scrolled + '%';
+            });
+
+            // 2. IntersectionObserver Scroll Reveal Animations (Exclude Hero Section)
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-revealed');
+                    }
+                });
+            }, {
+                threshold: 0.05,
+                rootMargin: '0px 0px -30px 0px'
+            });
+
+            // Target lower sections only, NEVER the hero section
+            const revealTargets = document.querySelectorAll('section:not(#hero-section) h2, section:not(#hero-section) .grid');
+            revealTargets.forEach(target => {
+                target.classList.add('scroll-reveal');
+                revealObserver.observe(target);
+            });
+
+            // 3. Custom Cursor Follower Logic
             const dot = document.getElementById('custom-cursor-dot');
             const ring = document.getElementById('custom-cursor-ring');
             if (!dot || !ring || window.innerWidth < 768) return;
