@@ -5,13 +5,13 @@
 @section('content')
 <!-- SECTION 1: HERO SECTION -->
 <section 
-    id="hero-section"
-    class="relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-4 sm:px-6 md:px-12 overflow-hidden"
->
+<section id="hero-section" class="relative min-h-[92vh] flex items-center pt-24 pb-12 sm:pt-28 sm:pb-16 px-6 md:px-16 overflow-hidden bg-gradient-to-b from-[#FAF7F2] via-[#FFFDF9] to-[#FAF7F2] border-b border-rose-100/50">
     <!-- Three.js RevealWaveImage WebGL Canvas Background -->
     <div id="hero-wave-canvas-container" class="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply transition-opacity duration-1000"></div>
 
-    <!-- Festive Ambient Lighting & Glow FX -->
+    <!-- Ambient Backdrop Lighting Glows -->
+    <div class="absolute -top-32 -left-32 w-[34rem] h-[34rem] bg-[#850625]/[0.06] rounded-full blur-[140px] pointer-events-none z-0"></div>
+    <div class="absolute -bottom-24 -right-24 w-[38rem] h-[38rem] bg-[#D4AF37]/[0.08] rounded-full blur-[160px] pointer-events-none z-0"></div>
     <div class="absolute top-1/4 left-1/4 w-[28rem] h-[28rem] bg-rose-200/30 rounded-full blur-[110px] pointer-events-none animate-pulse z-0"></div>
     <div class="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-amber-200/25 rounded-full blur-[130px] pointer-events-none z-0"></div>
 
@@ -25,7 +25,7 @@
         </svg>
     </div>
 
-    <div class="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-center">
+    <div class="max-w-[1600px] mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-center">
         <!-- Hero Details (Col 7) -->
         <div class="lg:col-span-7 space-y-4 md:space-y-5 text-left">
             <!-- Premium Badge -->
@@ -198,13 +198,13 @@
 </section>
 
 <!-- SECTION 2: HOW IT WORKS (SHUBH AARAMBH PROCESS) -->
-<section id="how-it-works" class="py-14 md:py-16 bg-[#FAF7F2] px-6 md:px-12 border-t border-b border-rose-100/60 relative overflow-hidden">
+<section id="how-it-works" class="py-14 md:py-16 bg-[#FAF7F2] px-6 md:px-16 border-t border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Glows & Shades (Matching Footer Style) -->
     <div class="absolute -top-20 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-rose-200/40 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-20 -right-20 w-[450px] h-[450px] bg-gradient-to-tl from-rose-200/50 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-6xl mx-auto relative z-10 space-y-10">
+    <div class="max-w-[1600px] mx-auto relative z-10 space-y-10">
         <!-- Compact Header -->
         <div class="text-center max-w-2xl mx-auto space-y-2">
             <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-[#850625] bg-rose-100/60 px-3 py-1 rounded-full border border-rose-200/50">
@@ -365,13 +365,13 @@
 </section>
 
 <!-- SECTION 3: WHY CHOOSE US / UNIQUE FEATURES -->
-<section id="why-choose-us" class="py-20 md:py-24 bg-[#FAF8F5] px-6 md:px-12 border-b border-rose-100/60 relative overflow-hidden">
+<section id="why-choose-us" class="py-20 md:py-24 bg-[#FAF8F5] px-6 md:px-16 border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Glows & Shades (Matching Footer & How It Works Style) -->
     <div class="absolute -top-24 -right-24 w-[500px] h-[500px] bg-gradient-to-br from-rose-200/50 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -left-24 w-[500px] h-[500px] bg-gradient-to-tl from-rose-200/60 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute top-1/2 left-1/3 -translate-y-1/2 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-7xl mx-auto relative z-10">
+    <div class="max-w-[1600px] mx-auto relative z-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <!-- Left Grid Info -->
             <div class="space-y-6">
@@ -423,12 +423,12 @@
 </section>
 
 <!-- SECTION 3.5: MANUAL VS SHAADI SENSE (PROBLEM VS SOLUTION) -->
-<section id="problem-vs-solution" class="py-16 md:py-24 bg-white px-6 md:px-12 border-b border-rose-100/60 relative overflow-hidden">
+<section id="problem-vs-solution" class="py-16 md:py-24 bg-white px-6 md:px-16 border-b border-rose-100/60 relative overflow-hidden">
     <!-- Ambient Light Shades -->
     <div class="absolute -top-24 left-1/4 w-[450px] h-[450px] bg-gradient-to-br from-rose-200/40 via-amber-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 right-1/4 w-[450px] h-[450px] bg-gradient-to-tl from-rose-200/50 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-6xl mx-auto relative z-10 space-y-12">
+    <div class="max-w-[1600px] mx-auto relative z-10 space-y-12">
         <!-- Section Header -->
         <div class="text-center max-w-2xl mx-auto space-y-3">
             <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-[#850625] bg-rose-100/60 px-3.5 py-1 rounded-full border border-rose-200/50">
@@ -592,12 +592,12 @@
 </section>
 
 <!-- SECTION 4: AI EVENT PLANNING STUDIO TEASER -->
-<section id="estimator" class="py-14 md:py-20 bg-gradient-to-b from-[#FFFDF9] to-[#FAF3EC] text-slate-900 px-6 md:px-12 relative overflow-hidden border-b border-rose-100/60">
+<section id="estimator" class="py-14 md:py-20 bg-gradient-to-b from-[#FFFDF9] to-[#FAF3EC] text-slate-900 px-6 md:px-16 relative overflow-hidden border-b border-rose-100/60">
     <!-- Ambient Light Shades -->
     <div class="absolute -top-20 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-rose-200/40 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-20 -right-20 w-[450px] h-[450px] bg-gradient-to-tl from-rose-200/50 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-6xl mx-auto relative z-10 space-y-10">
+    <div class="max-w-[1600px] mx-auto relative z-10 space-y-10">
         <!-- Compact Header -->
         <div class="text-center max-w-2xl mx-auto space-y-2">
             <span class="inline-block text-[11px] font-bold uppercase tracking-widest text-[#850625] bg-rose-100/60 px-3.5 py-1 rounded-full border border-rose-200/50">
@@ -750,19 +750,21 @@
 </section>
 
 <!-- SECTION 5: REVIEWS & TESTIMONIALS (COMPACT 7-ITEM SLIDER) -->
-<section id="testimonials" class="py-12 md:py-16 bg-[#FAF7F2] px-4 md:px-8 border-b border-rose-100/60 relative overflow-hidden"
+<section id="testimonials" class="py-12 md:py-16 bg-[#FAF7F2] px-6 md:px-16 border-b border-rose-100/60 relative overflow-hidden"
          x-data="{ 
             currentIndex: 0,
             autoPlayTimer: null,
-            itemsPerPage: 3,
+            itemsPerPage: 4,
             totalItems: 7,
             updateItemsPerPage() {
                 if (window.innerWidth < 640) {
                     this.itemsPerPage = 1;
                 } else if (window.innerWidth < 1024) {
                     this.itemsPerPage = 2;
-                } else {
+                } else if (window.innerWidth < 1280) {
                     this.itemsPerPage = 3;
+                } else {
+                    this.itemsPerPage = 4;
                 }
             },
             maxIndex() {
@@ -785,14 +787,14 @@
          @mouseenter="clearInterval(autoPlayTimer)"
          @mouseleave="autoPlayTimer = setInterval(() => { next() }, 5000)"
 >
-    <div class="max-w-6xl mx-auto space-y-6 relative z-10">
+    <div class="max-w-[1600px] mx-auto space-y-6 relative z-10">
         <!-- Compact Header & Navigation Arrows -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-rose-100/80 pb-4">
-            <div>
-                <span class="text-[10px] font-bold uppercase tracking-widest text-[#850625] bg-rose-100/60 px-2.5 py-0.5 rounded-full border border-rose-200/50">
-                    <i class="fa-solid fa-heart text-[#850625] text-[9px] mr-1"></i> Love & Stories (7 Reviews)
+            <div class="space-y-1 text-center sm:text-left">
+                <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-[#850625] bg-rose-100/60 px-2.5 py-0.5 rounded-full border border-rose-200/50">
+                    <i class="fa-solid fa-heart text-rose-600 text-[9px] mr-1"></i> Love & Stories (7 Reviews)
                 </span>
-                <h2 class="text-slate-900 text-xl md:text-2xl font-bold font-serif-luxury mt-1">
+                <h2 class="text-slate-900 text-xl md:text-3xl font-extrabold font-serif-luxury leading-tight">
                     What Our Couples & Families Say
                 </h2>
             </div>
@@ -823,7 +825,7 @@
                  :style="'transform: translateX(-' + (currentIndex * (100 / itemsPerPage)) + '%)'">
                 
                 <!-- Card 1 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
+                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
                     <div class="space-y-2.5">
                         <div class="flex items-center gap-3">
                             <div class="relative shrink-0">
@@ -854,7 +856,7 @@
                 </div>
 
                 <!-- Card 2 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
+                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
                     <div class="space-y-2.5">
                         <div class="flex items-center gap-3">
                             <div class="relative shrink-0">
@@ -885,7 +887,7 @@
                 </div>
 
                 <!-- Card 3 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
+                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
                     <div class="space-y-2.5">
                         <div class="flex items-center gap-3">
                             <div class="relative shrink-0">
@@ -916,7 +918,7 @@
                 </div>
 
                 <!-- Card 4 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
+                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
                     <div class="space-y-2.5">
                         <div class="flex items-center gap-3">
                             <div class="relative shrink-0">
@@ -947,7 +949,7 @@
                 </div>
 
                 <!-- Card 5 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
+                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
                     <div class="space-y-2.5">
                         <div class="flex items-center gap-3">
                             <div class="relative shrink-0">
@@ -978,7 +980,7 @@
                 </div>
 
                 <!-- Card 6 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
+                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
                     <div class="space-y-2.5">
                         <div class="flex items-center gap-3">
                             <div class="relative shrink-0">
@@ -1009,7 +1011,7 @@
                 </div>
 
                 <!-- Card 7 -->
-                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
+                <div class="shrink-0 w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.75rem)] xl:w-[calc(25%-0.75rem)] bg-white rounded-xl p-5 border border-rose-100/90 shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between space-y-3">
                     <div class="space-y-2.5">
                         <div class="flex items-center gap-3">
                             <div class="relative shrink-0">
@@ -1055,11 +1057,11 @@
 </section>
 
 <!-- SECTION 6: FINAL CTA BANNER (YOUR SHAADI, SORTED) -->
-<section id="final-cta" class="py-16 md:py-20 bg-[#FAF7F2] px-6 md:px-12 border-b border-rose-100/60 relative overflow-hidden text-center">
+<section id="final-cta" class="py-16 md:py-20 bg-[#FAF7F2] px-6 md:px-16 border-b border-rose-100/60 relative overflow-hidden text-center">
     <!-- Ambient Light Shades -->
     <div class="absolute -top-24 left-1/3 w-[450px] h-[450px] bg-gradient-to-br from-rose-200/40 via-amber-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-4xl mx-auto relative z-10 space-y-8">
+    <div class="max-w-[1600px] mx-auto relative z-10 space-y-8">
         <!-- Top Divider Line with 3 Gold Stars (Ref Image Style) -->
         <div class="flex items-center justify-center gap-4 max-w-lg mx-auto">
             <div class="flex-1 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-[#D4AF37]"></div>

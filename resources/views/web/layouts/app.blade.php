@@ -108,6 +108,62 @@
         @include('web.partials.footer')
     </div>
 
+    <!-- Custom Royal Shaadi Theme Mouse Cursor -->
+    <div id="custom-cursor-dot" class="hidden md:block fixed top-0 left-0 w-3.5 h-3.5 rounded-full bg-[#850625] border-2 border-[#D4AF37] shadow-md shadow-[#850625]/40 pointer-events-none z-[9999] transition-transform duration-75"></div>
+    <div id="custom-cursor-ring" class="hidden md:block fixed top-0 left-0 w-9 h-9 rounded-full border-2 border-[#850625]/35 bg-[#850625]/[0.04] backdrop-blur-[1px] pointer-events-none z-[9998] transition-all duration-200"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dot = document.getElementById('custom-cursor-dot');
+            const ring = document.getElementById('custom-cursor-ring');
+            if (!dot || !ring || window.innerWidth < 768) return;
+
+            let mouseX = -100, mouseY = -100;
+            let ringX = -100, ringY = -100;
+
+            window.addEventListener('mousemove', function(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+            });
+
+            function animateRing() {
+                ringX += (mouseX - ringX) * 0.18;
+                ringY += (mouseY - ringY) * 0.18;
+                ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+                requestAnimationFrame(animateRing);
+            }
+            animateRing();
+
+            // Hover effect on interactive elements
+            const updateHoverListeners = () => {
+                const interactiveElements = document.querySelectorAll('a, button, input, select, textarea, [role="button"], .group, .clickable');
+                interactiveElements.forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        ring.style.width = '3.25rem';
+                        ring.style.height = '3.25rem';
+                        ring.style.borderColor = '#850625';
+                        ring.style.backgroundColor = 'rgba(133, 6, 37, 0.12)';
+                        ring.style.boxShadow = '0 0 20px rgba(133, 6, 37, 0.25)';
+                        dot.style.backgroundColor = '#D4AF37';
+                        dot.style.borderColor = '#850625';
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        ring.style.width = '2.25rem';
+                        ring.style.height = '2.25rem';
+                        ring.style.borderColor = 'rgba(133, 6, 37, 0.35)';
+                        ring.style.backgroundColor = 'rgba(133, 6, 37, 0.04)';
+                        ring.style.boxShadow = 'none';
+                        dot.style.backgroundColor = '#850625';
+                        dot.style.borderColor = '#D4AF37';
+                    });
+                });
+            };
+
+            updateHoverListeners();
+        });
+    </script>
+
     @stack('scripts')
 </body>
 </html>

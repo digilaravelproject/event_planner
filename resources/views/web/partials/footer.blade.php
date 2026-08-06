@@ -1,10 +1,10 @@
-<footer class="w-full relative bg-gradient-to-br from-[#FFFDF9] via-white to-[#FAF7F2] py-12 md:py-16 px-6 md:px-12 border-t border-rose-200/80 shadow-2xl shadow-rose-950/[0.05] overflow-hidden">
+<footer class="w-full relative bg-gradient-to-br from-[#FFFDF9] via-white to-[#FAF7F2] py-12 md:py-16 px-6 md:px-16 border-t border-rose-200/80 shadow-2xl shadow-rose-950/[0.05] overflow-hidden">
     <!-- Full-bleed Ambient Corner Glows/Shades (Ref Image 1 style with Light Colors) -->
     <div class="absolute -top-24 -left-24 w-[500px] h-[500px] bg-gradient-to-br from-rose-200/50 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -right-24 w-[500px] h-[500px] bg-gradient-to-tl from-rose-200/60 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute top-1/2 right-1/3 -translate-y-1/2 w-96 h-96 bg-amber-100/30 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="max-w-7xl mx-auto relative z-10 space-y-12">
+    <div class="max-w-[1600px] mx-auto relative z-10 space-y-12">
         <!-- TOP CTA / NEWSLETTER SECTION (Ref Image 2 Top Section) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-rose-100/80 pb-12">
             <!-- Left: Headline & Email Form -->

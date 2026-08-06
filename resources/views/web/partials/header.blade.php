@@ -1,21 +1,25 @@
 <header 
     x-data="{ mobileMenuOpen: false }" 
     :class="scrolled ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-rose-950/[0.04] border-b border-rose-200/60 py-3 md:py-3.5' : 'bg-[#FFFDF9]/85 backdrop-blur-lg border-b border-rose-100/70 py-4 md:py-5'" 
-    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full px-6 md:px-12 flex items-center justify-between"
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full"
 >
-    <!-- Brand Logo with Spark Glow & Hover Animation -->
+    <div class="max-w-[1600px] mx-auto w-full px-6 md:px-16 flex items-center justify-between">
+    <!-- Brand Logo with Royal Gold Ring & Sparkle Glow Animation -->
     <a href="{{ url('/') }}" class="flex items-center space-x-3 group relative z-10">
-        <span class="bg-gradient-to-tr from-[#850625] to-[#a81036] text-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xl shadow-md shadow-[#850625]/25 group-hover:scale-105 group-hover:rotate-6 transition-all duration-300">
-            <svg class="h-5 w-5 text-white animate-pulse" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2c-.1 3.2-2.8 5.9-6 6 3.2.1 5.9 2.8 6 6 .1-3.2 2.8-5.9 6-6-3.2-.1-5.9-2.8-6-6z"/>
-            </svg>
-        </span>
+        <div class="relative flex items-center justify-center">
+            <span class="absolute inset-0 rounded-2xl bg-[#D4AF37]/30 blur-sm group-hover:blur-md transition-all"></span>
+            <span class="relative bg-gradient-to-br from-[#850625] via-[#9e0b30] to-[#6e041d] text-white w-10 h-10 rounded-2xl border-2 border-[#D4AF37]/90 flex items-center justify-center font-bold text-xl shadow-lg shadow-[#850625]/30 group-hover:scale-105 group-hover:rotate-6 transition-all duration-300">
+                <svg class="h-5 w-5 text-[#D4AF37]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2c-.1 3.2-2.8 5.9-6 6 3.2.1 5.9 2.8 6 6 .1-3.2 2.8-5.9 6-6-3.2-.1-5.9-2.8-6-6z"/>
+                </svg>
+            </span>
+        </div>
         <div class="flex flex-col">
             <span class="font-serif-luxury text-xl md:text-2xl font-extrabold tracking-wide text-slate-900 group-hover:text-[#850625] transition-colors leading-tight">
                 Shaadi <span class="text-[#850625] font-sans font-black text-lg md:text-xl">Sense</span>
             </span>
-            <span class="text-[9px] uppercase tracking-[0.2em] text-[#D4AF37] font-bold font-cinzel -mt-1 hidden sm:block">
-                AI Event Studio
+            <span class="text-[9px] uppercase tracking-[0.22em] text-[#D4AF37] font-bold font-cinzel -mt-0.5 hidden sm:block">
+                ✨ Royal AI Event Studio
             </span>
         </div>
     </a>
