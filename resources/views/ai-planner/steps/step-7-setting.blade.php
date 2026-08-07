@@ -104,7 +104,10 @@
                             </button>
 
                             <button type="button" 
-                                @click="planner.decorTheme = pkg.name"
+                                @click="
+                                    planner.decorTheme = pkg.name;
+                                    planner.selectedVendorId = pkg.id;
+                                "
                                 :class="planner.decorTheme === pkg.name ? 'bg-[#850625] text-white' : 'bg-rose-50 text-[#850625] hover:bg-[#850625] hover:text-white'"
                                 class="px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
                                 <span x-text="planner.decorTheme === pkg.name ? 'Selected' : 'Select'"></span>

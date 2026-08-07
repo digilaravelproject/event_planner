@@ -10,26 +10,64 @@
     </div>
 
     <!-- Vendor Menu Filter Bar -->
-    <div class="bg-gradient-to-r from-rose-900 via-[#850625] to-rose-950 p-5 rounded-3xl text-white shadow-lg space-y-3">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shrink-0">
-                    <i class="fa-solid fa-hotel text-lg"></i>
+    <div x-data="{ isVendorDropdownOpen: false }" class="bg-gradient-to-r from-rose-900 via-[#850625] to-rose-950 p-5 rounded-3xl text-white shadow-xl relative">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md border border-white/25 flex items-center justify-center text-white shrink-0 shadow-sm">
+                    <i class="fa-solid fa-utensils text-lg"></i>
                 </div>
                 <div>
-                    <span class="text-[10px] uppercase font-bold text-rose-200 tracking-wider block">Selected Venue / Lawn Caterer</span>
-                    <h3 class="font-extrabold text-lg text-white leading-tight" x-text="getSelectedCateringVendor()?.name || 'Mauli Blue Moon Club Catering'"></h3>
+                    <span class="text-[10px] uppercase font-bold text-rose-200 tracking-widest block">Selected Venue / Lawn Caterer</span>
+                    <h3 class="font-extrabold text-lg text-white leading-tight flex items-center gap-2" x-text="getSelectedCateringVendor()?.name || 'Select Caterer'">
+                    </h3>
                 </div>
             </div>
 
-            <!-- Vendor Switcher Dropdown -->
-            <div class="w-full sm:w-auto">
-                <label for="catering-vendor-select" class="sr-only">Select Catering Vendor</label>
-                <select id="catering-vendor-select" x-model="planner.selectedVendorId" class="w-full sm:w-auto bg-white/15 backdrop-blur-md border border-white/30 text-white rounded-xl px-4 py-2 text-xs font-bold focus:outline-none cursor-pointer">
+            <!-- Custom Luxury Vendor Switcher Dropdown Button -->
+            <div class="relative w-full sm:w-auto">
+                <button type="button" @click="isVendorDropdownOpen = !isVendorDropdownOpen" @click.away="isVendorDropdownOpen = false"
+                    class="w-full sm:w-auto bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 text-white rounded-2xl px-4 py-2.5 text-xs font-extrabold transition-all flex items-center justify-between gap-3 cursor-pointer shadow-sm">
+                    <div class="flex items-center gap-2 truncate">
+                        <i class="fa-solid fa-store text-rose-200 text-xs"></i>
+                        <span class="truncate" x-text="getSelectedCateringVendor()?.name || 'Choose Vendor'"></span>
+                        <span class="text-[9px] bg-rose-950/60 text-rose-200 border border-rose-400/30 px-2 py-0.5 rounded-full font-bold uppercase" x-text="getSelectedCateringVendor()?.category || 'Venue'"></span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" :class="isVendorDropdownOpen ? 'rotate-180' : ''"></i>
+                </button>
+
+                <!-- Dropdown Popup Panel -->
+                <div x-show="isVendorDropdownOpen" 
+                    x-transition:enter="transition ease-out duration-200 transform"
+                    x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-150 transform"
+                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+                    class="absolute right-0 mt-2 w-full sm:w-80 bg-white border-2 border-rose-200 rounded-3xl shadow-2xl p-2.5 z-50 max-h-72 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] divide-y divide-rose-100 space-y-1 text-slate-900">
+                    
+                    <div class="px-3 py-2 text-[10px] font-extrabold text-[#850625] uppercase tracking-widest">
+                        Available Venue & Catering Vendors
+                    </div>
+
                     <template x-for="vendor in cateringVendors" :key="vendor.id">
-                        <option :value="vendor.id" x-text="vendor.name + ' (' + vendor.category + ')'" class="text-slate-900 font-normal"></option>
+                        <button type="button" 
+                            @click="
+                                planner.selectedVendorId = vendor.id;
+                                isVendorDropdownOpen = false;
+                            "
+                            :class="planner.selectedVendorId === vendor.id ? 'bg-[#850625] text-white font-extrabold shadow-md' : 'text-slate-700 hover:bg-rose-50 hover:text-[#850625]'"
+                            class="w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center justify-between gap-2 text-xs cursor-pointer group">
+                            
+                            <div class="flex items-center gap-2.5 truncate">
+                                <i class="fa-solid fa-building-circle-check text-[#850625] group-hover:scale-110 transition-transform"></i>
+                                <span class="truncate font-semibold" x-text="vendor.name"></span>
+                            </div>
+
+                            <span :class="planner.selectedVendorId === vendor.id ? 'bg-white/20 text-white' : 'bg-rose-100 text-[#850625]'"
+                                class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0" x-text="vendor.category"></span>
+                        </button>
                     </template>
-                </select>
+                </div>
             </div>
         </div>
     </div>

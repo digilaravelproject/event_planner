@@ -40,8 +40,9 @@
                 pkg.locations.includes(loc) || pkg.locations.includes('All Mumbai')
             );
 
-            // 4. Tradition Check (If package specifies traditions, must match selected)
-            const traditionOk = !currentCulture || !pkg.traditions || !pkg.traditions.length || !pkg.traditions[0] || pkg.traditions.some(t => t.toLowerCase().includes(currentCulture.toLowerCase()) || currentCulture.toLowerCase().includes(t.toLowerCase()));
+            // 4. Tradition Check (Temporarily disabled)
+            // const traditionOk = !currentCulture || !pkg.traditions || !pkg.traditions.length || !pkg.traditions[0] || pkg.traditions.some(t => t.toLowerCase().includes(currentCulture.toLowerCase()) || currentCulture.toLowerCase().includes(t.toLowerCase()));
+            const traditionOk = true;
 
             // 5. Venue Setting Category Check (Must match clicked environment e.g. Sea-Facing, Lawn, Ballroom, Heritage)
             const settingOk = !currentSetting || !pkg.category || pkg.category.toLowerCase().includes(currentSetting.toLowerCase()) || currentSetting.toLowerCase().includes(pkg.category.toLowerCase());
@@ -240,7 +241,56 @@
         locations: [],
         subarea: 'Juhu Beach',
         timeline: @js($plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
+        eventDate: '',
         setting: 'Indoor AC Banquet'
+    },
+    calendarMonth: 10,
+    calendarYear: 2026,
+    monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    formatEventDate(dateStr) {
+        if (!dateStr) return 'Not set';
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
+        return date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    },
+    getDaysInMonth(year, month) {
+        return new Date(year, month + 1, 0).getDate();
+    },
+    getFirstDayOfMonth(year, month) {
+        return new Date(year, month, 1).getDay();
+    },
+    nextMonth() {
+        if (this.calendarMonth === 11) {
+            this.calendarMonth = 0;
+            this.calendarYear++;
+        } else {
+            this.calendarMonth++;
+        }
+    },
+    prevMonth() {
+        if (this.calendarMonth === 0) {
+            this.calendarMonth = 11;
+            this.calendarYear--;
+        } else {
+            this.calendarMonth--;
+        }
+    },
+    selectCalendarDate(day) {
+        const m = String(this.calendarMonth + 1).padStart(2, '0');
+        const d = String(day).padStart(2, '0');
+        this.planner.eventDate = `${this.calendarYear}-${m}-${d}`;
+    },
+    isDateSelected(day) {
+        if (!this.planner.eventDate) return false;
+        const parts = this.planner.eventDate.split('-');
+        return Number(parts[0]) === this.calendarYear && Number(parts[1]) === (this.calendarMonth + 1) && Number(parts[2]) === day;
+    },
+    isAuspiciousDate(day) {
+        const m = this.calendarMonth + 1;
+        if (this.calendarYear === 2026 && m === 11 && (day === 24 || day === 25 || day === 27)) return true;
+        if (this.calendarYear === 2026 && m === 12 && (day === 12 || day === 18 || day === 21)) return true;
+        if (this.calendarYear === 2027 && m === 1 && (day === 18 || day === 20 || day === 24)) return true;
+        return false;
     },
     getCeremonies() {
         const map = {
@@ -550,6 +600,7 @@
                     <button type="button" 
                         @click="
                             planner.decorTheme = activeModalPackage.decor_type;
+                            planner.selectedVendorId = activeModalPackage.id;
                             closePackageModal();
                         "
                         class="px-6 py-2.5 rounded-full bg-[#850625] text-white text-xs font-extrabold hover:bg-[#6b041e] shadow-md transition-all flex items-center gap-2">

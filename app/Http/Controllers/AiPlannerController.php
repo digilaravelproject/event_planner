@@ -96,6 +96,9 @@ class AiPlannerController extends Controller
         $cateringVendors = \App\Modules\DynamicVendors\Models\DynamicVendor::query()
             ->whereRaw('LOWER(status) = ?', ['active'])
             ->get()
+            ->filter(function (\App\Modules\DynamicVendors\Models\DynamicVendor $vendor): bool {
+                return in_array($vendor->category, ['Catering', 'Venue', 'Hotel', 'Lawn', 'Decorator'], true);
+            })
             ->map(function (\App\Modules\DynamicVendors\Models\DynamicVendor $vendor): array {
                 $brandName = data_get($vendor->vendor_json, 'identity.name') ?: data_get($vendor->vendor_json, 'name') ?: $vendor->name;
 
@@ -148,6 +151,7 @@ class AiPlannerController extends Controller
             'answers.food_type' => ['nullable', 'string', 'max:2000'],
             'answers.service_area' => ['nullable', 'string', 'max:255'],
             'answers.event_timeline' => ['nullable', 'string', 'max:255'],
+            'answers.event_date' => ['nullable', 'date'],
             'answers.food_menu_items' => ['nullable', 'array', 'max:100'],
             'answers.food_menu_items.*.id' => ['required', 'string', 'max:255'],
             'answers.food_menu_items.*.title' => ['required', 'string', 'max:255'],
