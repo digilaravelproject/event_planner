@@ -25,10 +25,10 @@ class NotificationController extends Controller
     public function edit(AdminNotification $notification){return $this->form($notification);}
     public function update(StoreNotificationRequest $request,AdminNotification $notification){$this->persist($request,$notification);return to_route('admin.notifications.show',$notification)->with('success','Notification updated.');}
     public function destroy(AdminNotification $notification){$notification->delete();return to_route('admin.notifications.index')->with('success','Notification deleted.');}
-    public function send(AdminNotification $notification){$notification->update(['status'=>'sent','sent_at'=>now()]);return back()->with('success','Notification marked as sent to '.$notification->users()->count().' recipients.');}
+    public function send(AdminNotification $notification){$notification->update(['status'=>'sent','sent_at'=>now()]);$notification->users()->newPivotStatement()->where('notification_id',$notification->id)->update(['is_read'=>false,'read_at'=>null,'updated_at'=>now()]);return back()->with('success','Notification sent to '.$notification->users()->count().' recipients.');}
     private function form(AdminNotification $notification){return view('admin.notifications.form',['notification'=>$notification,'users'=>User::orderBy('name')->get(['id','name','email']),'types'=>AdminModuleOption::forGroup('notification_type')->get()]);}
     private function persist(StoreNotificationRequest $request,AdminNotification $notification):AdminNotification
     {
-        return DB::transaction(function()use($request,$notification){$data=$request->validated();$scope=$data['recipient_scope'];$userIds=$scope==='all'?User::pluck('id')->all():($data['users']??[]);unset($data['recipient_scope'],$data['users']);$data['created_by']=$notification->exists?$notification->created_by:auth('admin')->id();if($data['status']==='sent')$data['sent_at']=now();$notification->fill($data)->save();$notification->users()->sync($userIds);return $notification;});
+        return DB::transaction(function()use($request,$notification){$data=$request->validated();$scope=$data['recipient_scope'];$userIds=$scope==='all'?User::pluck('id')->all():($data['users']??[]);unset($data['recipient_scope'],$data['users']);$data['created_by']=$notification->exists?$notification->created_by:auth('admin')->id();$data['sent_at']=$data['status']==='sent'?now():null;$notification->fill($data)->save();$notification->users()->sync($userIds);return $notification;});
     }
 }

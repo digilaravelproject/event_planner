@@ -296,9 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 cost.type = 'number';
                 cost.name = 'option_metadata_costs[]';
                 cost.value = saved.cost ?? 0;
-                cost.min = '0';
+                cost.min = '0.01';
                 cost.step = '0.01';
-                cost.placeholder = 'Cost per guest';
+                cost.placeholder = 'Cost per person';
                 cost.className = 'admin-control min-w-0 px-2.5 py-2 text-xs';
 
                 const rememberMetadata = () => {

@@ -51,6 +51,7 @@
     <!-- Right Side CTA / Auth Actions with Animated Buttons -->
     <div class="hidden lg:flex items-center space-x-3">
         @auth('web')
+            @include('user.partials.notification-bell')
             <a href="{{ route('user.dashboard') }}" class="px-5 py-2.5 rounded-full text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex items-center gap-2">
                 <i class="fa-solid fa-gauge text-xs"></i>
                 <span>Dashboard</span>
