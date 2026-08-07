@@ -88,7 +88,6 @@ class DynamicVendorSeeder extends Seeder
                 ['label' => 'Guest Capacity', 'type' => 'number', 'value' => [500, 800, 1200, 1600], 'required' => true],
                 ['label' => 'Parking', 'type' => 'boolean', 'value' => [true, true, false, true]],
                 ['label' => 'Rooms', 'type' => 'number', 'value' => [8, 14, 20, 30]],
-                ['label' => 'GPS Location', 'type' => 'gps', 'value' => ['18.5204, 73.8567', '19.0760, 72.8777', '19.9975, 73.7898', '21.1458, 79.0882']],
             ]],
             ['category' => 'Photographer', 'suffix' => 'Wedding Stories', 'price' => 45000, 'attributes' => [
                 ['label' => 'Drone', 'type' => 'boolean', 'value' => [true, true, false, true]],
@@ -98,9 +97,15 @@ class DynamicVendorSeeder extends Seeder
             ]],
             ['category' => 'Decorator', 'suffix' => 'Decor Studio', 'price' => 65000, 'attributes' => [
                 ['label' => 'Decoration Theme', 'type' => 'dropdown', 'value' => ['Floral', 'Royal', 'Minimal', 'Bohemian'], 'allowed' => ['Floral', 'Royal', 'Minimal', 'Bohemian']],
-                ['label' => 'Decoration Type', 'type' => 'multi_select', 'value' => ['Floral Stage, Entrance Arch', 'Royal Mandap, Floral Stage', 'Minimal Stage, Entrance Arch', 'Bohemian Lounge, Floral Stage'], 'allowed' => ['Floral Stage', 'Entrance Arch', 'Royal Mandap', 'Minimal Stage', 'Bohemian Lounge'], 'images' => ['demo-vendors/decor-floral.svg', 'demo-vendors/decor-mandap.svg', 'demo-vendors/decor-arch.svg']],
+                ['label' => 'Decoration Type', 'type' => 'multi_select', 'value' => ['Traditional Marigold & Brass', 'Arabian Night Floral Glow', 'Royal Red & Gold Canopy', 'Temple Lotus & White Mogra'], 'allowed' => ['Traditional Marigold & Brass', 'Arabian Night Floral Glow', 'Royal Red & Gold Canopy', 'Temple Lotus & White Mogra', 'Classic White & Pastel Floral Canopy', 'Vibrant Mirrors & Bandhani Theme']],
+                ['label' => 'Min Guest Capacity', 'type' => 'number', 'value' => [30, 50, 100, 150]],
+                ['label' => 'Max Guest Capacity', 'type' => 'number', 'value' => [500, 1000, 2000, 3000]],
+                ['label' => 'Min Budget Lakhs', 'type' => 'number', 'value' => [2, 5, 10, 20]],
+                ['label' => 'Max Budget Lakhs', 'type' => 'number', 'value' => [25, 40, 60, 100]],
+                ['label' => 'Supported Locations', 'type' => 'multi_select', 'value' => ['Juhu / Bandra Sea-Face, South Mumbai Heritage', 'Suburban AC Banquets, Thane & Navi Mumbai', 'Juhu / Bandra Sea-Face, Suburban AC Banquets', 'South Mumbai Heritage, Thane & Navi Mumbai']],
+                ['label' => 'Supported Traditions', 'type' => 'multi_select', 'value' => ['Maharashtrian Lagna, South Indian Tradition', 'Muslim Nikah & Walima, Royal Red & Gold Canopy', 'North Indian Punjabi, Gujarati Garba Shaadi', 'Catholic / Christian Wedding, Fusion / Modern Minimalist']],
+                ['label' => 'Package Details Note', 'type' => 'textarea', 'value' => ['Full mandap floral styling, entrance gate arch, couple stage set, VVIP sofa seating & ambient fairy light tunnel.']],
                 ['label' => 'Stage Included', 'type' => 'boolean', 'value' => [true, true, true, false]],
-                ['label' => 'Primary Colour', 'type' => 'color', 'value' => ['#f4b6c2', '#d4af37', '#f5f5dc', '#c97b63']],
             ]],
             ['category' => 'DJ', 'suffix' => 'DJ & Sound', 'price' => 30000, 'attributes' => [
                 ['label' => 'Sound Power', 'type' => 'text', 'value' => ['5000W', '8000W', '10000W', '6500W']],

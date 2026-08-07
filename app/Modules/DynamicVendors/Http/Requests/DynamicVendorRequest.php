@@ -54,6 +54,16 @@ abstract class DynamicVendorRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'tags' => ['nullable', 'string'],
             'keywords' => ['nullable', 'string'],
+            'offerings' => ['nullable', 'array'],
+            'offerings.*.name' => ['nullable', 'string', 'max:255'],
+            'offerings.*.category' => ['nullable', 'string', 'max:255'],
+            'offerings.*.min_capacity' => ['nullable', 'integer', 'min:0'],
+            'offerings.*.max_capacity' => ['nullable', 'integer', 'min:0'],
+            'offerings.*.min_budget' => ['nullable', 'numeric', 'min:0'],
+            'offerings.*.max_budget' => ['nullable', 'numeric', 'min:0'],
+            'offerings.*.locations' => ['nullable', 'string'],
+            'offerings.*.traditions' => ['nullable', 'string'],
+            'offerings.*.notes' => ['nullable', 'string'],
         ];
     }
 

@@ -21,7 +21,9 @@ class DynamicVendorController extends Controller
 {
     private const SUGGESTIONS = [
         'Name', 'Category', 'Price', 'Capacity', 'Location', 'Area', 'Guest Capacity',
-        'Parking', 'Decoration', 'Photography', 'DJ', 'Lighting', 'Sound', 'Food Type',
+        'Min Guest Capacity', 'Max Guest Capacity', 'Min Budget Lakhs', 'Max Budget Lakhs',
+        'Supported Locations', 'Decor Category', 'Supported Traditions', 'Decoration Type',
+        'Package Details Note', 'Parking', 'Decoration', 'Photography', 'DJ', 'Lighting', 'Sound', 'Food Type',
         'Cuisine', 'Rooms', 'Check In', 'Check Out', 'Drone', 'Album', 'Delivery Time',
     ];
 
@@ -134,10 +136,17 @@ class DynamicVendorController extends Controller
 
     private function formOptions(): array
     {
+        $venueQuestion = \App\Models\EventRequirementQuestion::where('question_code', 'decoration_type')->first();
+        $venueCategories = array_values(array_unique(array_merge(
+            ['Sea-Facing Beachfront', 'Lawn & Poolside', 'Grand AC Ballroom', 'Heritage Resort'],
+            $venueQuestion?->options ?? []
+        )));
+
         return [
             'attributeTypes' => DynamicVendorRequest::TYPES,
             'attributeSuggestions' => self::SUGGESTIONS,
             'categorySuggestions' => self::CATEGORY_SUGGESTIONS,
+            'venueCategories' => $venueCategories,
         ];
     }
 }
