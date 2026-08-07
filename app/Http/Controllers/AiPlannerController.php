@@ -19,7 +19,6 @@ class AiPlannerController extends Controller
 
         $vendorPackages = \App\Modules\DynamicVendors\Models\DynamicVendor::query()
             ->whereRaw('LOWER(status) = ?', ['active'])
-            ->whereIn('vendor_json->identity->category', ['Venue', 'Decorator'])
             ->latest('id')
             ->get()
             ->flatMap(function (\App\Modules\DynamicVendors\Models\DynamicVendor $vendor): array {
@@ -72,8 +71,11 @@ class AiPlannerController extends Controller
                     $pkgName = data_get($offering, 'name') ?: $vendor->name;
                     $note = data_get($offering, 'notes') ?: ($vendor->vendor_json['identity']['short_description'] ?? 'Custom tailored wedding package.');
 
+                    $vendorBrandName = data_get($vendor->vendor_json, 'identity.name') ?: data_get($vendor->vendor_json, 'name') ?: 'Vendor';
+
                     return [
                         'id' => $vendor->id,
+                        'vendor_name' => $vendorBrandName,
                         'name' => $pkgName,
                         'category' => $decorCategory,
                         'min_capacity' => (int) (data_get($offering, 'min_capacity', 50)),
@@ -82,8 +84,8 @@ class AiPlannerController extends Controller
                         'max_budget' => (float) (data_get($offering, 'max_budget', 50)),
                         'locations' => array_values(array_filter($locationsList)),
                         'traditions' => array_values(array_filter($traditionsList)),
-                        'decor_type' => $decorCategory,
-                        'note' => $note,
+                        'decor_type' => $pkgName,
+                        'note' => is_array($note) ? implode(' ', $note) : (string) $note,
                         'images' => $imageUrls,
                     ];
                 }, $offerings);

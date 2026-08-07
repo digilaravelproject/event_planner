@@ -136,7 +136,7 @@ class DynamicVendorController extends Controller
 
     private function formOptions(): array
     {
-        $venueQuestion = \App\Models\EventRequirementQuestion::where('question_code', 'decoration_type')->first();
+        $venueQuestion = \App\Models\EventRequirementQuestion::where('question_code', 'venue_setting')->first();
         $venueCategories = array_values(array_unique(array_merge(
             ['Sea-Facing Beachfront', 'Lawn & Poolside', 'Grand AC Ballroom', 'Heritage Resort'],
             $venueQuestion?->options ?? []

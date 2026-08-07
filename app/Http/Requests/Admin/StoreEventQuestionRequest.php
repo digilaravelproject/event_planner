@@ -46,25 +46,13 @@ class StoreEventQuestionRequest extends FormRequest
 
     public function rules(): array
     {
-        $routeQuestion = collect($this->route()?->parameters() ?? [])->first(fn ($parameter): bool => $parameter instanceof EventRequirementQuestion);
-        $id = $routeQuestion?->getKey();
+        $questionId = $this->route('event_question')?->id;
 
         return [
-            'question' => ['required', 'string', 'max:500'],
-            'question_code' => ['required', 'alpha_dash', 'max:100', Rule::unique('event_requirement_questions', 'question_code')->ignore($id)],
-            'question_type' => ['required', Rule::exists('admin_module_options', 'value')->where('group', 'question_type')->where('status', true)],
+            'question' => ['required', 'string', 'max:255'],
+            'question_code' => ['required', 'string', 'max:100', Rule::unique(EventRequirementQuestion::class, 'question_code')->ignore($questionId)],
+            'question_type' => ['required', 'string', 'max:50'],
             'placeholder' => ['nullable', 'string', 'max:255'],
-            'options' => [Rule::requiredIf(fn () => in_array($this->input('question_type'), ['dropdown', 'radio', 'checkbox'], true)), 'array'],
-            'options.*' => ['string', 'max:255', 'distinct'],
-            'option_metadata' => ['nullable', 'array', 'max:500'],
-            'option_metadata.*.category' => ['required', 'string', 'max:100'],
-            'option_metadata.*.cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'vendor_attribute_key' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9_]+$/'],
-            'vendor_attribute_values' => [Rule::requiredIf(fn () => $this->filled('vendor_attribute_key')), 'array', 'max:500'],
-            'vendor_attribute_values.*' => ['string', 'max:255', 'distinct'],
-            'vendor_attribute_images' => ['nullable', 'array', 'max:100'],
-            'vendor_attribute_images.*' => ['string', 'max:2048', 'distinct'],
-            'is_required' => ['boolean'],
             'display_order' => ['required', 'integer', 'min:0', 'max:9999'],
             'status' => ['boolean'],
         ];

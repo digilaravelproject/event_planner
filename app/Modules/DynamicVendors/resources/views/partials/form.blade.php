@@ -92,7 +92,7 @@
             </div>
 
             @php
-                $existingOfferings = data_get($document, 'offerings', []);
+                $existingOfferings = old('offerings', data_get($document, 'offerings', []));
                 if (empty($existingOfferings) && !empty(data_get($document, 'offering'))) {
                     $existingOfferings = [data_get($document, 'offering')];
                 }

@@ -9,11 +9,11 @@
         <p class="text-slate-600 text-sm sm:text-base">Visual previews & decor themes tailored for <span class="font-bold text-[#850625]" x-text="planner.culture"></span> tradition.</p>
     </div>
 
-    <!-- 1. Venue Setting Environment Cards (Loaded Dynamically from Question Management) -->
+    <!-- 1. Venue Setting Environment Cards (Dynamically Loaded from Admin Question) -->
     <div class="space-y-3">
         <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">1. What venue setting environment do you prefer?</span>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <template x-for="(settingOption, index) in optionsFor('decoration_type', [
+            <template x-for="(settingOption, index) in optionsFor('venue_setting', [
                 'Sea-Facing Beachfront',
                 'Lawn & Poolside',
                 'Grand AC Ballroom',
@@ -24,7 +24,7 @@
                     class="bg-white rounded-3xl border-2 overflow-hidden transition-all cursor-pointer group flex flex-col justify-between">
                     
                     <div class="relative h-32 w-full overflow-hidden bg-slate-900">
-                        <img :src="imageFor('decoration_type', index, [
+                        <img :src="imageFor('venue_setting', index, [
                             'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
                             'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80',
                             'https://images.unsplash.com/photo-1544078751-58fee2d8a03b?auto=format&fit=crop&w=600&q=80',
@@ -38,19 +38,19 @@
 
                     <div class="p-3.5 space-y-1">
                         <h4 class="font-bold text-slate-900 text-sm" x-text="settingOption"></h4>
-                        <p class="text-[11px] text-slate-500 leading-tight">Admin Managed Venue Category Vibe</p>
+                        <p class="text-[11px] text-slate-500 leading-tight">Admin Managed Venue Ambience</p>
                     </div>
                 </div>
             </template>
         </div>
     </div>
 
-    <!-- 2. Dynamic Real-Time Filtered Vendor Decor & Venue Packages -->
-    <div class="space-y-4 pt-6 border-t border-slate-200">
+    <!-- 2. Dynamic Real-Time Filtered Vendor Decor & Venue Packages (Reveals ONLY after user selects Section 1 venue setting) -->
+    <div x-show="planner.setting" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-4 pt-6 border-t border-slate-200">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
             <div>
                 <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">2. AI-Matched Vendor Decor & Hall Offerings</span>
-                <p class="text-xs text-slate-500">Filtered in real-time based on your selected Budget, Guests, Tradition & Locations.</p>
+                <p class="text-xs text-slate-500">Filtered in real-time for <span class="font-bold text-[#850625]" x-text="planner.setting"></span> based on your selected Budget, Guests, Tradition & Locations.</p>
             </div>
             <span class="text-xs font-bold text-[#850625] bg-rose-50 px-3 py-1 rounded-full border border-rose-100 self-start sm:self-auto" x-text="getMatchingVendorPackages().length + ' Matches Found'"></span>
         </div>
@@ -58,7 +58,7 @@
         <!-- Matching Packages Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <template x-for="pkg in getMatchingVendorPackages()">
-                <div :class="planner.decorTheme === pkg.decor_type ? 'border-[#850625] shadow-xl ring-2 ring-[#850625]/30 scale-[1.01]' : 'border-slate-200 hover:border-rose-300 hover:shadow-md'"
+                <div :class="planner.decorTheme === pkg.name ? 'border-[#850625] shadow-xl ring-2 ring-[#850625]/30 scale-[1.01]' : 'border-slate-200 hover:border-rose-300 hover:shadow-md'"
                     class="bg-white rounded-3xl border-2 overflow-hidden transition-all flex flex-col justify-between group relative">
                     
                     <div class="relative h-44 w-full bg-slate-900 overflow-hidden">
@@ -73,7 +73,7 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
 
                         <!-- Selected Badge -->
-                        <span x-show="planner.decorTheme === pkg.decor_type" class="absolute top-3 right-3 bg-[#850625] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                        <span x-show="planner.decorTheme === pkg.name" class="absolute top-3 right-3 bg-[#850625] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
                             <i class="fa-solid fa-circle-check text-[10px]"></i> Selected
                         </span>
 
@@ -86,8 +86,11 @@
 
                     <div class="p-4 space-y-3">
                         <div>
-                            <span class="text-[10px] font-bold text-[#850625] uppercase tracking-wider block" x-text="pkg.category"></span>
-                            <h4 class="font-extrabold text-slate-900 text-base leading-snug truncate" x-text="pkg.name"></h4>
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-[10px] font-extrabold text-[#850625] uppercase tracking-wider block" x-text="pkg.vendor_name || 'DECORATOR'"></span>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block" x-text="pkg.category"></span>
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 text-base leading-snug truncate mt-0.5" x-text="pkg.name"></h4>
                             <p class="text-xs text-slate-500 line-clamp-2 mt-1" x-text="pkg.note"></p>
                         </div>
 
@@ -101,10 +104,10 @@
                             </button>
 
                             <button type="button" 
-                                @click="planner.decorTheme = pkg.decor_type"
-                                :class="planner.decorTheme === pkg.decor_type ? 'bg-[#850625] text-white' : 'bg-rose-50 text-[#850625] hover:bg-[#850625] hover:text-white'"
+                                @click="planner.decorTheme = pkg.name"
+                                :class="planner.decorTheme === pkg.name ? 'bg-[#850625] text-white' : 'bg-rose-50 text-[#850625] hover:bg-[#850625] hover:text-white'"
                                 class="px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
-                                <span x-text="planner.decorTheme === pkg.decor_type ? 'Selected' : 'Select'"></span>
+                                <span x-text="planner.decorTheme === pkg.name ? 'Selected' : 'Select'"></span>
                             </button>
                         </div>
                     </div>
@@ -114,8 +117,8 @@
             <!-- Fallback Empty State if no vendors match criteria -->
             <div x-show="!getMatchingVendorPackages().length" class="col-span-full bg-rose-50/60 p-8 rounded-3xl border border-dashed border-rose-200 text-center space-y-2">
                 <i class="fa-solid fa-filter text-2xl text-[#850625]"></i>
-                <h4 class="font-bold text-slate-800 text-sm">No exact package matches for selected criteria</h4>
-                <p class="text-xs text-slate-500 max-w-md mx-auto">Try adjusting your locations or guest count range in earlier steps to view available offerings.</p>
+                <h4 class="font-bold text-slate-800 text-sm">No exact package matches for <span x-text="planner.setting"></span></h4>
+                <p class="text-xs text-slate-500 max-w-md mx-auto">Try selecting a different venue environment or adjusting your locations / budget in earlier steps.</p>
             </div>
         </div>
     </div>

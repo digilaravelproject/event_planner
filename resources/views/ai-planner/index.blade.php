@@ -25,6 +25,7 @@
         const currentBudget = Number(this.planner.budget || 20);
         const currentCulture = this.planner.culture || '';
         const currentLocations = this.planner.locations || [];
+        const currentSetting = this.planner.setting || '';
 
         return this.vendorPackages.filter(pkg => {
             // 1. Capacity Range Check
@@ -39,9 +40,12 @@
             );
 
             // 4. Tradition Check (If package specifies traditions, must match selected)
-            const traditionOk = !pkg.traditions.length || !pkg.traditions[0] || pkg.traditions.includes(currentCulture);
+            const traditionOk = !currentCulture || !pkg.traditions || !pkg.traditions.length || !pkg.traditions[0] || pkg.traditions.some(t => t.toLowerCase().includes(currentCulture.toLowerCase()) || currentCulture.toLowerCase().includes(t.toLowerCase()));
 
-            return capacityOk && budgetOk && locationOk && traditionOk;
+            // 5. Venue Setting Category Check (Must match clicked environment e.g. Sea-Facing, Lawn, Ballroom, Heritage)
+            const settingOk = !currentSetting || !pkg.category || pkg.category.toLowerCase().includes(currentSetting.toLowerCase()) || currentSetting.toLowerCase().includes(pkg.category.toLowerCase());
+
+            return capacityOk && budgetOk && locationOk && traditionOk && settingOk;
         });
     },
     optionsFor(code, fallback = []) {

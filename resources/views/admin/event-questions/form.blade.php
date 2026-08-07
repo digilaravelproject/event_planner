@@ -17,7 +17,7 @@
         <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{{ $errors->first() }}</div>
     @endif
 
-    <form method="POST" action="{{ $question->exists ? route('admin.event-questions.update', $question) : route('admin.event-questions.store') }}" class="admin-card space-y-7 p-6 sm:p-8">
+    <form method="POST" action="{{ $question->exists ? route('admin.event-questions.update', $question) : route('admin.event-questions.store') }}" enctype="multipart/form-data" class="admin-card space-y-7 p-6 sm:p-8">
         @csrf
         @if($question->exists) @method('PUT') @endif
 
@@ -96,11 +96,61 @@
             @endif
         </section>
 
-        <label id="options-wrap" class="block">
-            <span class="mb-2 block text-xs font-bold">Options <small class="font-normal text-slate-400">(one per line)</small></span>
-            <textarea name="options_text" id="options-text" rows="6" class="admin-control w-full px-4 py-3">{{ old('options_text', implode("\n", $question->options ?? [])) }}</textarea>
-            <span id="mapped-options-note" class="mt-2 hidden text-xs text-indigo-600">Options are synchronized from the selected vendor values.</span>
-        </label>
+        <section class="rounded-2xl border border-rose-100 bg-rose-50/40 p-6 space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-rose-100 pb-4">
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-900">Category Options & Visual Images</h2>
+                    <p class="text-xs text-slate-500">Manage Category Title and Upload Preview Image directly for Front-End Cards.</p>
+                </div>
+                <button type="button" id="add-category-option-btn" class="inline-flex items-center gap-1.5 rounded-xl bg-[#850625] px-4 py-2.5 text-xs font-extrabold text-white shadow-md hover:bg-[#6b041e] transition-all cursor-pointer">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>+ Add New Category Option</span>
+                </button>
+            </div>
+
+            <div id="category-options-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @php
+                    $currentOptions = $question->options ?? ['Sea-Facing Beachfront', 'Lawn & Poolside', 'Grand AC Ballroom', 'Heritage Resort'];
+                    $currentImages = $question->vendor_attribute_images ?? [];
+                @endphp
+                @foreach($currentOptions as $optIndex => $optionText)
+                    <div class="category-option-row rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-2xs hover:shadow-md transition-all relative flex flex-col justify-between">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <span class="text-[11px] font-extrabold text-[#850625] uppercase tracking-wider">Option #<span class="option-row-number">{{ $optIndex + 1 }}</span></span>
+                            <button type="button" class="remove-category-option-btn text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer">
+                                <i class="fa-solid fa-trash-can mr-1"></i> Delete
+                            </button>
+                        </div>
+
+                        <!-- Image Preview & Upload Box -->
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-700">Category Preview Image *</label>
+                            
+                            <div class="relative h-36 w-full rounded-xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 group flex items-center justify-center">
+                                @if(isset($currentImages[$optIndex]))
+                                    <img src="{{ str_starts_with($currentImages[$optIndex], 'http') ? $currentImages[$optIndex] : asset('storage/'.ltrim($currentImages[$optIndex], '/')) }}" class="category-preview-img w-full h-full object-cover">
+                                    <input type="hidden" name="category_options[{{ $optIndex }}][existing_image]" value="{{ $currentImages[$optIndex] }}">
+                                @else
+                                    <div class="category-preview-placeholder text-center p-3 space-y-1">
+                                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400"></i>
+                                        <span class="block text-xs font-bold text-slate-600">Click to upload image</span>
+                                        <span class="block text-[10px] text-slate-400">PNG, JPG, WEBP up to 5MB</span>
+                                    </div>
+                                @endif
+
+                                <input type="file" name="category_options[{{ $optIndex }}][image]" accept="image/*" class="category-file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            </div>
+                        </div>
+
+                        <!-- Category Title Input -->
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-slate-700">Category Title / Name *</label>
+                            <input name="category_options[{{ $optIndex }}][name]" required value="{{ $optionText }}" placeholder="e.g. Sea-Facing Beachfront" class="admin-control w-full px-4 py-2.5 text-sm font-semibold">
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
 
         <div class="flex gap-6">
             <label class="flex items-center gap-2 text-sm font-bold"><input type="checkbox" name="is_required" value="1" @checked(old('is_required', $question->is_required))> Required</label>
@@ -296,6 +346,76 @@ document.addEventListener('DOMContentLoaded', () => {
         valueCheckboxes().forEach(input => input.checked = selectAll.checked);
         syncOptions();
     });
+    // Category Options Repeater JS
+    const optionsList = document.getElementById('category-options-list');
+    const addOptionBtn = document.getElementById('add-category-option-btn');
+
+    const reindexCategoryOptions = () => {
+        if (!optionsList) return;
+        optionsList.querySelectorAll('.category-option-row').forEach((row, index) => {
+            row.querySelectorAll('[name]').forEach(input => {
+                input.name = input.name.replace(/category_options\[\d+\]/, `category_options[${index}]`);
+            });
+        });
+    };
+
+    const bindCategoryOptionRow = (row) => {
+        const removeBtn = row.querySelector('.remove-category-option-btn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', () => {
+                if (optionsList.querySelectorAll('.category-option-row').length > 1) {
+                    row.remove();
+                    reindexCategoryOptions();
+                } else {
+                    alert('At least one category option is required.');
+                }
+            });
+        }
+
+        const fileInput = row.querySelector('.category-file-input');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    let img = row.querySelector('.category-preview-img');
+                    const placeholder = row.querySelector('.category-preview-placeholder');
+                    if (placeholder) placeholder.remove();
+
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.className = 'category-preview-img w-full h-full object-cover';
+                        fileInput.parentElement.appendChild(img);
+                    }
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    };
+
+    if (optionsList) {
+        optionsList.querySelectorAll('.category-option-row').forEach(bindCategoryOptionRow);
+
+        if (addOptionBtn) {
+            addOptionBtn.addEventListener('click', () => {
+                const firstRow = optionsList.querySelector('.category-option-row');
+                if (!firstRow) return;
+
+                const clone = firstRow.cloneNode(true);
+                clone.querySelectorAll('input[type=text], input[type=file]').forEach(input => input.value = '');
+                const imgPreview = clone.querySelector('.mb-1');
+                if (imgPreview) imgPreview.remove();
+
+                optionsList.appendChild(clone);
+                bindCategoryOptionRow(clone);
+                reindexCategoryOptions();
+            });
+        }
+    }
+
     renderValues();
 });
 </script>
