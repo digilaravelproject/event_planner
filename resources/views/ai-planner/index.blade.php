@@ -32,7 +32,7 @@
         decorTheme: @js($plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
         ceremonies: ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'],
         foodType: @js($plannerOptions['food_type']['options'][0] ?? 'Pure Veg'),
-        location: @js($plannerOptions['service_area']['options'][0] ?? 'Juhu / Bandra Sea-Face'),
+        locations: [],
         subarea: 'Juhu Beach',
         timeline: @js($plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
         setting: 'Indoor AC Banquet'
@@ -113,10 +113,10 @@
                 <template x-for="(step, index) in [
                     { num: 1, name: 'Budget Allocation' },
                     { num: 2, name: 'Guest Capacity' },
-                    { num: 3, name: 'Wedding Tradition' },
-                    { num: 4, name: 'Decor & Mandap Visualizer' },
-                    { num: 5, name: 'Food & Catering' },
-                    { num: 6, name: 'Mumbai Location & Vibe' },
+                    { num: 3, name: 'Mumbai Location & Vibe' },
+                    { num: 4, name: 'Wedding Tradition' },
+                    { num: 5, name: 'Decor & Mandap Visualizer' },
+                    { num: 6, name: 'Food & Catering' },
                     { num: 7, name: 'Dates & Timeline' }
                 ]">
                     <div @click="currentStep = step.num" 
@@ -172,10 +172,10 @@
             <div class="space-y-6">
                 @include('ai-planner.steps.step-1-budget')
                 @include('ai-planner.steps.step-2-guests')
+                @include('ai-planner.steps.step-5-location')
                 @include('ai-planner.steps.step-3-type')
                 @include('ai-planner.steps.step-7-setting')
                 @include('ai-planner.steps.step-4-food')
-                @include('ai-planner.steps.step-5-location')
                 @include('ai-planner.steps.step-6-timeline')
                 @include('ai-planner.steps.step-8-summary')
             </div>
@@ -224,7 +224,7 @@
         <input type="hidden" name="answers[decoration_type]" :value="planner.decorTheme">
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
         <input type="hidden" name="answers[food_type]" :value="planner.foodType">
-        <input type="hidden" name="answers[service_area]" :value="planner.location">
+        <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
     </form>
 </div>

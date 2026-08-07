@@ -6,7 +6,7 @@
             <span>AI Plan Synthesized • Mumbai Region Edition</span>
         </div>
         <h2 class="text-3xl sm:text-5xl font-extrabold text-slate-900 font-serif-luxury">Your Custom Shaadi Breakdown</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Tailored for <span class="font-bold text-[#850625]" x-text="planner.culture"></span> at <span class="font-bold text-slate-900" x-text="planner.location"></span> with total budget <span class="font-bold text-[#850625]" x-text="planner.budget >= 100 ? (planner.budget / 100).toFixed(2) + ' Cr' : planner.budget + ' Lakh'"></span>.</p>
+        <p class="text-slate-600 text-sm sm:text-base">Tailored for <span class="font-bold text-[#850625]" x-text="planner.culture"></span> at <span class="font-bold text-slate-900" x-text="planner.locations.length ? planner.locations.join(', ') : 'Selected Locations'"></span> with total budget <span class="font-bold text-[#850625]" x-text="planner.budget >= 100 ? (planner.budget / 100).toFixed(2) + ' Cr' : planner.budget + ' Lakh'"></span>.</p>
     </div>
 
     <!-- AI Allocated Matrix Breakdown Grid -->
@@ -16,7 +16,7 @@
             <div class="text-xl font-extrabold text-[#850625] font-serif-luxury">
                 ₹<span x-text="((planner.budget * 0.35)).toFixed(1)"></span> L
             </div>
-            <p class="text-[11px] text-slate-500" x-text="planner.location + ' venue & guest rooms.'"></p>
+            <p class="text-[11px] text-slate-500" x-text="(planner.locations.length ? planner.locations.join(', ') : 'Selected') + ' venue & guest rooms.'"></p>
         </div>
 
         <div class="bg-white p-5 rounded-3xl border border-rose-100 shadow-md space-y-2">
@@ -52,7 +52,7 @@
         </div>
         <div class="flex flex-wrap gap-2 text-xs">
             <span class="bg-white px-3 py-1.5 rounded-xl border border-rose-200 font-semibold text-slate-800" x-text="'Culture: ' + planner.culture"></span>
-            <span class="bg-white px-3 py-1.5 rounded-xl border border-rose-200 font-semibold text-slate-800" x-text="'Location: ' + planner.location"></span>
+            <span class="bg-white px-3 py-1.5 rounded-xl border border-rose-200 font-semibold text-slate-800" x-text="'Location: ' + (planner.locations.length ? planner.locations.join(', ') : 'None Selected')"></span>
             <span class="bg-white px-3 py-1.5 rounded-xl border border-rose-200 font-semibold text-slate-800" x-text="'Decor: ' + planner.decorTheme"></span>
             <template x-for="c in planner.ceremonies">
                 <span class="bg-[#850625]/10 text-[#850625] px-3 py-1.5 rounded-xl font-bold" x-text="'✓ ' + c"></span>

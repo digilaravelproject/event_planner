@@ -1,7 +1,7 @@
-<!-- Step 5: Food & Catering Preferences -->
-<div x-show="currentStep === 5" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+<!-- Step 6: Food & Catering Preferences -->
+<div x-show="currentStep === 6" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
     <div class="space-y-1">
-        <span class="text-[11px] font-bold uppercase tracking-widest text-[#D4AF37]">Step 05 / 07</span>
+        <span class="text-[11px] font-bold uppercase tracking-widest text-[#D4AF37]">Step 06 / 07</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('food_type')?->question ?? 'What are your catering preferences?' }}</h2>
         <p class="text-slate-600 text-xs sm:text-sm">Food is the heart of an Indian wedding! Choose your menu style and dietary preference.</p>
     </div>

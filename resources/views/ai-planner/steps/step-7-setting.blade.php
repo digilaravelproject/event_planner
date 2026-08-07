@@ -1,9 +1,9 @@
-<!-- Step 4: Venue Ambience & Dynamic Decor Styling (With High-Resolution Visual Previews) -->
-<div x-show="currentStep === 4" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+<!-- Step 5: Venue Ambience & Dynamic Decor Styling (With High-Resolution Visual Previews) -->
+<div x-show="currentStep === 5" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
     <div class="space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
-            <span>Step 04 / 07 • Venue Ambience & Decor Visualizer</span>
+            <span>Step 05 / 07 • Venue Ambience & Decor Visualizer</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('decoration_type')?->question ?? 'Select your Venue Vibe & Mandap Decor' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Visual previews & decor themes tailored for <span class="font-bold text-[#850625]" x-text="planner.culture"></span> tradition.</p>
@@ -38,10 +38,8 @@
                 </div>
             </template>
         </div>
-    </div>
-
-    <!-- 2. Dynamic Mandap & Decor Themes (With High-Quality Visual Cards & Price Ranges) -->
-    <div class="space-y-3 pt-6 border-t border-slate-200">
+    </div>    <!-- 2. Dynamic Mandap & Decor Themes (Hidden as per request) -->
+    <div class="hidden space-y-3 pt-6 border-t border-slate-200">
         <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">2. Recommended Mandap & Stage Visual Themes</span>
             <span class="text-xs font-bold text-[#850625]" x-text="'Matching: ' + planner.culture"></span>
