@@ -87,13 +87,31 @@ class AiPlannerController extends Controller
                         'decor_type' => $pkgName,
                         'note' => is_array($note) ? implode(' ', $note) : (string) $note,
                         'images' => $imageUrls,
+                        'food_packages' => data_get($vendor->vendor_json, 'food_packages', []),
+                        'food_extras' => data_get($vendor->vendor_json, 'food_extras', []),
                     ];
                 }, $offerings);
+            })->values()->all();
+
+        $cateringVendors = \App\Modules\DynamicVendors\Models\DynamicVendor::query()
+            ->whereRaw('LOWER(status) = ?', ['active'])
+            ->get()
+            ->map(function (\App\Modules\DynamicVendors\Models\DynamicVendor $vendor): array {
+                $brandName = data_get($vendor->vendor_json, 'identity.name') ?: data_get($vendor->vendor_json, 'name') ?: $vendor->name;
+
+                return [
+                    'id' => $vendor->id,
+                    'name' => $brandName,
+                    'category' => $vendor->category,
+                    'food_packages' => data_get($vendor->vendor_json, 'food_packages', []),
+                    'food_extras' => data_get($vendor->vendor_json, 'food_extras', []),
+                ];
             })->values()->all();
 
         return view('ai-planner.index', [
             'questions' => $questions,
             'vendorPackages' => $vendorPackages,
+            'cateringVendors' => $cateringVendors,
             'plannerOptions' => $questions->map(fn (EventRequirementQuestion $question): array => [
                 'question' => $question->question,
                 'options' => $this->plannerOptions($question),
@@ -110,7 +128,7 @@ class AiPlannerController extends Controller
     public function generate(Request $request, EventPlanningService $planning)
     {
         $answers = (array) $request->input('answers', []);
-        foreach (['food_menu_items', 'ceremonies'] as $answerKey) {
+        foreach (['food_menu_items', 'ceremonies', 'selected_food_package', 'selected_food_extras'] as $answerKey) {
             $value = $answers[$answerKey] ?? null;
             if (is_string($value) && str_starts_with(trim($value), '[')) {
                 $answers[$answerKey] = json_decode($value, true) ?: [];
@@ -135,6 +153,8 @@ class AiPlannerController extends Controller
             'answers.food_menu_items.*.title' => ['required', 'string', 'max:255'],
             'answers.food_menu_items.*.category' => ['required', 'string', 'max:100'],
             'answers.food_menu_items.*.cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'answers.selected_food_package' => ['nullable', 'array'],
+            'answers.selected_food_extras' => ['nullable', 'array'],
             'answers.ceremonies' => ['nullable', 'array', 'max:50'],
             'answers.ceremonies.*' => ['string', 'max:255'],
         ]);

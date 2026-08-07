@@ -180,6 +180,35 @@ class DynamicVendorService
             ];
         }
 
+        $foodPackages = [];
+        foreach ($input['food_packages'] ?? [] as $pkg) {
+            $pkgName = trim((string) ($pkg['name'] ?? ''));
+            if ($pkgName === '') continue;
+            $items = is_array($pkg['items'] ?? null) ? $pkg['items'] : array_filter(array_map('trim', explode(',', (string) ($pkg['items'] ?? ''))));
+            $foodPackages[] = [
+                'id' => $pkg['id'] ?? \Illuminate\Support\Str::slug($pkgName, '_'),
+                'name' => $pkgName,
+                'min_price_per_plate' => isset($pkg['min_price_per_plate']) && $pkg['min_price_per_plate'] !== '' ? (float) $pkg['min_price_per_plate'] : 700,
+                'max_price_per_plate' => isset($pkg['max_price_per_plate']) && $pkg['max_price_per_plate'] !== '' ? (float) $pkg['max_price_per_plate'] : 1000,
+                'tagline' => trim((string) ($pkg['tagline'] ?? '')),
+                'items' => array_values($items),
+            ];
+        }
+
+        $foodExtras = [];
+        foreach ($input['food_extras'] ?? [] as $extra) {
+            $exName = trim((string) ($extra['name'] ?? ''));
+            if ($exName === '') continue;
+            $foodExtras[] = [
+                'id' => $extra['id'] ?? \Illuminate\Support\Str::slug($exName, '_'),
+                'name' => $exName,
+                'min_price' => isset($extra['min_price']) && $extra['min_price'] !== '' ? (float) $extra['min_price'] : 90,
+                'max_price' => isset($extra['max_price']) && $extra['max_price'] !== '' ? (float) $extra['max_price'] : 120,
+                'unit' => trim((string) ($extra['unit'] ?? 'per_plate')),
+                'icon' => trim((string) ($extra['icon'] ?? 'fa-utensils')),
+            ];
+        }
+
         return [
             'schema_version' => 1,
             'identity' => [
@@ -188,6 +217,8 @@ class DynamicVendorService
             ],
             'attributes' => $attributes,
             'offerings' => $offerings ?: data_get($existing, 'offerings', []),
+            'food_packages' => $foodPackages ?: data_get($existing, 'food_packages', []),
+            'food_extras' => $foodExtras ?: data_get($existing, 'food_extras', []),
             'media' => ['images' => array_values($images)],
             'seo' => [
                 'short_description' => $input['short_description'] ?? null,

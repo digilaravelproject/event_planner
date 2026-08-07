@@ -54,6 +54,8 @@ class DynamicVendorSeeder extends Seeder
                     'category' => $profile['category'],
                     'status' => $sequence % 11 === 0 ? 'draft' : ($sequence % 9 === 0 ? 'inactive' : 'active'),
                     'attributes' => $attributes,
+                    'food_packages' => $this->defaultFoodPackages($brandIndex),
+                    'food_extras' => $this->defaultFoodExtras(),
                     'short_description' => "$name provides professional {$profile['category']} services in $city.",
                     'description' => "Sample {$profile['category']} vendor serving events across $city and nearby areas. This record demonstrates typed, AI-ready dynamic attributes.",
                     'tags' => strtolower($profile['category']).", $city, event vendor",
@@ -334,6 +336,10 @@ SVG;
             return true;
         }
 
+        if (empty(data_get($vendor->vendor_json, 'food_packages'))) {
+            return true;
+        }
+
         $current = collect(data_get($vendor->vendor_json, 'attributes', []))->keyBy('label');
         foreach ($payload['attributes'] as $attribute) {
             $saved = $current->get($attribute['label']);
@@ -356,5 +362,89 @@ SVG;
         }
 
         return str_replace(['{city}', '{sequence}'], [$city, (string) $sequence], (string) $value);
+    }
+
+    private function defaultFoodPackages(int $brandIndex): array
+    {
+        $baseClassic = 700 + ($brandIndex * 20);
+        $baseDeluxe = 800 + ($brandIndex * 25);
+        $baseElite = 1000 + ($brandIndex * 35);
+
+        return [
+            [
+                'id' => 'classic_menu',
+                'name' => 'Classic Menu',
+                'min_price_per_plate' => $baseClassic,
+                'max_price_per_plate' => $baseClassic + 200,
+                'tagline' => 'Essential wedding feast with traditional starters & desserts',
+                'items' => [
+                    'Mineral Water Cups',
+                    'Assorted Soft Drinks',
+                    'Farsan (Any 1)',
+                    '1 Veg & 1 Spl Veg - Main Course',
+                    'Dal (Any 1)',
+                    'Rice (Any 1)',
+                    'Assorted Breads',
+                    'Salad, Papad, Pickle, Chutney',
+                    'Sweet (Any 1)',
+                    'Ice Cream (Any 1)',
+                ],
+            ],
+            [
+                'id' => 'deluxe_menu',
+                'name' => 'Deluxe Menu',
+                'min_price_per_plate' => $baseDeluxe,
+                'max_price_per_plate' => $baseDeluxe + 300,
+                'tagline' => 'Expanded menu with live Chinese counter & fresh welcome drinks',
+                'items' => [
+                    'Mineral Water Bottle',
+                    'Welcome Drink (Any 2: Fresh Juice & Mocktail)',
+                    '1 Veg & 1 Spl Veg - Starters',
+                    '1 Veg & 1 Spl Veg - Main Course',
+                    'Dal (Any 1)',
+                    'Rice (Any 2)',
+                    'Assorted Breads',
+                    'Farsan (Any 1)',
+                    'Salad, Papad, Pickle, Chutney',
+                    'Sweet (Any 1)',
+                    'Ice Cream (Any 1)',
+                    'Chinese Counter (Any 3)',
+                ],
+            ],
+            [
+                'id' => 'elite_menu',
+                'name' => 'Elite Menu',
+                'min_price_per_plate' => $baseElite,
+                'max_price_per_plate' => $baseElite + 400,
+                'tagline' => 'Luxury feast with Chat, Chinese & Dosa live counters + Kulfi Falooda',
+                'items' => [
+                    'Mineral Water Bottle',
+                    'Welcome Drink (Any 2: Fresh Juice & Mocktail)',
+                    'Starters Veg (Any 2) & 1 Spl Veg',
+                    '2 Veg & 1 Spl Veg - Main Course',
+                    'Dal (Any 1)',
+                    'Rice (Any 2)',
+                    'Assorted Breads',
+                    'Salad, Papad, Pickle, Chutney',
+                    'Sweet (Any 2) & Kulfi Falooda',
+                    'Chat Counter (Any 2)',
+                    'Chinese Counter (Any 3)',
+                    'Dosa Counter (Any 3)',
+                ],
+            ],
+        ];
+    }
+
+    private function defaultFoodExtras(): array
+    {
+        return [
+            ['id' => 'chinese_counter', 'name' => 'Chinese Counter (Any 3)', 'min_price' => 90, 'max_price' => 120, 'unit' => 'per_plate', 'icon' => 'fa-bowl-rice'],
+            ['id' => 'chat_counter', 'name' => 'Chat Counter (Any 2)', 'min_price' => 90, 'max_price' => 120, 'unit' => 'per_plate', 'icon' => 'fa-utensils'],
+            ['id' => 'dosa_counter', 'name' => 'Dosa Counter (Any 3)', 'min_price' => 90, 'max_price' => 120, 'unit' => 'per_plate', 'icon' => 'fa-plate-wheat'],
+            ['id' => 'italian_pasta', 'name' => 'Italian - Pasta (Any 2)', 'min_price' => 90, 'max_price' => 130, 'unit' => 'per_plate', 'icon' => 'fa-bowl-food'],
+            ['id' => 'italian_pizza', 'name' => 'Italian - Pizza (Any 2)', 'min_price' => 90, 'max_price' => 130, 'unit' => 'per_plate', 'icon' => 'fa-pizza-slice'],
+            ['id' => 'fruit_counter', 'name' => 'Exotic Fruit Counter', 'min_price' => 85, 'max_price' => 110, 'unit' => 'per_plate', 'icon' => 'fa-apple-whole'],
+            ['id' => 'hall_rent_extra', 'name' => 'Extra Hall Rent (Per Hour)', 'min_price' => 10000, 'max_price' => 12000, 'unit' => 'fixed', 'icon' => 'fa-clock'],
+        ];
     }
 }

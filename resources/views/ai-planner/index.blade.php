@@ -77,6 +77,145 @@
     formatMenuCost(cost) {
         return Number(cost) > 0 ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(cost)) + ' / person' : 'Cost not configured';
     },
+    cateringVendors: @js($cateringVendors),
+    getSelectedCateringVendor() {
+        if (this.planner.selectedVendorId) {
+            const found = this.cateringVendors.find(v => v.id === this.planner.selectedVendorId);
+            if (found) return found;
+        }
+        return this.cateringVendors[0] || null;
+    },
+    getFoodPackages() {
+        const vendor = this.getSelectedCateringVendor();
+        if (vendor && vendor.food_packages && vendor.food_packages.length) {
+            return vendor.food_packages;
+        }
+        return [
+            {
+                id: 'classic_menu',
+                name: 'Classic Menu',
+                min_price_per_plate: 700,
+                max_price_per_plate: 900,
+                tagline: 'Essential wedding feast with traditional starters & desserts',
+                items: [
+                    'Mineral Water Cups', 'Assorted Soft Drinks', 'Farsan (Any 1)',
+                    '1 Veg & 1 Spl Veg - Main Course', 'Dal (Any 1)', 'Rice (Any 1)',
+                    'Assorted Breads', 'Salad, Papad, Pickle, Chutney', 'Sweet (Any 1)', 'Ice Cream (Any 1)'
+                ]
+            },
+            {
+                id: 'deluxe_menu',
+                name: 'Deluxe Menu',
+                min_price_per_plate: 800,
+                max_price_per_plate: 1100,
+                tagline: 'Expanded menu with live Chinese counter & fresh welcome drinks',
+                items: [
+                    'Mineral Water Bottle', 'Welcome Drink (Any 2: Fresh Juice & Mocktail)',
+                    '1 Veg & 1 Spl Veg - Starters', '1 Veg & 1 Spl Veg - Main Course',
+                    'Dal (Any 1)', 'Rice (Any 2)', 'Assorted Breads', 'Farsan (Any 1)',
+                    'Salad, Papad, Pickle, Chutney', 'Sweet (Any 1)', 'Ice Cream (Any 1)', 'Chinese Counter (Any 3)'
+                ]
+            },
+            {
+                id: 'elite_menu',
+                name: 'Elite Menu',
+                min_price_per_plate: 1000,
+                max_price_per_plate: 1400,
+                tagline: 'Luxury feast with Chat, Chinese & Dosa live counters + Kulfi Falooda',
+                items: [
+                    'Mineral Water Bottle', 'Welcome Drink (Any 2: Fresh Juice & Mocktail)',
+                    'Starters Veg (Any 2) & 1 Spl Veg', '2 Veg & 1 Spl Veg - Main Course',
+                    'Dal (Any 1)', 'Rice (Any 2)', 'Assorted Breads',
+                    'Salad, Papad, Pickle, Chutney', 'Sweet (Any 2) & Kulfi Falooda',
+                    'Chat Counter (Any 2)', 'Chinese Counter (Any 3)', 'Dosa Counter (Any 3)'
+                ]
+            }
+        ];
+    },
+    getFoodExtras() {
+        const vendor = this.getSelectedCateringVendor();
+        if (vendor && vendor.food_extras && vendor.food_extras.length) {
+            return vendor.food_extras;
+        }
+        return [
+            { id: 'chinese_counter', name: 'Chinese Counter (Any 3)', min_price: 90, max_price: 120, unit: 'per_plate', icon: 'fa-bowl-rice' },
+            { id: 'chat_counter', name: 'Chat Counter (Any 2)', min_price: 90, max_price: 120, unit: 'per_plate', icon: 'fa-utensils' },
+            { id: 'dosa_counter', name: 'Dosa Counter (Any 3)', min_price: 90, max_price: 120, unit: 'per_plate', icon: 'fa-plate-wheat' },
+            { id: 'italian_pasta', name: 'Italian - Pasta (Any 2)', min_price: 90, max_price: 130, unit: 'per_plate', icon: 'fa-bowl-food' },
+            { id: 'italian_pizza', name: 'Italian - Pizza (Any 2)', min_price: 90, max_price: 130, unit: 'per_plate', icon: 'fa-pizza-slice' },
+            { id: 'fruit_counter', name: 'Exotic Fruit Counter', min_price: 85, max_price: 110, unit: 'per_plate', icon: 'fa-apple-whole' },
+            { id: 'hall_rent_extra', name: 'Extra Hall Rent (Per Hour)', min_price: 10000, max_price: 12000, unit: 'fixed', icon: 'fa-clock' }
+        ];
+    },
+    getSelectedPackage() {
+        const packages = this.getFoodPackages();
+        return packages.find(p => p.id === this.planner.selectedFoodPackageId) || packages[0] || null;
+    },
+    toggleFoodExtra(extraId) {
+        const idx = this.planner.selectedFoodExtras.indexOf(extraId);
+        if (idx >= 0) {
+            this.planner.selectedFoodExtras.splice(idx, 1);
+        } else {
+            this.planner.selectedFoodExtras.push(extraId);
+        }
+    },
+    isFoodExtraSelected(extraId) {
+        return this.planner.selectedFoodExtras.includes(extraId);
+    },
+    calculateCateringCostRange() {
+        const guests = Math.max(10, Number(this.planner.exactGuest || 100));
+        let minPerPlate = 0;
+        let maxPerPlate = 0;
+        let fixedMin = 0;
+        let fixedMax = 0;
+
+        if (this.planner.cateringMode === 'package') {
+            const pkg = this.getSelectedPackage();
+            if (pkg) {
+                minPerPlate += Number(pkg.min_price_per_plate || 700);
+                maxPerPlate += Number(pkg.max_price_per_plate || 900);
+            }
+        } else {
+            this.planner.foodItems.forEach(item => {
+                const cost = Number(item.cost || 0);
+                minPerPlate += cost > 0 ? cost : 100;
+                maxPerPlate += cost > 0 ? cost * 1.3 : 150;
+            });
+            if (!this.planner.foodItems.length) {
+                minPerPlate = 500;
+                maxPerPlate = 800;
+            }
+        }
+
+        const extrasList = this.getFoodExtras();
+        this.planner.selectedFoodExtras.forEach(extraId => {
+            const extra = extrasList.find(e => e.id === extraId);
+            if (extra) {
+                const minP = Number(extra.min_price || extra.price_per_plate || 90);
+                const maxP = Number(extra.max_price || extra.price_per_plate || 120);
+                if (extra.unit === 'fixed') {
+                    fixedMin += minP;
+                    fixedMax += maxP;
+                } else {
+                    minPerPlate += minP;
+                    maxPerPlate += maxP;
+                }
+            }
+        });
+
+        const totalMin = Math.round((minPerPlate * guests) + fixedMin);
+        const totalMax = Math.round((maxPerPlate * guests) + fixedMax);
+
+        return {
+            guests: guests,
+            minPerPlate: Math.round(minPerPlate),
+            maxPerPlate: Math.round(maxPerPlate),
+            totalMin: totalMin,
+            totalMax: totalMax,
+            formattedPerPlateRange: `₹${Math.round(minPerPlate).toLocaleString('en-IN')} – ₹${Math.round(maxPerPlate).toLocaleString('en-IN')}`,
+            formattedTotalRange: `₹${totalMin.toLocaleString('en-IN')} – ₹${totalMax.toLocaleString('en-IN')}`
+        };
+    },
     guestLabel(value) {
         const count = Number(String(value).replace(/\D/g, ''));
         if (count <= 50) return 'Under 50 Guests';
@@ -92,6 +231,10 @@
         culture: @js($plannerOptions['wedding_tradition']['options'][0] ?? 'Maharashtrian Lagna'),
         decorTheme: @js($plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
         ceremonies: ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'],
+        selectedVendorId: null,
+        cateringMode: 'package',
+        selectedFoodPackageId: 'deluxe_menu',
+        selectedFoodExtras: ['chinese_counter', 'chat_counter'],
         foodType: '',
         foodItems: [],
         locations: [],
@@ -120,7 +263,7 @@
             3: this.planner.locations.length > 0 ? '' : 'Select at least one preferred location to continue.',
             4: this.planner.culture ? '' : 'Select a wedding tradition to continue.',
             5: this.planner.setting ? '' : 'Select a venue vibe or mandap decor to continue.',
-            6: this.planner.foodItems.length > 0 ? '' : 'Select at least one food menu item to continue.',
+            6: (this.planner.cateringMode === 'package' && this.planner.selectedFoodPackageId) || (this.planner.cateringMode === 'custom' && this.planner.foodItems.length > 0) ? '' : 'Please select a catering package or custom menu items to continue.',
             7: this.planner.timeline ? '' : 'Select your event timeline to generate the plan.'
         };
         this.plannerError = messages[this.currentStep] || '';
