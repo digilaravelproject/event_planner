@@ -14,7 +14,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('subscription')->orderBy('created_at', 'desc')->get();
+        $users = User::with('subscription')->withCount(['eventPlans as plans_count' => fn ($query) => $query->whereNull('parent_plan_id')])->orderBy('created_at', 'desc')->get();
         return view('admin.users.index', compact('users'));
     }
 

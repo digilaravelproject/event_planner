@@ -73,4 +73,9 @@ class User extends Authenticatable
         return $this->belongsToMany(AdminNotification::class, 'notification_users', 'user_id', 'notification_id')
             ->withPivot(['is_read', 'read_at'])->withTimestamps();
     }
+
+    public function eventPlans()
+    {
+        return $this->hasMany(UserEventPlan::class);
+    }
 }

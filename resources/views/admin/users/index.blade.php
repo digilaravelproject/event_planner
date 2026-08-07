@@ -94,6 +94,12 @@
                             <!-- Actions -->
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-3.5">
+                                    <a href="{{ route('admin.users.plans.index', $user) }}" class="relative text-[#850625]/70 hover:text-[#850625] transition" title="View Generated Plans">
+                                        <svg class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h2m-5 13h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z"/></svg>
+                                        @if($user->plans_count)
+                                            <span class="absolute -right-2.5 -top-2.5 min-w-4 rounded-full bg-[#850625] px-1 text-center text-[9px] font-bold leading-4 text-white">{{ $user->plans_count }}</span>
+                                        @endif
+                                    </a>
                                     <!-- View Modal Toggle -->
                                     <button type="button" 
                                             onclick='openUserModal(@json($userData))'

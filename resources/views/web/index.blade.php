@@ -79,8 +79,8 @@
              x-data="{ 
                 selectedType: 'wedding',
                 selectedTypeLabel: '💍 Grand Wedding & Sangeet',
-                selectedGuest: '150',
-                selectedGuestLabel: '50 – 150 Guests',
+                selectedGuest: @js($guestOptions->has('150') ? '150' : (string) $guestOptions->keys()->first()),
+                selectedGuestLabel: @js($guestOptions->get('150') ?: $guestOptions->first()),
                 typeOpen: false,
                 guestOpen: false
              }"
@@ -158,22 +158,12 @@
                         class="absolute left-0 right-0 top-full mt-1.5 bg-white/95 backdrop-blur-2xl border border-[#850625]/15 rounded-2xl shadow-[0_20px_45px_-10px_rgba(133,6,37,0.18)] p-1.5 z-50 space-y-0.5"
                         style="display: none;"
                     >
-                        <button type="button" @click="selectedGuest = '50'; selectedGuestLabel = 'Under 50 Guests'; guestOpen = false" class="w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedGuest === '50' ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
-                            <span>👥 Under 50 Guests</span>
-                            <i x-show="selectedGuest === '50'" class="fa-solid fa-check text-[10px] text-[#850625]"></i>
-                        </button>
-                        <button type="button" @click="selectedGuest = '150'; selectedGuestLabel = '50 – 150 Guests'; guestOpen = false" class="w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedGuest === '150' ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
-                            <span>🏰 50 – 150 Guests</span>
-                            <i x-show="selectedGuest === '150'" class="fa-solid fa-check text-[10px] text-[#850625]"></i>
-                        </button>
-                        <button type="button" @click="selectedGuest = '300'; selectedGuestLabel = '150 – 300 Guests'; guestOpen = false" class="w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedGuest === '300' ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
-                            <span>👑 150 – 300 Guests</span>
-                            <i x-show="selectedGuest === '300'" class="fa-solid fa-check text-[10px] text-[#850625]"></i>
-                        </button>
-                        <button type="button" @click="selectedGuest = '500'; selectedGuestLabel = '300+ Guests'; guestOpen = false" class="w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedGuest === '500' ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
-                            <span>🌟 300+ Guests</span>
-                            <i x-show="selectedGuest === '500'" class="fa-solid fa-check text-[10px] text-[#850625]"></i>
-                        </button>
+                        @foreach($guestOptions as $value => $label)
+                            <button type="button" @click="selectedGuest = @js((string) $value); selectedGuestLabel = @js($label); guestOpen = false" class="w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedGuest === @js((string) $value) ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
+                                <span>👥 {{ $label }}</span>
+                                <i x-show="selectedGuest === @js((string) $value)" class="fa-solid fa-check text-[10px] text-[#850625]"></i>
+                            </button>
+                        @endforeach
                     </div>
                 </div>
 

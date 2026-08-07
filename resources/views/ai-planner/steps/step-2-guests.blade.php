@@ -5,7 +5,7 @@
             <i class="fa-solid fa-users text-[10px]"></i>
             <span>Step 02 / 07 • Hospitality & Capacity</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">How many guests will celebrate with you?</h2>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('guest_capacity')?->question ?? 'How many guests will celebrate with you?' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Select a tier preset below OR enter your exact expected guest count for precise catering & plate estimation.</p>
     </div>
 
@@ -39,12 +39,7 @@
 
     <!-- Capacity Preset Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <template x-for="option in [
-            { id: '50-150', defaultNum: 100, title: 'Intimate Gathering', range: '50 - 150 Guests', icon: 'fa-users-line', desc: 'Cozy & personalized setting for close family & core friends.' },
-            { id: '150-300', defaultNum: 200, title: 'Classic Celebration', range: '150 - 300 Guests', icon: 'fa-users-rectangle', desc: 'Most popular size! Perfect balance of energy & warmth.' },
-            { id: '300-600', defaultNum: 450, title: 'Grand Royal Affair', range: '300 - 600 Guests', icon: 'fa-crown', desc: 'High-capacity luxury setup with elaborate grand entry.' },
-            { id: '600+', defaultNum: 800, title: 'Mega Imperial Event', range: '600+ Guests', icon: 'fa-champagne-glasses', desc: 'Convention-scale extravaganza with multi-buffet spreads.' }
-        ]">
+        <template x-for="option in optionsFor('guest_capacity', ['50', '150', '300', '600']).map((value, index) => ({ id: String(value), defaultNum: Number(String(value).replace(/\D/g, '')) || 150, title: ['Intimate Gathering', 'Classic Celebration', 'Grand Royal Affair', 'Mega Imperial Event'][index] || 'Wedding Celebration', range: guestLabel(value), icon: ['fa-users-line', 'fa-users-rectangle', 'fa-crown', 'fa-champagne-glasses'][index] || 'fa-users', desc: 'Guest capacity managed from the event requirement questions.' }))">
             <div @click="planner.guestCount = option.id; planner.exactGuest = option.defaultNum" 
                 :class="planner.guestCount === option.id ? 'border-[#850625] bg-rose-50/50 shadow-xl ring-2 ring-[#850625]/20 scale-[1.01]' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-md'"
                 class="p-6 rounded-3xl border-2 transition-all cursor-pointer space-y-3 relative group">

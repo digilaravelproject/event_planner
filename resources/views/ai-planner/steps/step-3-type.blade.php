@@ -5,13 +5,13 @@
             <i class="fa-solid fa-om text-[10px]"></i>
             <span>Step 03 / 07 • Cultural Tradition & Vibe</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">What type of wedding celebration is this?</h2>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('wedding_tradition')?->question ?? 'What type of wedding celebration is this?' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Selecting your tradition customizes ceremonial requirements, decor color palettes, and mandap/stage styling.</p>
     </div>
 
     <!-- Micro-Level Tradition Cards Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <template x-for="culture in [
+        <template x-for="culture in optionsFor('wedding_tradition', [
             { id: 'Maharashtrian Lagna', name: 'Maharashtrian Lagna', icon: '🏵️', tag: 'Traditional Peshwai & Shehnai Vibe', defaultDecor: 'Traditional Marigold & Brass' },
             { id: 'Muslim Nikah & Walima', name: 'Muslim Nikah & Walima', icon: '🌙', tag: 'Royal Mogul & Emerald Green Glow', defaultDecor: 'Arabian Night Floral Glow' },
             { id: 'North Indian Punjabi', name: 'North Indian / Punjabi', icon: '✨', tag: 'High-Energy Dhol & Grand Mandap', defaultDecor: 'Royal Red & Gold Canopy' },
@@ -20,7 +20,7 @@
             { id: 'Marwari / Rajputana Royal', name: 'Marwari / Rajputana Royal', icon: '👑', tag: 'Palace Royal Entrance & Sheesh Mahal Decor', defaultDecor: 'Royal Palace Chandelier Elegance' },
             { id: 'Catholic / Christian Wedding', name: 'Catholic / Christian Nuptials', icon: '🕊️', tag: 'Graceful White Floral & Violin Aisle', defaultDecor: 'Classic White & Pastel Floral Canopy' },
             { id: 'Fusion / Modern Minimalist', name: 'Fusion / Modern Minimalist', icon: '💍', tag: 'Contemporary Aesthetic & Subtle Lights', defaultDecor: 'Modern Pastel & Crystal Glow' }
-        ]">
+        ]).map(value => typeof value === 'object' ? value : ({ id: value, name: value, icon: '💍', tag: 'A celebration tailored to your selected tradition.', defaultDecor: planner.decorTheme }))">
             <div @click="
                 planner.culture = culture.id; 
                 planner.decorTheme = culture.defaultDecor;

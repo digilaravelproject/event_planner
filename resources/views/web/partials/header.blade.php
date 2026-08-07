@@ -51,7 +51,7 @@
     <!-- Right Side CTA / Auth Actions with Animated Buttons -->
     <div class="hidden lg:flex items-center space-x-3">
         @auth('web')
-            <a href="{{ route('user.profile') }}" class="px-5 py-2.5 rounded-full text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex items-center gap-2">
+            <a href="{{ route('user.dashboard') }}" class="px-5 py-2.5 rounded-full text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex items-center gap-2">
                 <i class="fa-solid fa-gauge text-xs"></i>
                 <span>Dashboard</span>
             </a>
@@ -115,7 +115,7 @@
         
         <div class="pt-4 border-t border-rose-100/80 flex flex-col space-y-2.5">
             @auth('web')
-                <a @click="mobileMenuOpen = false" href="{{ route('user.profile') }}" class="w-full text-center px-5 py-3 rounded-full text-white bg-[#850625] text-xs font-bold shadow-md flex items-center justify-center gap-2">
+                <a @click="mobileMenuOpen = false" href="{{ route('user.dashboard') }}" class="w-full text-center px-5 py-3 rounded-full text-white bg-[#850625] text-xs font-bold shadow-md flex items-center justify-center gap-2">
                     <i class="fa-solid fa-gauge"></i>
                     <span>Dashboard</span>
                 </a>

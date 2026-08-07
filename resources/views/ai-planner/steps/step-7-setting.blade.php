@@ -5,7 +5,7 @@
             <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
             <span>Step 04 / 07 • Venue Ambience & Decor Visualizer</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">Select your Venue Vibe & Mandap Decor</h2>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('decoration_type')?->question ?? 'Select your Venue Vibe & Mandap Decor' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Visual previews & decor themes tailored for <span class="font-bold text-[#850625]" x-text="planner.culture"></span> tradition.</p>
     </div>
 
@@ -48,14 +48,14 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <template x-for="decor in [
+            <template x-for="decor in optionsFor('decoration_type', [
                 { id: 'Traditional Marigold & Brass', title: 'Peshwai Marigold & Brass Mandap', range: '₹2.5 Lakh – ₹4.5 Lakh', img: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=600&q=80', desc: 'Fresh yellow-orange marigold drapes, brass samai lamps & toran entrance.' },
                 { id: 'Arabian Night Floral Glow', title: 'Arabian Emerald & Crystal Glow', range: '₹3.5 Lakh – ₹6.0 Lakh', img: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80', desc: 'Deep green velvet backdrops, fairy lights, crystal chandeliers & rose mandap.' },
                 { id: 'Royal Red & Gold Canopy', title: 'Royal Red & Gold Palace Mandap', range: '₹4.0 Lakh – ₹7.5 Lakh', img: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=600&q=80', desc: 'Carved pillar structures, red velvet drapes, grand arch & royal seating.' },
                 { id: 'Temple Lotus & White Mogra', title: 'Temple Lotus & Mogra Fragrance', range: '₹2.0 Lakh – ₹4.0 Lakh', img: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=600&q=80', desc: 'White jasmine garlands, lotus urlis, banana leaf backdrop & brass lamps.' },
                 { id: 'Classic White & Pastel Floral Canopy', title: 'Pastel Rose & Crystal Sunset Canopy', range: '₹3.0 Lakh – ₹5.5 Lakh', img: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=600&q=80', desc: 'Blush pink & white orchid ceiling drops, glass aisle & fairy light tunnel.' },
                 { id: 'Vibrant Mirrors & Bandhani Theme', title: 'Vibrant Mirror Work & Folk Vibe', range: '₹2.5 Lakh – ₹4.5 Lakh', img: 'https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&w=600&q=80', desc: 'Colorful umbrella installations, mirror work backdrops & festive seating.' }
-            ]">
+            ]).map((value, index) => typeof value === 'object' ? value : ({ id: value, title: value, range: 'Dynamic vendor quote', img: imageFor('decoration_type', index, ['https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=600&q=80', 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=600&q=80'][index % 4]), desc: 'Matched against decorator images and active vendor attributes.' }))">
                 <div @click="planner.decorTheme = decor.id"
                     :class="planner.decorTheme === decor.id ? 'border-[#850625] shadow-xl ring-2 ring-[#850625]/30 scale-[1.01]' : 'border-slate-200 hover:border-rose-300 hover:shadow-md'"
                     class="bg-white rounded-3xl border-2 overflow-hidden transition-all cursor-pointer group flex flex-col justify-between">

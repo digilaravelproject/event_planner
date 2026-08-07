@@ -5,7 +5,7 @@
             <i class="fa-solid fa-calculator text-[10px]"></i>
             <span>Step 01 / 07 • Financial Comfort</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">What is your total estimated wedding budget?</h2>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('wedding_budget')?->question ?? 'What is your total estimated wedding budget?' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Drag the slider, select a preset, or type your exact budget manually in Lakhs.</p>
     </div>
 
@@ -48,7 +48,7 @@
 
         <!-- Quick Select Pills with Micro-feedback badges -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-            <template x-for="b in [10, 25, 50, 100]">
+            <template x-for="b in optionsFor('wedding_budget', ['10', '25', '50', '100']).map(Number)">
                 <button type="button" @click="planner.budget = b" 
                     :class="planner.budget == b ? 'bg-[#850625] text-white shadow-lg shadow-[#850625]/25 ring-2 ring-[#850625]/40 scale-[1.02]' : 'bg-slate-50 text-slate-700 hover:bg-rose-50 border border-slate-200'" 
                     class="py-3 px-4 rounded-2xl text-xs font-bold transition-all text-center flex flex-col items-center justify-center gap-1 cursor-pointer">

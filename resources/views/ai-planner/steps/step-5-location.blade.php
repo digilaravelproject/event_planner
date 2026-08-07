@@ -5,18 +5,18 @@
             <i class="fa-solid fa-location-dot text-[10px]"></i>
             <span>Step 06 / 07 • Mumbai Region & Micro Locations</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">Where in Mumbai would you like to host?</h2>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('service_area')?->question ?? 'Where would you like to host?' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Currently servicing all premier zones across Greater Mumbai & Metropolitan Region.</p>
     </div>
 
     <!-- Mumbai Specific Location Cards Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <template x-for="loc in [
+        <template x-for="loc in optionsFor('service_area', [
             { id: 'Juhu / Bandra Sea-Face', title: 'Juhu & Bandra Sea-Face', icon: '🌊', desc: '5-Star Beachside Lawns & Luxury Ocean Views', tag: 'Luxury Ocean Vibe' },
             { id: 'South Mumbai Heritage', title: 'South Mumbai Heritage', icon: '🏛️', tag: 'Colonial Elegance', desc: 'Colaba, Marine Drive & Worli Royal Heritage Hotels' },
             { id: 'Suburban AC Banquets', title: 'Suburban AC Banquets', icon: '🏰', tag: 'High-Capacity Comfort', desc: 'Andheri, Malad & Goregaon Grand AC Ballrooms' },
             { id: 'Thane & Navi Mumbai', title: 'Thane & Navi Mumbai Lawns', icon: '🌿', tag: 'Spacious Open Air', desc: 'Lush Green Resort Lawns & Open Sky Amphitheatres' }
-        ]">
+        ]).map(value => typeof value === 'object' ? value : ({ id: value, title: value, icon: '📍', tag: 'Available Area', desc: 'Matched with active vendors serving this location.' }))">
             <div @click="planner.location = loc.id"
                 :class="planner.location === loc.id ? 'border-[#850625] bg-rose-50/60 shadow-xl ring-2 ring-[#850625]/20 scale-[1.01]' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-md'"
                 class="p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 relative group">

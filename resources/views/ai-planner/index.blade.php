@@ -7,17 +7,34 @@
     currentStep: 1,
     totalSteps: 7,
     isCalculating: false,
+    managedOptions: @js($plannerOptions),
+    optionsFor(code, fallback = []) {
+        const options = this.managedOptions[code]?.options || [];
+        return options.length ? options : fallback;
+    },
+    imageFor(code, index, fallback) {
+        const images = this.managedOptions[code]?.images || [];
+        return images.length ? images[index % images.length] : fallback;
+    },
+    guestLabel(value) {
+        const count = Number(String(value).replace(/\D/g, ''));
+        if (count <= 50) return 'Under 50 Guests';
+        if (count <= 150) return '50 - 150 Guests';
+        if (count <= 300) return '150 - 300 Guests';
+        if (count <= 600) return '300 - 600 Guests';
+        return '600+ Guests';
+    },
     planner: {
         budget: {{ request('guests') ? 25 : 20 }},
-        guestCount: '150-300',
-        exactGuest: 200,
-        culture: 'Maharashtrian Lagna',
-        decorTheme: 'Traditional Marigold & Brass',
+        guestCount: @js((string) $initialGuestCount),
+        exactGuest: {{ $initialGuestCount }},
+        culture: @js($plannerOptions['wedding_tradition']['options'][0] ?? 'Maharashtrian Lagna'),
+        decorTheme: @js($plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
         ceremonies: ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'],
-        foodType: 'Pure Veg',
-        location: 'Juhu / Bandra Sea-Face',
+        foodType: @js($plannerOptions['food_type']['options'][0] ?? 'Pure Veg'),
+        location: @js($plannerOptions['service_area']['options'][0] ?? 'Juhu / Bandra Sea-Face'),
         subarea: 'Juhu Beach',
-        timeline: '3 - 6 Months',
+        timeline: @js($plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
         setting: 'Indoor AC Banquet'
     },
     getCeremonies() {
@@ -45,10 +62,7 @@
     },
     generatePlan() {
         this.isCalculating = true;
-        setTimeout(() => {
-            this.isCalculating = false;
-            this.currentStep = 8;
-        }, 1200);
+        this.$nextTick(() => this.$refs.planForm.submit());
     }
 }">
 
@@ -198,5 +212,20 @@
         </div>
 
     </div>
+
+    <form x-ref="planForm" method="POST" action="{{ route('ai-planner.generate') }}" class="hidden">
+        @csrf
+        <input type="hidden" name="category" value="wedding">
+        <input type="hidden" name="guest_count" :value="planner.exactGuest">
+        <input type="hidden" name="answers[wedding_budget]" :value="planner.budget">
+        <input type="hidden" name="answers[guest_capacity]" :value="planner.exactGuest">
+        <input type="hidden" name="answers[wedding_tradition]" :value="planner.culture">
+        <input type="hidden" name="answers[ceremonies]" :value="JSON.stringify(planner.ceremonies)">
+        <input type="hidden" name="answers[decoration_type]" :value="planner.decorTheme">
+        <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
+        <input type="hidden" name="answers[food_type]" :value="planner.foodType">
+        <input type="hidden" name="answers[service_area]" :value="planner.location">
+        <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
+    </form>
 </div>
 @endsection

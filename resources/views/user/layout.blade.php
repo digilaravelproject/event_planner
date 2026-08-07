@@ -43,6 +43,20 @@
                 @php
                     $route = Route::currentRouteName();
                 @endphp
+
+                <a href="{{ route('user.dashboard') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
+                    {{ $route === 'user.dashboard' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h8V3H3v10Zm10 8h8V11h-8v10ZM3 21h8v-6H3v6Zm10-12h8V3h-8v6Z"/></svg>
+                    Dashboard
+                </a>
+
+                <a href="{{ route('user.plans.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
+                    {{ str_starts_with((string) $route, 'user.plans.') ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h2m-5 13h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z"/></svg>
+                    My Event Plans
+                </a>
                 
                 <a href="{{ route('user.subscription') }}" 
                     class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150

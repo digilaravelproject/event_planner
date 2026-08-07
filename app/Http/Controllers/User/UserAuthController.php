@@ -16,7 +16,7 @@ class UserAuthController extends Controller
     public function showRegister()
     {
         if (Auth::guard('web')->check()) {
-            return redirect()->route('user.profile');
+            return redirect()->route('user.dashboard');
         }
         return view('user.auth.register');
     }
@@ -44,6 +44,10 @@ class UserAuthController extends Controller
 
         Auth::guard('web')->login($user);
 
+        if ($request->session()->has('pending_event_plan')) {
+            return redirect()->route('ai-planner.resume');
+        }
+
         return redirect()->route('user.subscription')
             ->with('success', 'Account created successfully! Please select a subscription plan to continue.');
     }
@@ -54,7 +58,7 @@ class UserAuthController extends Controller
     public function showLogin()
     {
         if (Auth::guard('web')->check()) {
-            return redirect()->route('user.profile');
+            return redirect()->route('user.dashboard');
         }
         return view('user.auth.login');
     }
@@ -84,8 +88,12 @@ class UserAuthController extends Controller
 
             $request->session()->regenerate();
 
+            if ($request->session()->has('pending_event_plan')) {
+                return redirect()->route('ai-planner.resume');
+            }
+
             if ($user->subscription_id && (!$user->subscription_ends_at || $user->subscription_ends_at->isFuture())) {
-                return redirect()->route('user.profile')
+                return redirect()->route('user.dashboard')
                     ->with('success', 'Welcome back!');
             }
 

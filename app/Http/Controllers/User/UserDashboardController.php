@@ -11,6 +11,19 @@ use Illuminate\Validation\Rules\Password;
 
 class UserDashboardController extends Controller
 {
+    public function dashboard()
+    {
+        $user = Auth::guard('web')->user();
+        $recentPlans = $user->eventPlans()->whereNull('parent_plan_id')->withCount('suggestions')->latest()->take(5)->get();
+        $statistics = [
+            'plans' => $user->eventPlans()->whereNull('parent_plan_id')->count(),
+            'alternatives' => $user->eventPlans()->whereNotNull('parent_plan_id')->count(),
+            'latest_budget' => (float) ($recentPlans->first()?->total_cost ?? 0),
+        ];
+
+        return view('user.dashboard', compact('user', 'recentPlans', 'statistics'));
+    }
+
     public function profile()
     {
         $user = Auth::guard('web')->user();

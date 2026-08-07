@@ -170,8 +170,10 @@ class AdminModulesTest extends TestCase
         $this->seed(EventRequirementQuestionSeeder::class);
 
         $this->assertDatabaseMissing('event_requirement_questions', ['question_code' => 'legacy']);
-        $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'vendor_area', 'vendor_attribute_key' => 'area']);
-        $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'vendor_parking', 'question_type' => 'radio']);
+        $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'wedding_budget', 'question_type' => 'number']);
+        $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'guest_capacity', 'is_required' => true]);
+        $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'decoration_type', 'vendor_attribute_key' => 'decoration_type']);
+        $this->assertDatabaseCount('event_requirement_questions', 7);
     }
 
     public function test_notification_creation_syncs_recipients_using_the_correct_pivot_keys(): void

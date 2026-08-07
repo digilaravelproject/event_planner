@@ -12,9 +12,11 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\VendorAnalyticsController;
+use App\Http\Controllers\Admin\UserPlanController;
 use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserSubscriptionController;
 use App\Http\Controllers\User\UserDashboardController;
+use App\Http\Controllers\AiPlannerController;
 
 // Redirect /admin to /admin/dashboard
 Route::redirect('/admin', '/admin/dashboard');
@@ -63,6 +65,9 @@ Route::prefix('admin')->group(function () {
 
         // User Management CRUD
         Route::post('/users/{id}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+        Route::get('/users/{user}/plans', [UserPlanController::class, 'index'])->name('admin.users.plans.index');
+        Route::get('/user-plans/{plan}', [UserPlanController::class, 'show'])->name('admin.users.plans.show');
+        Route::get('/user-plans/{plan}/download', [UserPlanController::class, 'download'])->name('admin.users.plans.download');
         Route::resource('/users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show', 'store'])->names('admin.users');
     });
 });
@@ -94,6 +99,11 @@ Route::prefix('user')->group(function () {
     // Authenticated User Routes
     Route::middleware('auth:web')->group(function () {
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('user.logout');
+        Route::get('/dashboard', [UserDashboardController::class, 'dashboard'])->name('user.dashboard');
+        Route::get('/plans', [AiPlannerController::class, 'history'])->name('user.plans.index');
+        Route::get('/plans/{plan}', [AiPlannerController::class, 'show'])->name('user.plans.show');
+        Route::get('/plans/{plan}/download', [AiPlannerController::class, 'download'])->name('user.plans.download');
+        Route::get('/planner/resume', [AiPlannerController::class, 'resume'])->name('ai-planner.resume');
 
         // Subscription tier choosing & payment verification
         Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('user.subscription');
@@ -108,19 +118,34 @@ Route::prefix('user')->group(function () {
     });
 });
 
-use App\Http\Controllers\AiPlannerController;
-
 Route::get('/', function () {
     $content = fn (string $type) => \Illuminate\Support\Facades\Schema::hasTable('landing_contents')
         ? \App\Models\LandingContent::where('type', $type)->published()->get()
         : collect();
 
+    $guestQuestion = \Illuminate\Support\Facades\Schema::hasTable('event_requirement_questions')
+        ? \App\Models\EventRequirementQuestion::enabled()->where('question_code', 'guest_capacity')->first()
+        : null;
+    $guestOptions = collect($guestQuestion?->options ?: ['50', '150', '300', '600'])
+        ->mapWithKeys(function ($value): array {
+            $number = (int) preg_replace('/\D+/', '', (string) $value);
+            $label = match (true) {
+                $number <= 50 => 'Under 50 Guests',
+                $number <= 150 => '50 – 150 Guests',
+                $number <= 300 => '150 – 300 Guests',
+                $number <= 600 => '300 – 600 Guests',
+                default => '600+ Guests',
+            };
+            return [(string) $number => $label];
+        })->filter(fn ($label, $value) => (int) $value > 0);
+
     return view('web.index', [
         'howItWorks' => $content('how-it-works'),
         'comparisons' => $content('comparisons'),
         'testimonials' => $content('testimonials'),
+        'guestOptions' => $guestOptions,
     ]);
 })->name('home');
 
 Route::get('/ai-planner', [AiPlannerController::class, 'index'])->name('ai-planner');
-
+Route::post('/ai-planner/generate', [AiPlannerController::class, 'generate'])->name('ai-planner.generate');
