@@ -8,6 +8,42 @@
     totalSteps: 7,
     isCalculating: false,
     managedOptions: @js($plannerOptions),
+    vendorPackages: @js($vendorPackages ?? []),
+    activeModalPackage: null,
+    isModalOpen: false,
+    openPackageModal(pkg) {
+        this.activeModalPackage = pkg;
+        this.isModalOpen = true;
+    },
+    closePackageModal() {
+        this.isModalOpen = false;
+        this.activeModalPackage = null;
+    },
+    getMatchingVendorPackages() {
+        if (!this.vendorPackages || !this.vendorPackages.length) return [];
+        const currentGuest = Number(this.planner.exactGuest || 150);
+        const currentBudget = Number(this.planner.budget || 20);
+        const currentCulture = this.planner.culture || '';
+        const currentLocations = this.planner.locations || [];
+
+        return this.vendorPackages.filter(pkg => {
+            // 1. Capacity Range Check
+            const capacityOk = currentGuest >= pkg.min_capacity && currentGuest <= pkg.max_capacity;
+            
+            // 2. Budget Range Check
+            const budgetOk = currentBudget >= pkg.min_budget && currentBudget <= pkg.max_budget;
+            
+            // 3. Location Check (If user selected locations, must match at least one)
+            const locationOk = !currentLocations.length || currentLocations.some(loc => 
+                pkg.locations.includes(loc) || pkg.locations.includes('All Mumbai')
+            );
+
+            // 4. Tradition Check (If package specifies traditions, must match selected)
+            const traditionOk = !pkg.traditions.length || !pkg.traditions[0] || pkg.traditions.includes(currentCulture);
+
+            return capacityOk && budgetOk && locationOk && traditionOk;
+        });
+    },
     optionsFor(code, fallback = []) {
         const options = this.managedOptions[code]?.options || [];
         return options.length ? options : fallback;
@@ -227,5 +263,100 @@
         <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
     </form>
+
+    <!-- Package Details Interactive Popup Modal -->
+    <div x-show="isModalOpen" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+        style="display: none;">
+        
+        <div @click.away="closePackageModal()" 
+            class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-rose-100 relative space-y-0 text-slate-900">
+            
+            <!-- Modal Header Image & Close Button -->
+            <div class="relative h-64 sm:h-72 w-full bg-slate-900 overflow-hidden">
+                <template x-if="activeModalPackage && activeModalPackage.images && activeModalPackage.images.length">
+                    <img :src="activeModalPackage.images[0]" :alt="activeModalPackage.name" class="w-full h-full object-cover">
+                </template>
+                <template x-if="!activeModalPackage || !activeModalPackage.images || !activeModalPackage.images.length">
+                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-r from-[#850625] to-rose-900 text-white">
+                        <i class="fa-solid fa-gem text-5xl opacity-40"></i>
+                    </div>
+                </template>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent"></div>
+
+                <button type="button" @click="closePackageModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white/40 transition-all cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <div class="absolute bottom-4 left-5 right-5 space-y-1 text-white">
+                    <span class="text-[10px] font-bold text-[#D4AF37] uppercase tracking-widest bg-black/40 px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30" x-text="activeModalPackage?.category || 'Vendor Package'"></span>
+                    <h3 class="text-xl sm:text-2xl font-extrabold font-serif-luxury drop-shadow-md" x-text="activeModalPackage?.name"></h3>
+                </div>
+            </div>
+
+            <!-- Modal Content & Attributes Matrix -->
+            <div class="p-6 space-y-5">
+                <!-- Capacity & Budget Highlights -->
+                <div class="grid grid-cols-2 gap-3 bg-rose-50/80 p-4 rounded-2xl border border-rose-100">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Guest Capacity Range</span>
+                        <div class="text-sm font-extrabold text-[#850625] flex items-center gap-1.5">
+                            <i class="fa-solid fa-users text-xs"></i>
+                            <span x-text="(activeModalPackage?.min_capacity || 50) + ' – ' + (activeModalPackage?.max_capacity || 1000) + ' Guests'"></span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Package Budget Range</span>
+                        <div class="text-sm font-extrabold text-[#850625] flex items-center gap-1.5">
+                            <i class="fa-solid fa-indian-rupee-sign text-xs"></i>
+                            <span x-text="'₹' + (activeModalPackage?.min_budget || 2) + 'L – ₹' + (activeModalPackage?.max_budget || 50) + ' Lakhs'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Locations & Supported Traditions Badges -->
+                <div class="space-y-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600 block">Service Locations & Coverage</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <template x-for="loc in (activeModalPackage?.locations || ['All Mumbai'])">
+                            <span class="bg-white border border-slate-200 text-slate-800 text-[11px] font-bold px-3 py-1 rounded-xl shadow-2xs flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-[10px] text-[#850625]"></i>
+                                <span x-text="loc"></span>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Description & Timing Provisions -->
+                <div class="space-y-1.5">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-600 block">Package Details & Provisions</span>
+                    <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-2xl border border-slate-100" x-text="activeModalPackage?.note || 'Custom tailored wedding package.'"></p>
+                </div>
+
+                <!-- Action Button -->
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <button type="button" @click="closePackageModal()" class="px-5 py-2.5 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all">Close</button>
+                    
+                    <button type="button" 
+                        @click="
+                            planner.decorTheme = activeModalPackage.decor_type;
+                            closePackageModal();
+                        "
+                        class="px-6 py-2.5 rounded-full bg-[#850625] text-white text-xs font-extrabold hover:bg-[#6b041e] shadow-md transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Select This Theme Package</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>
 @endsection

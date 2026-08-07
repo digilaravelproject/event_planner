@@ -44,7 +44,7 @@
         @if($method !== 'POST') @method($method) @endif
 
         <div class="admin-card flex gap-2 overflow-x-auto p-2" role="tablist">
-            @foreach(['details' => 'Vendor Details', 'attributes' => 'Dynamic Attributes', 'media' => 'Images', 'seo' => 'SEO'] as $tab => $label)
+            @foreach(['details' => 'Vendor Details', 'attributes' => 'Dynamic Attributes', 'offerings' => 'Decor & Hall Offerings', 'media' => 'Images', 'seo' => 'SEO'] as $tab => $label)
                 <button type="button" data-tab-button="{{ $tab }}" class="tab-button whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-bold {{ $loop->first ? 'bg-[#3950a2] text-white' : 'text-slate-600 hover:bg-slate-50' }}">{{ $label }}</button>
             @endforeach
         </div>
@@ -77,6 +77,107 @@
                 @endforeach
             </div>
             <div id="empty-attributes" class="hidden rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">No attributes yet. Add one whenever you are ready.</div>
+        </section>
+
+        <section data-tab-panel="offerings" class="admin-card tab-panel hidden p-6">
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-900">Decor & Hall Offerings</h2>
+                    <p class="text-sm text-slate-500">Add multiple custom halls, mandap decor themes & packages for AI Planner matching.</p>
+                </div>
+                <button type="button" id="add-offering-button" class="inline-flex items-center gap-2 rounded-xl bg-[#3950a2] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#2b3c7b] transition-all cursor-pointer">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>+ Add Package / Offering</span>
+                </button>
+            </div>
+
+            @php
+                $existingOfferings = data_get($document, 'offerings', []);
+                if (empty($existingOfferings) && !empty(data_get($document, 'offering'))) {
+                    $existingOfferings = [data_get($document, 'offering')];
+                }
+                if (empty($existingOfferings)) {
+                    $existingOfferings = [[
+                        'name' => '',
+                        'category' => 'Sea-Facing Beachfront',
+                        'min_capacity' => 50,
+                        'max_capacity' => 1000,
+                        'min_budget' => 5,
+                        'max_budget' => 50,
+                        'locations' => [],
+                        'traditions' => [],
+                        'notes' => ''
+                    ]];
+                }
+            @endphp
+
+            <div id="offerings-container" class="space-y-6">
+                @foreach($existingOfferings as $offIndex => $offering)
+                    <div class="offering-card rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-4 relative">
+                        <div class="flex items-center justify-between border-b border-slate-200/80 pb-3">
+                            <span class="text-xs font-extrabold text-[#3950a2] uppercase tracking-wider">Package / Hall Offering #<span class="offering-number">{{ $offIndex + 1 }}</span></span>
+                            <button type="button" class="remove-offering-btn text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer">
+                                Remove Package
+                            </button>
+                        </div>
+                        
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <label class="block">
+                                <span class="mb-1 block text-xs font-bold text-slate-700">Package / Hall Name *</span>
+                                <input name="offerings[{{ $offIndex }}][name]" placeholder="e.g. Royal Palace Mandap & Grand AC Hall" value="{{ old("offerings.{$offIndex}.name", data_get($offering, 'name')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-[#3950a2] focus:outline-none">
+                            </label>
+
+                            <label class="block">
+                                <span class="mb-1 block text-xs font-bold text-slate-700">Venue Setting Category *</span>
+                                <select name="offerings[{{ $offIndex }}][category]" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
+                                    @foreach($venueCategories as $catOption)
+                                        <option value="{{ $catOption }}" @selected(old("offerings.{$offIndex}.category", data_get($offering, 'category')) === $catOption)>{{ $catOption }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="grid gap-4 md:grid-cols-4">
+                            <label class="block">
+                                <span class="mb-1 block text-xs font-bold text-slate-700">Min Capacity (Guests)</span>
+                                <input type="number" name="offerings[{{ $offIndex }}][min_capacity]" placeholder="50" value="{{ old("offerings.{$offIndex}.min_capacity", data_get($offering, 'min_capacity', 50)) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
+                            </label>
+
+                            <label class="block">
+                                <span class="mb-1 block text-xs font-bold text-slate-700">Max Capacity (Guests)</span>
+                                <input type="number" name="offerings[{{ $offIndex }}][max_capacity]" placeholder="1000" value="{{ old("offerings.{$offIndex}.max_capacity", data_get($offering, 'max_capacity', 1000)) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
+                            </label>
+
+                            <label class="block">
+                                <span class="mb-1 block text-xs font-bold text-slate-700">Min Budget Range (Lakhs)</span>
+                                <input type="number" step="0.5" name="offerings[{{ $offIndex }}][min_budget]" placeholder="2.5" value="{{ old("offerings.{$offIndex}.min_budget", data_get($offering, 'min_budget', 5)) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
+                            </label>
+
+                            <label class="block">
+                                <span class="mb-1 block text-xs font-bold text-slate-700">Max Budget Range (Lakhs)</span>
+                                <input type="number" step="0.5" name="offerings[{{ $offIndex }}][max_budget]" placeholder="25.0" value="{{ old("offerings.{$offIndex}.max_budget", data_get($offering, 'max_budget', 50)) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
+                            </label>
+                        </div>
+
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <label class="block">
+                                <span class="mb-1 block text-xs font-bold text-slate-700">Supported Service Locations (Comma separated)</span>
+                                <input name="offerings[{{ $offIndex }}][locations]" placeholder="Juhu / Bandra Sea-Face, South Mumbai Heritage, Suburban AC Banquets" value="{{ old("offerings.{$offIndex}.locations", is_array(data_get($offering, 'locations')) ? implode(', ', data_get($offering, 'locations')) : data_get($offering, 'locations')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
+                            </label>
+
+                            <label class="block">
+                                <span class="mb-1 block text-xs font-bold text-slate-700">Supported Traditions (Comma separated)</span>
+                                <input name="offerings[{{ $offIndex }}][traditions]" placeholder="Muslim Nikah & Walima, Maharashtrian Lagna, North Indian Punjabi" value="{{ old("offerings.{$offIndex}.traditions", is_array(data_get($offering, 'traditions')) ? implode(', ', data_get($offering, 'traditions')) : data_get($offering, 'traditions')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
+                            </label>
+                        </div>
+
+                        <label class="block">
+                            <span class="mb-1 block text-xs font-bold text-slate-700">Timing Provisions & Extra Notes</span>
+                            <textarea name="offerings[{{ $offIndex }}][notes]" rows="2" placeholder="Mention hall timing slots (e.g. 8 AM - 12 AM), extra charges, mandap setup inclusions..." class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">{{ old("offerings.{$offIndex}.notes", data_get($offering, 'notes')) }}</textarea>
+                        </label>
+                    </div>
+                @endforeach
+            </div>
         </section>
 
         <section data-tab-panel="media" class="admin-card tab-panel hidden p-6">
@@ -223,6 +324,67 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.dataset.tabPanel !== button.dataset.tabButton));
         document.querySelectorAll('.tab-button').forEach(item => { const active = item === button; item.classList.toggle('bg-[#3950a2]', active); item.classList.toggle('text-white', active); item.classList.toggle('text-slate-600', !active); });
     }));
+
+    // Offerings Repeater JS Logic
+    const offeringsContainer = document.getElementById('offerings-container');
+    const addOfferingBtn = document.getElementById('add-offering-button');
+
+    const reindexOfferings = () => {
+        if (!offeringsContainer) return;
+        const cards = offeringsContainer.querySelectorAll('.offering-card');
+        cards.forEach((card, index) => {
+            const numberSpan = card.querySelector('.offering-number');
+            if (numberSpan) numberSpan.textContent = index + 1;
+
+            card.querySelectorAll('[name]').forEach(input => {
+                input.name = input.name.replace(/offerings\[\d+\]/, `offerings[${index}]`);
+            });
+        });
+    };
+
+    const bindOfferingEvents = (card) => {
+        const removeBtn = card.querySelector('.remove-offering-btn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', () => {
+                if (offeringsContainer.querySelectorAll('.offering-card').length > 1) {
+                    card.remove();
+                    reindexOfferings();
+                } else {
+                    alert('At least one package offering is required.');
+                }
+            });
+        }
+    };
+
+    if (offeringsContainer) {
+        offeringsContainer.querySelectorAll('.offering-card').forEach(bindOfferingEvents);
+
+        if (addOfferingBtn) {
+            addOfferingBtn.addEventListener('click', () => {
+                const firstCard = offeringsContainer.querySelector('.offering-card');
+                if (!firstCard) return;
+
+                const clone = firstCard.cloneNode(true);
+                clone.querySelectorAll('input, textarea').forEach(input => {
+                    if (input.type === 'number') {
+                        if (input.name.includes('min_capacity')) input.value = 50;
+                        else if (input.name.includes('max_capacity')) input.value = 1000;
+                        else if (input.name.includes('min_budget')) input.value = 5;
+                        else if (input.name.includes('max_budget')) input.value = 50;
+                    } else if (input.tagName.toLowerCase() === 'select') {
+                        input.selectedIndex = 0;
+                    } else {
+                        input.value = '';
+                    }
+                });
+
+                offeringsContainer.appendChild(clone);
+                bindOfferingEvents(clone);
+                reindexOfferings();
+            });
+        }
+    }
+
     reindex();
 });
 </script>

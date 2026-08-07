@@ -159,6 +159,27 @@ class DynamicVendorService
             }
         }
 
+        $offerings = [];
+        foreach ($input['offerings'] ?? [] as $offeringInput) {
+            $offName = trim((string) ($offeringInput['name'] ?? ''));
+            if ($offName === '') continue;
+
+            $offLocations = array_filter(array_map('trim', explode(',', (string) ($offeringInput['locations'] ?? ''))));
+            $offTraditions = array_filter(array_map('trim', explode(',', (string) ($offeringInput['traditions'] ?? ''))));
+
+            $offerings[] = [
+                'name' => $offName,
+                'category' => trim((string) ($offeringInput['category'] ?? 'Sea-Facing Beachfront')),
+                'min_capacity' => isset($offeringInput['min_capacity']) && $offeringInput['min_capacity'] !== '' ? (int) $offeringInput['min_capacity'] : 50,
+                'max_capacity' => isset($offeringInput['max_capacity']) && $offeringInput['max_capacity'] !== '' ? (int) $offeringInput['max_capacity'] : 1000,
+                'min_budget' => isset($offeringInput['min_budget']) && $offeringInput['min_budget'] !== '' ? (float) $offeringInput['min_budget'] : 5,
+                'max_budget' => isset($offeringInput['max_budget']) && $offeringInput['max_budget'] !== '' ? (float) $offeringInput['max_budget'] : 50,
+                'locations' => array_values($offLocations),
+                'traditions' => array_values($offTraditions),
+                'notes' => trim((string) ($offeringInput['notes'] ?? '')),
+            ];
+        }
+
         return [
             'schema_version' => 1,
             'identity' => [
@@ -166,6 +187,7 @@ class DynamicVendorService
                 'category' => trim((string) $input['category']),
             ],
             'attributes' => $attributes,
+            'offerings' => $offerings ?: data_get($existing, 'offerings', []),
             'media' => ['images' => array_values($images)],
             'seo' => [
                 'short_description' => $input['short_description'] ?? null,
