@@ -6,6 +6,7 @@
 <div class="min-h-screen bg-[#FAF7F2] text-slate-800 pt-24 md:pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans-ui relative overflow-hidden" x-data="{
     currentStep: 1,
     totalSteps: 7,
+    maxVisitedStep: 1,
     isCalculating: false,
     managedOptions: @js($plannerOptions),
     vendorPackages: @js($vendorPackages ?? []),
@@ -70,7 +71,7 @@
         return this.planner.foodItems.some(item => item.id === id);
     },
     formatMenuCost(cost) {
-        return Number(cost) > 0 ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(cost)) + ' per guest' : 'Price on request';
+        return Number(cost) > 0 ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(cost)) + ' / person' : 'Cost not configured';
     },
     guestLabel(value) {
         const count = Number(String(value).replace(/\D/g, ''));
@@ -87,7 +88,8 @@
         culture: @js($plannerOptions['wedding_tradition']['options'][0] ?? 'Maharashtrian Lagna'),
         decorTheme: @js($plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
         ceremonies: ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'],
-        foodType: @js($plannerOptions['food_type']['options'][0] ?? 'Pure Veg'),
+        foodType: '',
+        foodItems: [],
         locations: [],
         subarea: 'Juhu Beach',
         timeline: @js($plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
@@ -107,21 +109,48 @@
         return map[this.planner.culture] || ['Haldi & Mehendi', 'Sangeet & Cocktail', 'Main Ceremony', 'Grand Reception'];
     },
     plannerError: '',
+    validateCurrentStep() {
+        const messages = {
+            1: Number(this.planner.budget) > 0 ? '' : 'Choose your wedding budget to continue.',
+            2: Number(this.planner.exactGuest) >= 10 ? '' : 'Enter a valid guest count to continue.',
+            3: this.planner.locations.length > 0 ? '' : 'Select at least one preferred location to continue.',
+            4: this.planner.culture ? '' : 'Select a wedding tradition to continue.',
+            5: this.planner.setting ? '' : 'Select a venue vibe or mandap decor to continue.',
+            6: this.planner.foodItems.length > 0 ? '' : 'Select at least one food menu item to continue.',
+            7: this.planner.timeline ? '' : 'Select your event timeline to generate the plan.'
+        };
+        this.plannerError = messages[this.currentStep] || '';
+        return this.plannerError === '';
+    },
+    goToStep(step) {
+        if (step > this.maxVisitedStep) return;
+        this.currentStep = step;
+        this.plannerError = '';
+        this.scrollToPlanner();
+    },
+    scrollToPlanner() {
+        this.$nextTick(() => window.scrollTo({ top: Math.max(0, this.$root.offsetTop - 100), behavior: 'smooth' }));
+    },
     nextStep() {
-        if (this.currentStep === 5 && this.planner.foodItems.length === 0) {
-            this.plannerError = 'Select at least one food menu item to continue.';
-            return;
-        }
+        if (!this.validateCurrentStep()) return;
         if (this.currentStep < 7) {
             this.currentStep++;
+            this.maxVisitedStep = Math.max(this.maxVisitedStep, this.currentStep);
+            this.plannerError = '';
+            this.scrollToPlanner();
         } else if (this.currentStep === 7) {
             this.generatePlan();
         }
     },
     prevStep() {
-        if (this.currentStep > 1) this.currentStep--;
+        if (this.currentStep > 1) {
+            this.currentStep--;
+            this.plannerError = '';
+            this.scrollToPlanner();
+        }
     },
     generatePlan() {
+        if (!this.validateCurrentStep()) return;
         this.isCalculating = true;
         this.$nextTick(() => this.$refs.planForm.submit());
     }
@@ -180,9 +209,9 @@
                     { num: 6, name: 'Food & Catering' },
                     { num: 7, name: 'Dates & Timeline' }
                 ]">
-                    <div @click="currentStep = step.num" 
+                    <div @click="goToStep(step.num)"
                         class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer text-xs"
-                        :class="currentStep === step.num ? 'bg-white/15 text-white font-bold backdrop-blur-md shadow-sm border border-white/20' : (currentStep > step.num ? 'text-rose-200 hover:bg-white/5' : 'text-rose-200/60 hover:bg-white/5')">
+                        :class="currentStep === step.num ? 'bg-white/15 text-white font-bold backdrop-blur-md shadow-sm border border-white/20' : (step.num <= maxVisitedStep ? 'text-rose-200 hover:bg-white/5' : 'text-rose-200/40 cursor-not-allowed')">
                         <div class="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold transition-all shrink-0"
                             :class="currentStep === step.num ? 'bg-[#D4AF37] text-slate-950 shadow-sm' : (currentStep > step.num ? 'bg-rose-900/80 text-rose-200 border border-rose-700' : 'bg-rose-950/40 text-rose-300/40')">
                             <span x-show="currentStep <= step.num" x-text="step.num"></span>
@@ -242,6 +271,7 @@
             </div>
 
             <!-- Action Controls (Back / Continue Buttons) -->
+            <p x-show="plannerError && currentStep !== 6" x-text="plannerError" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700"></p>
             <div x-show="currentStep <= 7" class="pt-8 border-t border-slate-100 flex items-center justify-between gap-4 mt-8">
                 <button type="button" 
                     @click="prevStep()" 
@@ -284,7 +314,8 @@
         <input type="hidden" name="answers[ceremonies]" :value="JSON.stringify(planner.ceremonies)">
         <input type="hidden" name="answers[decoration_type]" :value="planner.decorTheme">
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
-        <input type="hidden" name="answers[food_type]" :value="planner.foodType">
+        <input type="hidden" name="answers[food_type]" :value="planner.foodItems.map(item => item.title).join(', ')">
+        <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.foodItems)">
         <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
     </form>

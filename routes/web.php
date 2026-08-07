@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\UserPlanController;
 use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserSubscriptionController;
 use App\Http\Controllers\User\UserDashboardController;
+use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\AiPlannerController;
 
 // Redirect /admin to /admin/dashboard
@@ -104,6 +105,9 @@ Route::prefix('user')->group(function () {
         Route::get('/plans/{plan}', [AiPlannerController::class, 'show'])->name('user.plans.show');
         Route::get('/plans/{plan}/download', [AiPlannerController::class, 'download'])->name('user.plans.download');
         Route::get('/planner/resume', [AiPlannerController::class, 'resume'])->name('ai-planner.resume');
+        Route::get('/notifications', [UserNotificationController::class, 'index'])->name('user.notifications.index');
+        Route::patch('/notifications/read-all', [UserNotificationController::class, 'readAll'])->name('user.notifications.read-all');
+        Route::patch('/notifications/{notification}/read', [UserNotificationController::class, 'read'])->name('user.notifications.read');
 
         // Subscription tier choosing & payment verification
         Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('user.subscription');

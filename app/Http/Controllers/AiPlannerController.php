@@ -225,7 +225,7 @@ class AiPlannerController extends Controller
 
             return [
                 'id' => $value,
-                'title' => (string) ($question->options[$index] ?? $details['label'] ?? $value),
+                'title' => (string) ($details['label'] ?? $value),
                 'category' => (string) ($details['category'] ?? 'Menu Items'),
                 'cost' => max(0, (float) ($details['cost'] ?? 0)),
             ];
@@ -237,7 +237,7 @@ class AiPlannerController extends Controller
         $question = EventRequirementQuestion::enabled()->where('question_code', 'food_type')->first();
         $metadata = (array) ($question?->option_metadata ?? []);
         $values = collect($question?->vendor_attribute_values ?? [])->map('strval')->values();
-        $labels = $values->mapWithKeys(fn (string $value, int $index): array => [$value => (string) ($question->options[$index] ?? $value)]);
+        $labels = $values->mapWithKeys(fn (string $value): array => [$value => (string) data_get($metadata, $value.'.label', $value)]);
         $selectedIds = collect($selectedItems)->pluck('id')->map('strval')->unique()->values();
 
         if (! $question || $selectedIds->diff($values)->isNotEmpty()) {

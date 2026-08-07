@@ -58,7 +58,7 @@ class StoreEventQuestionRequest extends FormRequest
             'options.*' => ['string', 'max:255', 'distinct'],
             'option_metadata' => ['nullable', 'array', 'max:500'],
             'option_metadata.*.category' => ['required', 'string', 'max:100'],
-            'option_metadata.*.cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'option_metadata.*.cost' => ['required', 'numeric', $this->input('question_code') === 'food_type' ? 'min:0.01' : 'min:0', 'max:99999999.99'],
             'vendor_attribute_key' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9_]+$/'],
             'vendor_attribute_values' => [Rule::requiredIf(fn () => $this->filled('vendor_attribute_key')), 'array', 'max:500'],
             'vendor_attribute_values.*' => ['string', 'max:255', 'distinct'],

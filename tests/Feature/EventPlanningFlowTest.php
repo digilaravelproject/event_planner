@@ -37,7 +37,11 @@ class EventPlanningFlowTest extends TestCase
         $this->get(route('ai-planner', ['type' => 'wedding', 'guests' => 300]))
             ->assertOk()
             ->assertSee('What is your total estimated wedding budget?')
-            ->assertSee('How many guests will celebrate with you?');
+            ->assertSee('How many guests will celebrate with you?')
+            ->assertSee('foodItems: []', false)
+            ->assertSee('answers[food_menu_items]', false)
+            ->assertSee('6: this.planner.foodItems.length', false)
+            ->assertDontSee('currentStep === 5 && this.planner.foodItems', false);
     }
 
     public function test_guest_requirements_resume_after_login_and_create_history_with_suggestions(): void

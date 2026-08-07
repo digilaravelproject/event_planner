@@ -186,7 +186,7 @@ class AdminModulesTest extends TestCase
         $this->assertDatabaseMissing('event_requirement_questions', ['question_code' => 'invalid_area']);
     }
 
-    public function test_food_question_saves_category_and_per_guest_cost_for_menu_items(): void
+    public function test_food_question_saves_category_and_per_person_cost_for_menu_items(): void
     {
         $this->createDynamicVendor('Wedding Caterer', [
             ['key' => 'menu_card_items', 'label' => 'Menu Card Items', 'type' => 'multi_select', 'value' => ['Paneer Tikka', 'Gulab Jamun']],
@@ -256,6 +256,22 @@ class AdminModulesTest extends TestCase
             $this->assertDatabaseHas('notification_users', ['notification_id' => $notification->id, 'user_id' => $user->id]);
             $this->assertTrue($user->adminNotifications()->whereKey($notification->id)->exists());
         }
+    }
+
+    public function test_vendor_inventory_totals_are_not_reduced_by_activity_period(): void
+    {
+        $active = $this->createDynamicVendor('Established Active Venue', []);
+        $inactive = $this->createDynamicVendor('Established Inactive Venue', []);
+        $inactive->update(['status' => 'inactive']);
+        DynamicVendor::whereKey([$active->id, $inactive->id])->update(['created_at' => now()->subMonths(3)]);
+
+        $response = $this->get(route('admin.vendor-analytics.index', ['period' => 'month']))->assertOk();
+        $cards = $response->viewData('cards');
+
+        $this->assertSame(1, $cards['active_vendors']);
+        $this->assertSame(1, $cards['inactive_vendors']);
+        $this->assertSame(1, $cards['total_categories']);
+        $this->assertSame(0, $cards['period_vendors']);
     }
 
     public function test_admin_can_create_update_view_and_delete_a_sanitized_page(): void

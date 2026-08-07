@@ -3,7 +3,7 @@
     <div class="space-y-1">
         <span class="text-[11px] font-bold uppercase tracking-widest text-[#D4AF37]">Step 06 / 07</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('food_type')?->question ?? 'What are your catering preferences?' }}</h2>
-        <p class="text-slate-600 text-xs sm:text-sm">Choose only the dishes you want in your plan. Prices are shown per guest and grouped by food category.</p>
+        <p class="text-slate-600 text-xs sm:text-sm">Choose only the dishes you want in your plan. Costs are shown per person and grouped by food category.</p>
     </div>
 
     <div class="space-y-5">
