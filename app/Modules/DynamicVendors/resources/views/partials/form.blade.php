@@ -44,7 +44,7 @@
         @if($method !== 'POST') @method($method) @endif
 
         <div class="admin-card flex gap-2 overflow-x-auto p-2" role="tablist">
-            @foreach(['details' => 'Vendor Details', 'attributes' => 'Dynamic Attributes', 'offerings' => 'Decor & Hall Offerings', 'media' => 'Images', 'seo' => 'SEO'] as $tab => $label)
+            @foreach(['details' => 'Vendor Details', 'attributes' => 'Dynamic Attributes', 'offerings' => 'Decor & Hall Offerings', 'food' => 'Food Packages & Extras', 'media' => 'Images', 'seo' => 'SEO'] as $tab => $label)
                 <button type="button" data-tab-button="{{ $tab }}" class="tab-button whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-bold {{ $loop->first ? 'bg-[#3950a2] text-white' : 'text-slate-600 hover:bg-slate-50' }}">{{ $label }}</button>
             @endforeach
         </div>
@@ -177,6 +177,135 @@
                         </label>
                     </div>
                 @endforeach
+            </div>
+        </section>
+
+        <section data-tab-panel="food" class="admin-card tab-panel hidden p-6 space-y-8">
+            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">
+                <div>
+                    <h2 class="text-lg font-extrabold text-slate-900">Food Packages & Extras</h2>
+                    <p class="text-sm text-slate-500">Configure custom catering packages (Classic, Deluxe, Elite) & extra live counters with per plate price ranges for this vendor.</p>
+                </div>
+            </div>
+
+            <!-- Food Packages Sub-Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-extrabold text-[#3950a2] uppercase tracking-wider">1. Food Packages (Classic / Deluxe / Elite)</h3>
+                    <button type="button" id="add-food-package-button" class="inline-flex items-center gap-1.5 rounded-xl bg-[#3950a2] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#2b3c7b] cursor-pointer">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>+ Add Food Package</span>
+                    </button>
+                </div>
+
+                @php
+                    $existingFoodPackages = old('food_packages', data_get($document, 'food_packages', []));
+                    if (empty($existingFoodPackages)) {
+                        $existingFoodPackages = [
+                            [
+                                'name' => 'Classic Menu',
+                                'min_price_per_plate' => 700,
+                                'max_price_per_plate' => 900,
+                                'tagline' => 'Essential wedding feast with starters & desserts',
+                                'items' => ['Mineral Water Cups', 'Assorted Soft Drinks', 'Farsan (Any 1)', 'Main Course', 'Dal', 'Rice', 'Assorted Breads', 'Sweet (Any 1)', 'Ice Cream (Any 1)']
+                            ]
+                        ];
+                    }
+                @endphp
+
+                <div id="food-packages-container" class="space-y-4">
+                    @foreach($existingFoodPackages as $fpIndex => $fp)
+                        <div class="food-package-card rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-4 relative">
+                            <div class="flex items-center justify-between border-b border-slate-200/80 pb-3">
+                                <span class="text-xs font-extrabold text-[#3950a2] uppercase tracking-wider">Package #<span class="fp-number">{{ $fpIndex + 1 }}</span></span>
+                                <button type="button" class="remove-fp-btn text-xs font-bold text-rose-600 hover:text-rose-800 cursor-pointer">Remove Package</button>
+                            </div>
+                            <div class="grid gap-4 md:grid-cols-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Package Name</label>
+                                    <input name="food_packages[{{ $fpIndex }}][name]" placeholder="e.g. Classic Menu" value="{{ old("food_packages.{$fpIndex}.name", data_get($fp, 'name')) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:border-[#3950a2] focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Min Price / Plate (₹)</label>
+                                    <input type="number" name="food_packages[{{ $fpIndex }}][min_price_per_plate]" placeholder="700" value="{{ old("food_packages.{$fpIndex}.min_price_per_plate", data_get($fp, 'min_price_per_plate', 700)) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Max Price / Plate (₹)</label>
+                                    <input type="number" name="food_packages[{{ $fpIndex }}][max_price_per_plate]" placeholder="900" value="{{ old("food_packages.{$fpIndex}.max_price_per_plate", data_get($fp, 'max_price_per_plate', 900)) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm">
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Package Tagline / Description</label>
+                                    <input name="food_packages[{{ $fpIndex }}][tagline]" placeholder="e.g. Essential wedding feast with traditional starters & desserts" value="{{ old("food_packages.{$fpIndex}.tagline", data_get($fp, 'tagline')) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm">
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Included Menu Items <span class="font-normal text-slate-400">(comma-separated)</span></label>
+                                    @php
+                                        $fpItems = data_get($fp, 'items', []);
+                                        $fpItemsStr = is_array($fpItems) ? implode(', ', $fpItems) : $fpItems;
+                                    @endphp
+                                    <textarea name="food_packages[{{ $fpIndex }}][items]" rows="2" placeholder="e.g. Mineral Water, Soft Drinks, Farsan, Main Course, Dal, Rice, Breads, Sweets" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm">{{ old("food_packages.{$fpIndex}.items", $fpItemsStr) }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Food Extras Sub-Section -->
+            <div class="space-y-4 pt-6 border-t border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-extrabold text-[#3950a2] uppercase tracking-wider">2. Extra Live Counters & Add-ons</h3>
+                    <button type="button" id="add-food-extra-button" class="inline-flex items-center gap-1.5 rounded-xl bg-[#3950a2] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#2b3c7b] cursor-pointer">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>+ Add Extra Counter</span>
+                    </button>
+                </div>
+
+                @php
+                    $existingFoodExtras = old('food_extras', data_get($document, 'food_extras', []));
+                    if (empty($existingFoodExtras)) {
+                        $existingFoodExtras = [
+                            ['name' => 'Chinese Counter (Any 3)', 'min_price' => 90, 'max_price' => 120, 'unit' => 'per_plate', 'icon' => 'fa-bowl-rice'],
+                            ['name' => 'Chat Counter (Any 2)', 'min_price' => 90, 'max_price' => 120, 'unit' => 'per_plate', 'icon' => 'fa-utensils'],
+                        ];
+                    }
+                @endphp
+
+                <div id="food-extras-container" class="space-y-4">
+                    @foreach($existingFoodExtras as $feIndex => $fe)
+                        <div class="food-extra-card rounded-2xl border border-slate-200 bg-slate-50/50 p-4 space-y-3 relative">
+                            <div class="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                                <span class="text-xs font-extrabold text-[#3950a2] uppercase tracking-wider">Extra Counter #<span class="fe-number">{{ $feIndex + 1 }}</span></span>
+                                <button type="button" class="remove-fe-btn text-xs font-bold text-rose-600 hover:text-rose-800 cursor-pointer">Remove Extra</button>
+                            </div>
+                            <div class="grid gap-3 md:grid-cols-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Extra Counter Name</label>
+                                    <input name="food_extras[{{ $feIndex }}][name]" placeholder="e.g. Dosa Counter (Any 3)" value="{{ old("food_extras.{$feIndex}.name", data_get($fe, 'name')) }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Min Extra Cost (₹)</label>
+                                    <input type="number" name="food_extras[{{ $feIndex }}][min_price]" placeholder="90" value="{{ old("food_extras.{$feIndex}.min_price", data_get($fe, 'min_price', data_get($fe, 'price_per_plate', 90))) }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Max Extra Cost (₹)</label>
+                                    <input type="number" name="food_extras[{{ $feIndex }}][max_price]" placeholder="120" value="{{ old("food_extras.{$feIndex}.max_price", data_get($fe, 'max_price', data_get($fe, 'price_per_plate', 120))) }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Pricing Unit</label>
+                                    <select name="food_extras[{{ $feIndex }}][unit]" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                        <option value="per_plate" @selected(old("food_extras.{$feIndex}.unit", data_get($fe, 'unit')) === 'per_plate')>Per Plate (₹ / plate)</option>
+                                        <option value="fixed" @selected(old("food_extras.{$feIndex}.unit", data_get($fe, 'unit')) === 'fixed')>Fixed Rental (₹ / hr or flat)</option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Icon Class</label>
+                                    <input name="food_extras[{{ $feIndex }}][icon]" placeholder="fa-solid fa-utensils" value="{{ old("food_extras.{$feIndex}.icon", data_get($fe, 'icon', 'fa-solid fa-utensils')) }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </section>
 
@@ -381,6 +510,97 @@ document.addEventListener('DOMContentLoaded', () => {
                 offeringsContainer.appendChild(clone);
                 bindOfferingEvents(clone);
                 reindexOfferings();
+            });
+        }
+    }
+
+    // Food Packages Repeater JS Logic
+    const fpContainer = document.getElementById('food-packages-container');
+    const addFpBtn = document.getElementById('add-food-package-button');
+
+    const reindexFp = () => {
+        if (!fpContainer) return;
+        fpContainer.querySelectorAll('.food-package-card').forEach((card, index) => {
+            const num = card.querySelector('.fp-number');
+            if (num) num.textContent = index + 1;
+            card.querySelectorAll('[name]').forEach(input => {
+                input.name = input.name.replace(/food_packages\[\d+\]/, `food_packages[${index}]`);
+            });
+        });
+    };
+
+    const bindFpEvents = (card) => {
+        const removeBtn = card.querySelector('.remove-fp-btn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', () => {
+                if (fpContainer.querySelectorAll('.food-package-card').length > 1) {
+                    card.remove();
+                    reindexFp();
+                } else {
+                    alert('At least one food package is required.');
+                }
+            });
+        }
+    };
+
+    if (fpContainer) {
+        fpContainer.querySelectorAll('.food-package-card').forEach(bindFpEvents);
+        if (addFpBtn) {
+            addFpBtn.addEventListener('click', () => {
+                const first = fpContainer.querySelector('.food-package-card');
+                if (!first) return;
+                const clone = first.cloneNode(true);
+                clone.querySelectorAll('input, textarea').forEach(input => input.value = '');
+                fpContainer.appendChild(clone);
+                bindFpEvents(clone);
+                reindexFp();
+            });
+        }
+    }
+
+    // Food Extras Repeater JS Logic
+    const feContainer = document.getElementById('food-extras-container');
+    const addFeBtn = document.getElementById('add-food-extra-button');
+
+    const reindexFe = () => {
+        if (!feContainer) return;
+        feContainer.querySelectorAll('.food-extra-card').forEach((card, index) => {
+            const num = card.querySelector('.fe-number');
+            if (num) num.textContent = index + 1;
+            card.querySelectorAll('[name]').forEach(input => {
+                input.name = input.name.replace(/food_extras\[\d+\]/, `food_extras[${index}]`);
+            });
+        });
+    };
+
+    const bindFeEvents = (card) => {
+        const removeBtn = card.querySelector('.remove-fe-btn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', () => {
+                if (feContainer.querySelectorAll('.food-extra-card').length > 1) {
+                    card.remove();
+                    reindexFe();
+                } else {
+                    alert('At least one extra counter is required.');
+                }
+            });
+        }
+    };
+
+    if (feContainer) {
+        feContainer.querySelectorAll('.food-extra-card').forEach(bindFeEvents);
+        if (addFeBtn) {
+            addFeBtn.addEventListener('click', () => {
+                const first = feContainer.querySelector('.food-extra-card');
+                if (!first) return;
+                const clone = first.cloneNode(true);
+                clone.querySelectorAll('input').forEach(input => {
+                    if (input.tagName.toLowerCase() === 'select') input.selectedIndex = 0;
+                    else input.value = '';
+                });
+                feContainer.appendChild(clone);
+                bindFeEvents(clone);
+                reindexFe();
             });
         }
     }
