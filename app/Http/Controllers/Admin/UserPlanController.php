@@ -29,7 +29,7 @@ class UserPlanController extends Controller
     {
         $plan->load('user');
 
-        return response($pdf->render($plan, $presenter->present($plan), true))
+        return response($pdf->render($plan, $presenter->present($plan)))
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="admin-wedding-plan-'.$plan->id.'.pdf"');
     }

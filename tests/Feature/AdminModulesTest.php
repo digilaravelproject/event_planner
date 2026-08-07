@@ -4,19 +4,21 @@ namespace Tests\Feature;
 
 use App\Models\Admin;
 use App\Models\AdminNotification;
-use App\Models\EventRequirementQuestion;
 use App\Models\AiSetting;
+use App\Models\EventRequirementQuestion;
+use App\Models\Feedback;
 use App\Models\LandingContent;
 use App\Models\Page;
 use App\Models\User;
+use App\Models\UserEventPlan;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
+use App\Services\OpenRouterService;
 use Database\Seeders\AdminModulesSeeder;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
-use App\Services\OpenRouterService;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -41,6 +43,34 @@ class AdminModulesTest extends TestCase
         foreach (array_keys(LandingContent::TYPES) as $type) {
             $this->get(route('admin.landing-content.index', $type))->assertOk();
         }
+    }
+
+    public function test_admin_dashboard_uses_current_platform_records(): void
+    {
+        $user = User::factory()->create(['name' => 'Dashboard Couple']);
+        UserEventPlan::create([
+            'user_id' => $user->id,
+            'title' => 'Dashboard Wedding Plan',
+            'category' => 'wedding',
+            'guest_count' => 250,
+            'answers' => ['wedding_budget' => 30],
+            'requirement_prompt' => 'prompt',
+            'summary' => ['title' => 'Dashboard Wedding Plan', 'total_cost' => 3000000, 'costing' => []],
+            'total_cost' => 3000000,
+            'status' => 'completed',
+        ]);
+        $this->createDynamicVendor('Dashboard Caterer', [
+            ['key' => 'service_area', 'label' => 'Service Area', 'type' => 'dropdown', 'value' => 'Mumbai'],
+        ]);
+        Feedback::create(['user_id' => $user->id, 'subject' => 'Plan', 'message' => 'Useful', 'rating' => 4, 'status' => 'pending']);
+
+        $this->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Live platform overview')
+            ->assertSee('Dashboard Wedding Plan')
+            ->assertSee(number_format(User::count()))
+            ->assertDontSee('2,453')
+            ->assertDontSee('14.8L');
     }
 
     public function test_admin_can_manage_database_backed_landing_content(): void
@@ -154,6 +184,38 @@ class AdminModulesTest extends TestCase
         ])->assertSessionHasErrors('vendor_attribute_values');
 
         $this->assertDatabaseMissing('event_requirement_questions', ['question_code' => 'invalid_area']);
+    }
+
+    public function test_food_question_saves_category_and_per_guest_cost_for_menu_items(): void
+    {
+        $this->createDynamicVendor('Wedding Caterer', [
+            ['key' => 'menu_card_items', 'label' => 'Menu Card Items', 'type' => 'multi_select', 'value' => ['Paneer Tikka', 'Gulab Jamun']],
+        ]);
+
+        $question = EventRequirementQuestion::where('question_code', 'food_type')->firstOrFail();
+
+        $this->put(route('admin.event-questions.update', $question), [
+            'question' => 'Which dishes would you like?',
+            'question_code' => 'food_type',
+            'question_type' => 'checkbox',
+            'vendor_attribute_key' => 'menu_card_items',
+            'vendor_attribute_values' => ['Paneer Tikka', 'Gulab Jamun'],
+            'option_metadata_values' => ['Paneer Tikka', 'Gulab Jamun'],
+            'option_metadata_categories' => ['Starters', 'Desserts'],
+            'option_metadata_costs' => ['125.50', '60'],
+            'display_order' => 5,
+            'status' => 1,
+        ])->assertRedirect(route('admin.event-questions.index'));
+
+        $question->refresh();
+        $this->assertSame('Starters', data_get($question->option_metadata, 'Paneer Tikka.category'));
+        $this->assertSame(125.5, data_get($question->option_metadata, 'Paneer Tikka.cost'));
+
+        $this->get(route('ai-planner'))
+            ->assertOk()
+            ->assertSee('Paneer Tikka')
+            ->assertSee('Starters')
+            ->assertSee('125.5');
     }
 
     public function test_question_data_can_be_freshly_rebuilt_from_current_dynamic_vendors(): void

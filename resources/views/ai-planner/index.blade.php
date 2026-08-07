@@ -16,6 +16,26 @@
         const images = this.managedOptions[code]?.images || [];
         return images.length ? images[index % images.length] : fallback;
     },
+    foodOptions() {
+        return this.optionsFor('food_type', []).map(value => typeof value === 'object' ? value : ({ id: value, title: value, category: 'Menu Items', cost: 0 }));
+    },
+    foodCategories() {
+        return [...new Set(this.foodOptions().map(item => item.category || 'Menu Items'))];
+    },
+    foodItemsFor(category) {
+        return this.foodOptions().filter(item => (item.category || 'Menu Items') === category);
+    },
+    toggleFoodItem(item) {
+        const index = this.planner.foodItems.findIndex(selected => selected.id === item.id);
+        index >= 0 ? this.planner.foodItems.splice(index, 1) : this.planner.foodItems.push(item);
+        this.plannerError = '';
+    },
+    isFoodSelected(id) {
+        return this.planner.foodItems.some(item => item.id === id);
+    },
+    formatMenuCost(cost) {
+        return Number(cost) > 0 ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(cost)) + ' per guest' : 'Price on request';
+    },
     guestLabel(value) {
         const count = Number(String(value).replace(/\D/g, ''));
         if (count <= 50) return 'Under 50 Guests';
@@ -31,7 +51,8 @@
         culture: @js($plannerOptions['wedding_tradition']['options'][0] ?? 'Maharashtrian Lagna'),
         decorTheme: @js($plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
         ceremonies: ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'],
-        foodType: @js($plannerOptions['food_type']['options'][0] ?? 'Pure Veg'),
+        foodType: '',
+        foodItems: [],
         location: @js($plannerOptions['service_area']['options'][0] ?? 'Juhu / Bandra Sea-Face'),
         subarea: 'Juhu Beach',
         timeline: @js($plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
@@ -50,7 +71,12 @@
         };
         return map[this.planner.culture] || ['Haldi & Mehendi', 'Sangeet & Cocktail', 'Main Ceremony', 'Grand Reception'];
     },
+    plannerError: '',
     nextStep() {
+        if (this.currentStep === 5 && this.planner.foodItems.length === 0) {
+            this.plannerError = 'Select at least one food menu item to continue.';
+            return;
+        }
         if (this.currentStep < 7) {
             this.currentStep++;
         } else if (this.currentStep === 7) {
@@ -223,7 +249,8 @@
         <input type="hidden" name="answers[ceremonies]" :value="JSON.stringify(planner.ceremonies)">
         <input type="hidden" name="answers[decoration_type]" :value="planner.decorTheme">
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
-        <input type="hidden" name="answers[food_type]" :value="planner.foodType">
+        <input type="hidden" name="answers[food_type]" :value="planner.foodItems.map(item => item.title).join(', ')">
+        <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.foodItems)">
         <input type="hidden" name="answers[service_area]" :value="planner.location">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
     </form>

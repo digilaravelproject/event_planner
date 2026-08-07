@@ -45,6 +45,9 @@ class EventPlanningService
             $plan->error_message = Str::limit($exception->getMessage(), 1000);
         }
 
+        $summary = $this->applySelectedFoodCosting($summary, $answers, $guestCount);
+        $summary['display_content'] = $this->displayContent($summary, $answers, $guestCount, $category);
+
         $plan->fill([
             'title' => (string) ($summary['title'] ?? $plan->title),
             'summary' => $summary,
@@ -82,6 +85,7 @@ class EventPlanningService
             .'{"title":string,"overview":string,"total_cost":number,"costing":[{"category":string,"amount":number,"percentage":number,"summary":string,"vendor_ids":number[],"attributes":[{"name":string,"value":string,"cost":number}]}],'
             .'"recommendations":[{"vendor_id":number,"name":string,"category":string,"reason":string,"estimated_cost":number}],"notes":string[]}. '
             .'All monetary numbers must be INR rupees. Keep each costing item small and understandable, include 3 to 6 attribute-level costs in every costing item, and make total_cost equal the sum of costing amounts. '
+            .'When answers.food_menu_items is present, it is the exclusive food menu selected by the user. Each configured cost is INR per guest: include only those dishes in catering attributes and calculate each dish as cost multiplied by guest_count. '
             .'Requirements: '.json_encode(['category' => $category, 'guest_count' => $guestCount, 'answers' => $answers], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).'. '
             .'Active vendors: '.json_encode($vendors, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).'.';
     }
@@ -120,6 +124,7 @@ class EventPlanningService
             if (! $vendor) {
                 return null;
             }
+
             return [
                 'vendor_id' => $vendor['id'],
                 'name' => $vendor['name'],
@@ -178,17 +183,27 @@ class EventPlanningService
 
     private function createSuggestions(UserEventPlan $plan): void
     {
-        foreach ([['Nearby Value Plan', .90], ['Nearby Premium Plan', 1.10]] as [$title, $factor]) {
+        foreach ($this->suggestionDefinitions() as $index => [$title, $factor, $tier]) {
             $summary = $plan->summary;
             $summary['title'] = $title;
+            $change = (int) round(abs(1 - $factor) * 100);
             $summary['overview'] = $factor < 1
-                ? 'A nearby-cost alternative that preserves the core celebration priorities.'
-                : 'A nearby premium alternative with extra flexibility in each service category.';
+                ? $change.'% below the original plan while retaining the saved wedding requirements.'
+                : $change.'% above the original plan with additional budget across the saved service categories.';
             $summary['costing'] = collect($summary['costing'])->map(function (array $item) use ($factor): array {
                 $item['amount'] = round(((float) $item['amount']) * $factor, 2);
+
                 return $item;
             })->all();
             $summary['total_cost'] = round(collect($summary['costing'])->sum('amount'), 2);
+            $summary['comparison'] = [
+                'tier' => $tier,
+                'change_label' => $change.'% '.($factor < 1 ? 'lower investment' : 'higher investment'),
+                'requirements_label' => count($plan->answers ?? []).' saved selections retained',
+                'costing_label' => count($summary['costing']).' service costs recalculated',
+                'image' => $index % 2 === 0 ? 'images/planner/value-wedding-plan.webp' : 'images/planner/premium-wedding-plan.webp',
+            ];
+            $summary['display_content'] = $this->displayContent($summary, $plan->answers ?? [], $plan->guest_count, $plan->category);
 
             UserEventPlan::create([
                 'user_id' => $plan->user_id,
@@ -205,5 +220,98 @@ class EventPlanningService
                 'status' => 'completed',
             ]);
         }
+    }
+
+    private function suggestionDefinitions(): array
+    {
+        return [
+            ['Essential Wedding Plan', .75, 'Essential option'],
+            ['Smart Value Wedding Plan', .85, 'Smart value option'],
+            ['Nearby Value Plan', .90, 'Value option'],
+            ['Nearby Premium Plan', 1.10, 'Premium option'],
+            ['Signature Wedding Plan', 1.15, 'Signature option'],
+            ['Luxury Wedding Plan', 1.25, 'Luxury option'],
+        ];
+    }
+
+    private function displayContent(array $summary, array $answers, int $guestCount, string $category): array
+    {
+        $serviceCount = count($summary['costing'] ?? []);
+        $answerCount = count($answers);
+        $categoryName = Str::headline($category);
+
+        return [
+            'brand_label' => 'Shaadi Sense AI',
+            'sidebar_title' => (string) ($summary['title'] ?? $categoryName.' plan'),
+            'sidebar_description' => $guestCount.' guests · '.$serviceCount.' costed services · '.$answerCount.' saved requirements',
+            'estimated_total_label' => 'Estimated plan total',
+            'guests_label' => 'Guests',
+            'services_label' => 'Costed services',
+            'download_label' => 'Download plan PDF',
+            'new_plan_label' => 'Generate new plan',
+            'dashboard_label' => 'User dashboard',
+            'hero_badge' => $guestCount.'-guest '.$categoryName.' plan',
+            'selection_eyebrow' => $answerCount.' saved requirements',
+            'selection_title' => 'Selections used for '.$summary['title'],
+            'costing_eyebrow' => $serviceCount.' costed service categories',
+            'costing_title' => 'Detailed costing for '.$summary['title'],
+            'costing_description' => 'Every amount below comes from the costing saved with this generated plan.',
+            'category_total_label' => 'Saved category total',
+            'comparison_eyebrow' => 'Saved plan alternatives',
+            'comparison_title' => 'More budgets for the same requirements',
+            'comparison_description' => 'Compare saved alternatives generated from this plan and its recorded selections.',
+            'comparison_count_label' => 'saved alternatives',
+            'comparison_costing_label' => 'Open saved costing',
+            'comparison_view_label' => 'View plan →',
+        ];
+    }
+
+    private function applySelectedFoodCosting(array $summary, array $answers, int $guestCount): array
+    {
+        $menuItems = $answers['food_menu_items'] ?? [];
+        if (is_string($menuItems)) {
+            $menuItems = json_decode($menuItems, true) ?: [];
+        }
+
+        $menuItems = collect(is_array($menuItems) ? $menuItems : [])->filter(fn ($item): bool => is_array($item) && trim((string) ($item['title'] ?? '')) !== '')->map(function (array $item) use ($guestCount): array {
+            $pricePerGuest = max(0, (float) ($item['cost'] ?? 0));
+
+            return [
+                'name' => Str::limit((string) $item['title'], 100),
+                'value' => Str::limit((string) ($item['category'] ?? 'Menu Items').' at Rs. '.number_format($pricePerGuest, 2).' per guest for '.$guestCount.' guests', 200),
+                'cost' => round($pricePerGuest * $guestCount, 2),
+            ];
+        })->values();
+
+        if ($menuItems->isEmpty()) {
+            return $summary;
+        }
+
+        $costing = collect($summary['costing'] ?? [])->values();
+        $cateringIndex = $costing->search(fn (array $item): bool => str_contains(strtolower((string) ($item['category'] ?? '')), 'cater') || str_contains(strtolower((string) ($item['category'] ?? '')), 'food'));
+        $menuTotal = round((float) $menuItems->sum('cost'), 2);
+        $catering = $cateringIndex === false ? [
+            'category' => 'Food & Catering',
+            'vendor_ids' => [],
+        ] : $costing->get($cateringIndex);
+        $catering['amount'] = $menuTotal;
+        $catering['summary'] = 'Your selected food menu for '.number_format($guestCount).' guests.';
+        $catering['attributes'] = $menuItems->all();
+
+        if ($cateringIndex === false) {
+            $costing->push($catering);
+        } else {
+            $costing->put($cateringIndex, $catering);
+        }
+
+        $total = round((float) $costing->sum(fn (array $item): float => (float) ($item['amount'] ?? 0)), 2);
+        $summary['costing'] = $costing->map(function (array $item) use ($total): array {
+            $item['percentage'] = $total > 0 ? round(((float) ($item['amount'] ?? 0) / $total) * 100, 1) : 0;
+
+            return $item;
+        })->values()->all();
+        $summary['total_cost'] = $total;
+
+        return $summary;
     }
 }

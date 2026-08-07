@@ -28,9 +28,11 @@
             <h2 class="text-base font-extrabold text-slate-900">Answer options</h2>
             <div class="mt-4 grid gap-3 sm:grid-cols-2">
                 @forelse($question->options ?? [] as $index => $option)
+                    @php($optionValue = (string) data_get($question->vendor_attribute_values, $index, $option))
+                    @php($optionDetails = (array) data_get($question->option_metadata, $optionValue, []))
                     <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3">
                         <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-extrabold text-indigo-700">{{ $index + 1 }}</span>
-                        <span class="break-words text-sm font-semibold text-slate-700">{{ $option }}</span>
+                        <span class="min-w-0 flex-1"><span class="block break-words text-sm font-semibold text-slate-700">{{ $option }}</span>@if($question->vendor_attribute_key === 'menu_card_items')<span class="mt-1 block text-xs text-slate-500">{{ $optionDetails['category'] ?? 'Menu Items' }} · ₹{{ number_format((float) ($optionDetails['cost'] ?? 0), 2) }} per guest</span>@endif</span>
                     </div>
                 @empty
                     <p class="text-sm text-slate-400">This question does not use predefined options.</p>

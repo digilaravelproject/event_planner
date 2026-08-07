@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\EventRequirementQuestion;
 use App\Models\UserEventPlan;
 use Illuminate\Support\Str;
 
@@ -14,8 +15,8 @@ class PlanPresentationService
         $costing = collect($summary['costing'] ?? [])->map(function (array $item) use ($vendors): array {
             $amount = (float) ($item['amount'] ?? 0);
             $attributes = collect($item['attributes'] ?? [])->map(fn ($attribute): array => [
-                'name' => (string) ($attribute['name'] ?? 'Service item'),
-                'value' => (string) ($attribute['value'] ?? ''),
+                'name' => $this->cleanText((string) ($attribute['name'] ?? 'Service item')),
+                'value' => $this->cleanText((string) ($attribute['value'] ?? '')),
                 'cost' => max(0, (float) ($attribute['cost'] ?? 0)),
             ])->filter(fn (array $attribute): bool => $attribute['name'] !== '')->values();
 
@@ -24,6 +25,7 @@ class PlanPresentationService
             } elseif (($attributeTotal = (float) $attributes->sum('cost')) > 0 && abs($attributeTotal - $amount) > 0.01) {
                 $attributes = $attributes->map(function (array $attribute) use ($amount, $attributeTotal): array {
                     $attribute['cost'] = round($amount * ((float) $attribute['cost'] / $attributeTotal), 2);
+
                     return $attribute;
                 });
             }
@@ -31,6 +33,8 @@ class PlanPresentationService
             $matchedVendors = collect($item['vendor_ids'] ?? [])->map(fn ($id) => $vendors->get((int) $id))->filter()->values()->all();
 
             return array_merge($item, [
+                'category' => $this->cleanText((string) ($item['category'] ?? 'Service')),
+                'summary' => $this->cleanText((string) ($item['summary'] ?? '')),
                 'amount' => $amount,
                 'attributes' => $attributes->all(),
                 'vendors' => $matchedVendors,
@@ -75,14 +79,36 @@ class PlanPresentationService
             ]);
         })->values()->all();
 
+        $answers = (array) ($plan->answers ?? []);
+        $displayAnswers = $answers;
+        if (! empty($displayAnswers['food_menu_items'])) {
+            unset($displayAnswers['food_type']);
+        }
+        $questionLabels = EventRequirementQuestion::query()->whereIn('question_code', array_keys($displayAnswers))->pluck('question', 'question_code');
+        $fallbackLabels = [
+            'ceremonies' => 'Which ceremonies would you like to include?',
+            'venue_setting' => 'What venue setting did you select?',
+            'food_menu_items' => 'Which food menu items did you select?',
+        ];
+        $answerDetails = collect($displayAnswers)->map(function ($value, $key) use ($questionLabels, $fallbackLabels): array {
+            return [
+                'code' => (string) $key,
+                'question' => $this->cleanText((string) ($questionLabels[$key] ?? $fallbackLabels[$key] ?? Str::of((string) $key)->replace('_', ' ')->title())),
+                'answer' => $this->displayAnswerValue($value, (string) $key),
+            ];
+        })->filter(fn (array $answer): bool => $answer['answer'] !== '')->values()->all();
+
         return [
-            'title' => (string) ($summary['title'] ?? $plan->title),
-            'overview' => (string) ($summary['overview'] ?? 'Your personalized wedding plan.'),
+            'title' => $this->cleanText((string) ($summary['title'] ?? $plan->title)),
+            'overview' => $this->cleanText((string) ($summary['overview'] ?? 'Your personalized wedding plan.')),
             'total_cost' => (float) $plan->total_cost,
             'costing' => $costing,
             'recommendations' => $recommendations,
-            'notes' => $summary['notes'] ?? [],
-            'answers' => $plan->answers ?? [],
+            'notes' => collect($summary['notes'] ?? [])->map(fn ($note) => $this->cleanText((string) $note))->all(),
+            'answers' => $answers,
+            'answer_details' => $answerDetails,
+            'content' => array_merge($this->defaultDisplayContent($summary, $answers, $plan), (array) ($summary['display_content'] ?? [])),
+            'comparison' => (array) ($summary['comparison'] ?? []),
         ];
     }
 
@@ -113,6 +139,80 @@ class PlanPresentationService
             return collect($value)->flatten()->filter(fn ($item) => is_scalar($item))->implode(', ');
         }
 
-        return is_scalar($value) ? trim((string) $value) : '';
+        return is_scalar($value) ? $this->cleanText(trim((string) $value)) : '';
+    }
+
+    private function displayAnswerValue(mixed $value, string $key = ''): string
+    {
+        if (is_string($value) && str_starts_with(trim($value), '[')) {
+            $value = json_decode($value, true) ?: $value;
+        }
+        if (is_array($value)) {
+            return collect($value)->map(function ($item): string {
+                if (is_array($item)) {
+                    $label = $item['title'] ?? $item['label'] ?? $item['name'] ?? null;
+                    $cost = (float) ($item['cost'] ?? 0);
+
+                    return $label ? $this->cleanText((string) $label).($cost > 0 ? ' (Rs. '.number_format($cost, 2).' per guest)' : '') : '';
+                }
+
+                return is_scalar($item) ? $this->cleanText((string) $item) : '';
+            })->filter()->implode(', ');
+        }
+
+        if (! is_scalar($value)) {
+            return '';
+        }
+
+        if ($key === 'wedding_budget' && is_numeric($value)) {
+            $budget = (float) $value;
+
+            return '₹'.number_format($budget, floor($budget) === $budget ? 0 : 2).' lakh';
+        }
+        if ($key === 'guest_capacity' && is_numeric($value)) {
+            return number_format((float) $value, 0).' guests';
+        }
+
+        return $this->cleanText((string) $value);
+    }
+
+    private function cleanText(string $value): string
+    {
+        $hadUnderscore = str_contains($value, '_');
+        $value = trim(preg_replace('/_+/', ' ', $value) ?? $value);
+
+        return $hadUnderscore ? Str::headline($value) : $value;
+    }
+
+    private function defaultDisplayContent(array $summary, array $answers, UserEventPlan $plan): array
+    {
+        $title = $this->cleanText((string) ($summary['title'] ?? $plan->title));
+        $serviceCount = count($summary['costing'] ?? []);
+        $answerCount = count($answers);
+
+        return [
+            'brand_label' => 'Shaadi Sense AI',
+            'sidebar_title' => $title,
+            'sidebar_description' => $plan->guest_count.' guests · '.$serviceCount.' costed services · '.$answerCount.' saved requirements',
+            'estimated_total_label' => 'Estimated plan total',
+            'guests_label' => 'Guests',
+            'services_label' => 'Costed services',
+            'download_label' => 'Download plan PDF',
+            'new_plan_label' => 'Generate new plan',
+            'dashboard_label' => 'User dashboard',
+            'hero_badge' => $plan->guest_count.'-guest '.Str::headline($plan->category).' plan',
+            'selection_eyebrow' => $answerCount.' saved requirements',
+            'selection_title' => 'Selections used for '.$title,
+            'costing_eyebrow' => $serviceCount.' costed service categories',
+            'costing_title' => 'Detailed costing for '.$title,
+            'costing_description' => 'Every amount below comes from the costing saved with this generated plan.',
+            'category_total_label' => 'Saved category total',
+            'comparison_eyebrow' => 'Saved plan alternatives',
+            'comparison_title' => 'More budgets for the same requirements',
+            'comparison_description' => 'Compare saved alternatives generated from this plan and its recorded selections.',
+            'comparison_count_label' => 'saved alternatives',
+            'comparison_costing_label' => 'Open saved costing',
+            'comparison_view_label' => 'View plan →',
+        ];
     }
 }

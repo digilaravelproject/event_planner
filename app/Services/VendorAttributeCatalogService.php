@@ -79,6 +79,7 @@ class VendorAttributeCatalogService
             $data['vendor_attribute_label'] = null;
             $data['vendor_attribute_values'] = null;
             $data['vendor_attribute_images'] = null;
+            $data['option_metadata'] = null;
 
             return $data;
         }
@@ -117,6 +118,16 @@ class VendorAttributeCatalogService
         }
         $data['vendor_attribute_images'] = $selectedImages;
         $data['options'] = array_map(fn (string $value): string => $values[$value]['label'], $selected);
+        $metadata = (array) ($data['option_metadata'] ?? []);
+        $data['option_metadata'] = collect($selected)->mapWithKeys(function (string $value) use ($metadata, $values): array {
+            $details = (array) ($metadata[$value] ?? []);
+
+            return [$value => [
+                'label' => (string) ($values[$value]['label'] ?? $value),
+                'category' => trim((string) ($details['category'] ?? '')) ?: 'Menu Items',
+                'cost' => max(0, round((float) ($details['cost'] ?? 0), 2)),
+            ]];
+        })->all();
 
         return $data;
     }

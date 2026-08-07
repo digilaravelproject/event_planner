@@ -5,6 +5,7 @@
     $selectedAttribute = old('vendor_attribute_key', $question->vendor_attribute_key);
     $selectedValues = array_map('strval', old('vendor_attribute_values', $question->vendor_attribute_values ?? []));
     $selectedImages = array_map('strval', old('vendor_attribute_images', $question->vendor_attribute_images ?? []));
+    $selectedMetadata = old('option_metadata', $question->option_metadata ?? []);
 @endphp
 <div class="admin-page mx-auto max-w-5xl">
     @include('admin.partials.module-header', [
@@ -77,6 +78,7 @@
                         Select all
                     </label>
                 </div>
+                <div id="menu-costing-note" class="mt-3 hidden rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">Set a food category and per-guest cost for every menu item you make available. These prices are shown to users and used in their generated catering plan.</div>
                 <div id="vendor-values" class="mt-4 grid max-h-72 gap-2 overflow-y-auto sm:grid-cols-2"></div>
                 <p id="vendor-values-empty" class="hidden py-5 text-center text-sm text-slate-400">No populated values exist for this attribute yet.</p>
             </div>
@@ -117,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const catalog = @json($attributeCatalog);
     const previouslySelected = @json($selectedValues);
     const previouslySelectedImages = @json($selectedImages);
+    const previouslySelectedMetadata = @json($selectedMetadata);
     const attributeSelect = document.getElementById('vendor-attribute');
     const panel = document.getElementById('vendor-values-panel');
     const valuesContainer = document.getElementById('vendor-values');
@@ -126,8 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mappedNote = document.getElementById('mapped-options-note');
     const imagesPanel = document.getElementById('vendor-images-panel');
     const imagesContainer = document.getElementById('vendor-images');
+    const menuCostingNote = document.getElementById('menu-costing-note');
     let selectedByAttribute = {};
     let selectedImagesByAttribute = {};
+    let metadataByAttribute = {};
     const vendorTooltip = document.createElement('div');
     vendorTooltip.className = 'pointer-events-none fixed z-[100] hidden max-w-xs rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold leading-5 text-white shadow-xl';
     vendorTooltip.setAttribute('role', 'tooltip');
@@ -149,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (attributeSelect.value) {
         selectedByAttribute[attributeSelect.value] = previouslySelected;
         selectedImagesByAttribute[attributeSelect.value] = previouslySelectedImages;
+        metadataByAttribute[attributeSelect.value] = previouslySelectedMetadata;
     }
 
     const valueCheckboxes = () => [...valuesContainer.querySelectorAll('input[name="vendor_attribute_values[]"]')];
@@ -170,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         valuesContainer.replaceChildren();
         imagesContainer.replaceChildren();
         panel.classList.toggle('hidden', !key);
+        menuCostingNote.classList.toggle('hidden', key !== 'menu_card_items');
         optionsText.readOnly = Boolean(key);
         mappedNote.classList.toggle('hidden', !key);
 
@@ -183,10 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('vendor-values-title').textContent = `${attribute.label} values`;
         const selected = new Set(selectedByAttribute[key] || []);
         attribute.values.forEach(item => {
-            const label = document.createElement('label');
-            label.className = 'flex items-center justify-between gap-3 rounded-lg border border-slate-100 px-3 py-2.5 text-sm transition hover:border-indigo-200 hover:bg-indigo-50/40';
+            const row = document.createElement('div');
+            row.className = 'rounded-lg border border-slate-100 px-3 py-2.5 text-sm transition hover:border-indigo-200 hover:bg-indigo-50/40';
 
-            const left = document.createElement('span');
+            const top = document.createElement('div');
+            top.className = 'flex items-center justify-between gap-3';
+
+            const left = document.createElement('label');
             left.className = 'flex min-w-0 items-center gap-2';
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -213,8 +223,45 @@ document.addEventListener('DOMContentLoaded', () => {
             count.addEventListener('mouseleave', hideVendorTooltip);
             count.addEventListener('focus', () => showVendorTooltip(count));
             count.addEventListener('blur', hideVendorTooltip);
-            label.append(left, count);
-            valuesContainer.appendChild(label);
+            top.append(left, count);
+            row.appendChild(top);
+
+            if (key === 'menu_card_items') {
+                const saved = metadataByAttribute[key]?.[String(item.value)] || {};
+                const fields = document.createElement('div');
+                fields.className = 'mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3';
+
+                const valueInput = document.createElement('input');
+                valueInput.type = 'hidden';
+                valueInput.name = 'option_metadata_values[]';
+                valueInput.value = item.value;
+
+                const category = document.createElement('input');
+                category.name = 'option_metadata_categories[]';
+                category.value = saved.category || 'Menu Items';
+                category.placeholder = 'Category (e.g. Main Course)';
+                category.className = 'admin-control min-w-0 px-2.5 py-2 text-xs';
+
+                const cost = document.createElement('input');
+                cost.type = 'number';
+                cost.name = 'option_metadata_costs[]';
+                cost.value = saved.cost ?? 0;
+                cost.min = '0';
+                cost.step = '0.01';
+                cost.placeholder = 'Cost per guest';
+                cost.className = 'admin-control min-w-0 px-2.5 py-2 text-xs';
+
+                const rememberMetadata = () => {
+                    metadataByAttribute[key] ||= {};
+                    metadataByAttribute[key][String(item.value)] = { category: category.value, cost: cost.value };
+                };
+                category.addEventListener('input', rememberMetadata);
+                cost.addEventListener('input', rememberMetadata);
+                fields.append(valueInput, category, cost);
+                row.appendChild(fields);
+            }
+
+            valuesContainer.appendChild(row);
         });
 
         emptyMessage.classList.toggle('hidden', attribute.values.length > 0);

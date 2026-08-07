@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Admin;
 use App\Models\AiSetting;
+use App\Models\EventRequirementQuestion;
 use App\Models\User;
 use App\Models\UserEventPlan;
-use App\Models\Admin;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
@@ -19,6 +20,14 @@ class EventPlanningFlowTest extends TestCase
     public function test_landing_and_planner_use_managed_wedding_questions(): void
     {
         $this->seed(EventRequirementQuestionSeeder::class);
+        EventRequirementQuestion::where('question_code', 'food_type')->update([
+            'options' => ['Paneer Tikka', 'Gulab Jamun'],
+            'vendor_attribute_values' => ['Paneer Tikka', 'Gulab Jamun'],
+            'option_metadata' => [
+                'Paneer Tikka' => ['label' => 'Paneer Tikka', 'category' => 'Starters', 'cost' => 125],
+                'Gulab Jamun' => ['label' => 'Gulab Jamun', 'category' => 'Desserts', 'cost' => 50],
+            ],
+        ]);
 
         $this->get(route('home'))
             ->assertOk()
@@ -34,6 +43,14 @@ class EventPlanningFlowTest extends TestCase
     public function test_guest_requirements_resume_after_login_and_create_history_with_suggestions(): void
     {
         $this->seed(EventRequirementQuestionSeeder::class);
+        EventRequirementQuestion::where('question_code', 'food_type')->update([
+            'options' => ['Paneer Tikka', 'Gulab Jamun'],
+            'vendor_attribute_values' => ['Paneer Tikka', 'Gulab Jamun'],
+            'option_metadata' => [
+                'Paneer Tikka' => ['label' => 'Paneer Tikka', 'category' => 'Starters', 'cost' => 125],
+                'Gulab Jamun' => ['label' => 'Gulab Jamun', 'category' => 'Desserts', 'cost' => 50],
+            ],
+        ]);
         $user = User::factory()->create(['status' => true, 'password' => 'password']);
         AiSetting::setValue('openrouter_api_key', Crypt::encryptString('test-key'));
         AiSetting::setValue('openrouter_model', 'openrouter/auto');
@@ -61,12 +78,17 @@ class EventPlanningFlowTest extends TestCase
                 'wedding_budget' => 25,
                 'guest_capacity' => 200,
                 'wedding_tradition' => 'Maharashtrian Lagna',
+                'food_menu_items' => [
+                    ['id' => 'Paneer Tikka', 'title' => 'Paneer Tikka', 'category' => 'Starters', 'cost' => 125],
+                    ['id' => 'Gulab Jamun', 'title' => 'Gulab Jamun', 'category' => 'Desserts', 'cost' => 50],
+                ],
             ],
         ];
 
         $this->post(route('ai-planner.generate'), $payload)
             ->assertRedirect(route('user.login'))
-            ->assertSessionHas('pending_event_plan');
+            ->assertSessionHas('pending_event_plan')
+            ->assertSessionHas('pending_event_plan.answers.food_menu_items.0.title', 'Paneer Tikka');
 
         $this->post(route('user.login.submit'), ['email' => $user->email, 'password' => 'password'])
             ->assertRedirect(route('ai-planner.resume'));
@@ -74,7 +96,12 @@ class EventPlanningFlowTest extends TestCase
         $response = $this->actingAs($user)->get(route('ai-planner.resume'));
         $plan = UserEventPlan::whereNull('parent_plan_id')->firstOrFail();
         $response->assertRedirect(route('user.plans.show', $plan));
-        $this->assertCount(2, $plan->suggestions);
+        $this->assertCount(6, $plan->suggestions);
+        $this->assertSame('4 saved requirements', data_get($plan->summary, 'display_content.selection_eyebrow'));
+        $this->assertSame('Essential option', data_get($plan->suggestions->firstWhere('title', 'Essential Wedding Plan')?->summary, 'comparison.tier'));
+        $catering = collect($plan->summary['costing'])->firstWhere('category', 'Catering');
+        $this->assertSame(35000.0, (float) $catering['amount']);
+        $this->assertSame(['Paneer Tikka', 'Gulab Jamun'], array_column($catering['attributes'], 'name'));
 
         $this->actingAs($user)->get(route('user.plans.index'))
             ->assertOk()->assertSee('AI Wedding Plan');
@@ -108,11 +135,21 @@ class EventPlanningFlowTest extends TestCase
 
         $this->actingAs($user)->get(route('user.dashboard'))
             ->assertOk()->assertSee('planning studio')->assertSee('Detailed plan', false);
+        $this->actingAs($user)->get(route('user.plans.show', $plan))
+            ->assertOk()
+            ->assertSee('Detailed plan')
+            ->assertSee('Food Type')
+            ->assertSee('₹25 lakh')
+            ->assertSee('Generate new plan')
+            ->assertSee('Base Catering Service')
+            ->assertDontSee('base_catering_service');
 
         $response = $this->actingAs($user)->get(route('user.plans.download', $plan));
         $response->assertOk()->assertHeader('content-type', 'application/pdf');
         $this->assertStringStartsWith('%PDF-1.4', $response->getContent());
         $this->assertStringContainsString('DETAILED COSTING', $response->getContent());
+        $this->assertStringNotContainsString('MATCHED VENDORS', $response->getContent());
+        $this->assertStringNotContainsString('Royal Caterer', $response->getContent());
     }
 
     public function test_admin_can_open_user_plan_audit_and_download_pdf(): void
@@ -130,7 +167,10 @@ class EventPlanningFlowTest extends TestCase
 
         $response = $this->actingAs($admin, 'admin')->get(route('admin.users.plans.download', $plan));
         $response->assertOk()->assertHeader('content-type', 'application/pdf');
-        $this->assertStringContainsString('AI REQUIREMENT PROMPT', $response->getContent());
+        $this->assertStringContainsString('DETAILED COSTING', $response->getContent());
+        $this->assertStringNotContainsString('AI REQUIREMENT PROMPT', $response->getContent());
+        $this->assertStringNotContainsString('MATCHED VENDORS', $response->getContent());
+        $this->assertStringNotContainsString('Royal Caterer', $response->getContent());
     }
 
     private function planFor(User $user): UserEventPlan
@@ -147,7 +187,7 @@ class EventPlanningFlowTest extends TestCase
                 'title' => 'Detailed plan',
                 'overview' => 'A deeply costed plan.',
                 'total_cost' => 2500000,
-                'costing' => [['category' => 'Catering', 'amount' => 750000, 'percentage' => 30, 'summary' => 'Food and service', 'vendor_ids' => [10]]],
+                'costing' => [['category' => 'Catering', 'amount' => 750000, 'percentage' => 30, 'summary' => 'Food and service', 'vendor_ids' => [10], 'attributes' => [['name' => 'Base_Catering_Service', 'value' => 'main_course', 'cost' => 750000]]]],
                 'recommendations' => [['vendor_id' => 10, 'name' => 'Royal Caterer', 'category' => 'Catering', 'reason' => 'Matches the menu.', 'estimated_cost' => 750000]],
                 'notes' => ['Confirm availability.'],
             ],

@@ -80,7 +80,7 @@ class EventRequirementQuestionSeeder extends Seeder
                     'question' => $definition['question'],
                     'question_code' => $definition['question_code'],
                     'question_type' => $definition['question_type'],
-                    'options' => $definition['options'],
+                    'options' => $attribute ? array_column($attribute['values'] ?? [], 'label') : $definition['options'],
                     'vendor_attribute_key' => $attributeKey,
                     'vendor_attribute_label' => $attribute['label'] ?? null,
                     'vendor_attribute_values' => $mappedValues,
