@@ -8,6 +8,8 @@
     totalSteps: 7,
     maxVisitedStep: 1,
     isCalculating: false,
+    calculationStage: 0,
+    calculationTimer: null,
     managedOptions: @js($plannerOptions),
     vendorPackages: @js($vendorPackages ?? []),
     activeModalPackage: null,
@@ -349,7 +351,13 @@
     generatePlan() {
         if (!this.validateCurrentStep()) return;
         this.isCalculating = true;
-        this.$nextTick(() => this.$refs.planForm.submit());
+        this.calculationStage = 0;
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        this.calculationTimer = setInterval(() => {
+            this.calculationStage = Math.min(2, this.calculationStage + 1);
+        }, 900);
+        this.$nextTick(() => setTimeout(() => this.$refs.planForm.submit(), 350));
     }
 }">
 
@@ -446,15 +454,6 @@
         <div class="lg:col-span-8 xl:col-span-9 bg-white/90 backdrop-blur-xl rounded-3xl p-5 sm:p-7 shadow-lg border border-rose-100/80 min-h-[480px] flex flex-col justify-between relative overflow-hidden">
 
             
-            <!-- AI Calculation Loader State -->
-            <div x-show="isCalculating" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="absolute inset-0 bg-white/95 backdrop-blur-md z-30 flex flex-col items-center justify-center space-y-4 p-8 text-center" style="display: none;">
-                <div class="w-16 h-16 rounded-full border-4 border-rose-100 border-t-[#850625] animate-spin flex items-center justify-center">
-                    <i class="fa-solid fa-wand-magic-sparkles text-xl text-[#D4AF37] animate-pulse"></i>
-                </div>
-                <h3 class="text-2xl font-bold font-serif-luxury text-slate-900">Synthesizing Your Royal Plan...</h3>
-                <p class="text-xs text-slate-500 max-w-sm">Shaadi Sense AI is balancing venue, catering, decor & media proportions for maximum hospitality value.</p>
-            </div>
-
             <!-- Steps Content Include -->
             <div class="space-y-6">
                 @include('ai-planner.steps.step-1-budget')
@@ -500,6 +499,59 @@
         </div>
 
     </div>
+
+    <template x-teleport="body">
+        <div x-show="isCalculating"
+            x-transition:enter="transition ease-out duration-500"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            class="fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-[#31000d]/95 px-4 py-6 backdrop-blur-xl"
+            style="display: none;">
+            <div class="absolute inset-0 opacity-40" style="background: radial-gradient(circle at 20% 20%, rgba(212,175,55,.38), transparent 22rem), radial-gradient(circle at 85% 80%, rgba(190,24,74,.5), transparent 26rem);"></div>
+            <div class="absolute left-[10%] top-[12%] h-2 w-2 animate-ping rounded-full bg-amber-300"></div>
+            <div class="absolute right-[15%] top-[20%] h-3 w-3 animate-pulse rotate-45 bg-rose-300"></div>
+            <div class="absolute bottom-[15%] left-[20%] h-2.5 w-2.5 animate-ping rounded-full bg-[#D4AF37]" style="animation-delay:.8s"></div>
+
+            <div class="relative w-full max-w-4xl overflow-hidden rounded-[2rem] border border-white/15 bg-white/[.97] p-6 text-center shadow-[0_35px_100px_rgba(0,0,0,.45)] sm:p-10">
+                <div class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#850625] via-[#D4AF37] to-[#850625]"></div>
+                <div class="mx-auto flex h-28 w-28 items-center justify-center sm:h-32 sm:w-32">
+                    <div class="absolute h-28 w-28 animate-spin rounded-full border border-dashed border-[#D4AF37] sm:h-32 sm:w-32" style="animation-duration:8s"></div>
+                    <div class="absolute h-20 w-20 animate-spin rounded-full border-[3px] border-rose-100 border-t-[#850625] border-r-[#D4AF37] sm:h-24 sm:w-24" style="animation-duration:1.6s;animation-direction:reverse"></div>
+                    <div class="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#850625] to-[#b71648] text-xl text-[#F2D15C] shadow-xl shadow-rose-900/30 sm:h-16 sm:w-16 sm:text-2xl">
+                        <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-[10px] font-extrabold uppercase tracking-[.28em] text-[#9B0B35]">Shaadi Sense AI Studio</div>
+                <h2 class="mt-2 text-3xl font-extrabold font-serif-luxury text-slate-950 sm:text-5xl">Crafting your celebration</h2>
+                <p class="mx-auto mt-3 max-w-2xl text-xs leading-6 text-slate-500 sm:text-sm">We are connecting your saved preferences with active vendors, organizing service costs, and preparing easy-to-compare plan options.</p>
+
+                <div class="mx-auto mt-7 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+                    <template x-for="(stage, index) in [
+                        { icon: 'fa-sliders', title: 'Reading preferences', text: 'Budget, guests and style' },
+                        { icon: 'fa-store', title: 'Matching vendors', text: 'Active database vendors' },
+                        { icon: 'fa-chart-pie', title: 'Organizing plan', text: 'Clear costing and options' }
+                    ]" :key="stage.title">
+                        <div class="rounded-2xl border p-4 text-left transition-all duration-500"
+                            :class="calculationStage >= index ? 'border-rose-200 bg-rose-50 shadow-md' : 'border-slate-200 bg-slate-50 opacity-55'">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors"
+                                    :class="calculationStage >= index ? 'bg-[#850625] text-white' : 'bg-slate-200 text-slate-400'">
+                                    <i class="fa-solid" :class="calculationStage > index ? 'fa-check' : stage.icon"></i>
+                                </span>
+                                <div><div class="text-xs font-extrabold text-slate-800" x-text="stage.title"></div><div class="mt-0.5 text-[10px] text-slate-500" x-text="stage.text"></div></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="mx-auto mt-6 h-1.5 max-w-xl overflow-hidden rounded-full bg-rose-100">
+                    <div class="h-full rounded-full bg-gradient-to-r from-[#850625] via-[#D4AF37] to-[#850625] transition-all duration-700" :style="`width: ${33 + (calculationStage * 33)}%`"></div>
+                </div>
+                <p class="mt-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Please keep this window open</p>
+            </div>
+        </div>
+    </template>
 
     <form x-ref="planForm" method="POST" action="{{ route('ai-planner.generate') }}" class="hidden">
         @csrf

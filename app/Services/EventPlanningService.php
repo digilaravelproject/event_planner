@@ -65,7 +65,7 @@ class EventPlanningService
         return DynamicVendor::query()
             ->whereRaw('LOWER(status) = ?', ['active'])
             ->latest('id')
-            ->limit(60)
+            ->limit(200)
             ->get()
             ->map(fn (DynamicVendor $vendor): array => [
                 'id' => $vendor->id,
@@ -155,15 +155,20 @@ class EventPlanningService
             ['Photography & Entertainment', .12, 'Photography, film and entertainment coverage.'],
             ['Planning Contingency', .08, 'Coordination, transport and contingency reserve.'],
         ];
-        $costing = collect($allocations)->map(fn (array $row): array => [
-            'category' => $row[0],
-            'amount' => round($total * $row[1], 2),
-            'percentage' => $row[1] * 100,
-            'summary' => $row[2],
-            'vendor_ids' => [],
-            'attributes' => [],
-        ])->all();
-        $recommendations = collect($vendors)->unique('category')->take(8)->map(fn (array $vendor): array => [
+        $costing = collect($allocations)->map(function (array $row) use ($total, $vendors): array {
+            $matchedVendors = $this->vendorsForCategory($vendors, $row[0])->take(3);
+
+            return [
+                'category' => $row[0],
+                'amount' => round($total * $row[1], 2),
+                'percentage' => $row[1] * 100,
+                'summary' => $row[2],
+                'vendor_ids' => $matchedVendors->pluck('id')->all(),
+                'attributes' => [],
+            ];
+        })->all();
+        $usedVendorIds = collect($costing)->pluck('vendor_ids')->flatten()->unique();
+        $recommendations = collect($vendors)->whereIn('id', $usedVendorIds)->take(12)->map(fn (array $vendor): array => [
             'vendor_id' => $vendor['id'],
             'name' => $vendor['name'],
             'category' => $vendor['category'],
@@ -179,6 +184,34 @@ class EventPlanningService
             'recommendations' => $recommendations,
             'notes' => ['Confirm final quotations and availability directly with shortlisted vendors.'],
         ];
+    }
+
+    private function vendorsForCategory(array $vendors, string $category)
+    {
+        $category = strtolower($category);
+        $groups = [
+            ['venue', 'stay', 'hotel', 'banquet', 'resort'],
+            ['cater', 'food', 'menu'],
+            ['decor', 'style', 'florist', 'flower', 'mandap'],
+            ['photo', 'media', 'video', 'entertainment', 'dj', 'sound'],
+            ['planning', 'contingency', 'transport', 'travel', 'coordination'],
+        ];
+        $selectedGroup = collect($groups)->first(fn (array $group): bool => collect($group)->contains(fn (string $word): bool => str_contains($category, $word)));
+
+        return collect($vendors)->filter(function (array $vendor) use ($category, $selectedGroup): bool {
+            $vendorText = strtolower((string) ($vendor['category'] ?? '').' '.(string) ($vendor['name'] ?? ''));
+
+            return $selectedGroup
+                ? collect($selectedGroup)->contains(fn (string $word): bool => str_contains($vendorText, $word))
+                : str_contains($vendorText, $category);
+        })->sortBy(function (array $vendor) use ($selectedGroup): int {
+            if (! $selectedGroup) {
+                return 0;
+            }
+            $vendorText = strtolower((string) ($vendor['category'] ?? '').' '.(string) ($vendor['name'] ?? ''));
+
+            return (int) (collect($selectedGroup)->search(fn (string $word): bool => str_contains($vendorText, $word)) ?: 0);
+        })->values();
     }
 
     private function createSuggestions(UserEventPlan $plan): void

@@ -7,6 +7,7 @@ use App\Models\AiSetting;
 use App\Models\EventRequirementQuestion;
 use App\Models\User;
 use App\Models\UserEventPlan;
+use App\Services\PlanPresentationService;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
@@ -130,6 +131,55 @@ class EventPlanningFlowTest extends TestCase
         ]);
 
         $this->actingAs($other)->get(route('user.plans.show', $plan))->assertForbidden();
+    }
+
+    public function test_legacy_fallback_plan_shows_database_vendors_without_static_allocations(): void
+    {
+        $user = User::factory()->create();
+        $plan = UserEventPlan::create([
+            'user_id' => $user->id,
+            'title' => 'Readable vendor plan',
+            'category' => 'wedding',
+            'guest_count' => 300,
+            'answers' => ['wedding_budget' => 25],
+            'requirement_prompt' => 'prompt',
+            'vendor_snapshot' => [
+                ['id' => 1, 'name' => 'Royal Grand Hotel', 'category' => 'Hotel', 'attributes' => [['key' => 'price', 'value' => 500000]]],
+                ['id' => 2, 'name' => 'Celebration Caterers', 'category' => 'Catering', 'attributes' => [['key' => 'price', 'value' => 300000]]],
+            ],
+            'summary' => [
+                'title' => 'Readable vendor plan',
+                'overview' => 'Saved plan overview.',
+                'costing' => [
+                    ['category' => 'Venue & Stay', 'amount' => 500000, 'percentage' => 62.5, 'summary' => 'Venue total', 'vendor_ids' => [], 'attributes' => []],
+                    ['category' => 'Catering & Service', 'amount' => 300000, 'percentage' => 37.5, 'summary' => 'Catering total', 'vendor_ids' => [], 'attributes' => []],
+                ],
+            ],
+            'total_cost' => 800000,
+            'status' => 'completed',
+        ]);
+
+        $presentation = app(PlanPresentationService::class)->present($plan);
+        $this->assertSame(['Royal Grand Hotel', 'Celebration Caterers'], array_column($presentation['plan_vendors'], 'name'));
+
+        $this->actingAs($user)->get(route('user.plans.show', $plan))
+            ->assertOk()
+            ->assertSee('Vendors matched to this plan')
+            ->assertSee('Royal Grand Hotel')
+            ->assertSee('Celebration Caterers')
+            ->assertDontSee('Indicative allocation');
+    }
+
+    public function test_generation_screen_is_viewport_fixed_and_staged(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+
+        $this->get(route('ai-planner', ['type' => 'wedding', 'guests' => 300]))
+            ->assertOk()
+            ->assertSee('x-teleport="body"', false)
+            ->assertSee('fixed inset-0 z-[120]', false)
+            ->assertSee('Crafting your celebration')
+            ->assertSee('Matching vendors');
     }
 
     public function test_user_dashboard_and_pdf_download_are_available(): void

@@ -14,15 +14,23 @@ class PlanPresentationService
         $vendors = collect($plan->vendor_snapshot ?? [])->keyBy('id');
         $costing = collect($summary['costing'] ?? [])->map(function (array $item) use ($vendors): array {
             $amount = (float) ($item['amount'] ?? 0);
-            $attributes = collect($item['attributes'] ?? [])->map(fn ($attribute): array => [
-                'name' => $this->cleanText((string) ($attribute['name'] ?? 'Service item')),
-                'value' => $this->cleanText((string) ($attribute['value'] ?? '')),
-                'cost' => max(0, (float) ($attribute['cost'] ?? 0)),
-            ])->filter(fn (array $attribute): bool => $attribute['name'] !== '')->values();
+            $matchedVendors = collect($item['vendor_ids'] ?? [])->map(fn ($id) => $vendors->get((int) $id))->filter()->values();
+            if ($matchedVendors->isEmpty()) {
+                $matchedVendors = $this->vendorsForCategory($vendors->values(), (string) ($item['category'] ?? ''))->take(3)->values();
+            }
 
-            if ($attributes->isEmpty()) {
-                $attributes = collect($this->defaultBreakdown((string) ($item['category'] ?? 'Service'), $amount));
-            } elseif (($attributeTotal = (float) $attributes->sum('cost')) > 0 && abs($attributeTotal - $amount) > 0.01) {
+            $attributes = collect($item['attributes'] ?? [])->map(function ($attribute, $index) use ($matchedVendors): array {
+                $savedValue = $this->cleanText((string) ($attribute['value'] ?? ''));
+
+                return [
+                    'name' => $this->cleanText((string) ($attribute['name'] ?? 'Service item')),
+                    'value' => strcasecmp($savedValue, 'Indicative allocation') === 0 ? '' : $savedValue,
+                    'vendor_name' => (string) data_get($matchedVendors->get(((int) $index) % max(1, $matchedVendors->count())), 'name', ''),
+                    'cost' => max(0, (float) ($attribute['cost'] ?? 0)),
+                ];
+            })->filter(fn (array $attribute): bool => $attribute['name'] !== '')->values();
+
+            if (($attributeTotal = (float) $attributes->sum('cost')) > 0 && abs($attributeTotal - $amount) > 0.01) {
                 $attributes = $attributes->map(function (array $attribute) use ($amount, $attributeTotal): array {
                     $attribute['cost'] = round($amount * ((float) $attribute['cost'] / $attributeTotal), 2);
 
@@ -30,16 +38,16 @@ class PlanPresentationService
                 });
             }
 
-            $matchedVendors = collect($item['vendor_ids'] ?? [])->map(fn ($id) => $vendors->get((int) $id))->filter()->values()->all();
-
             return array_merge($item, [
                 'category' => $this->cleanText((string) ($item['category'] ?? 'Service')),
                 'summary' => $this->cleanText((string) ($item['summary'] ?? '')),
                 'amount' => $amount,
                 'attributes' => $attributes->all(),
-                'vendors' => $matchedVendors,
+                'vendors' => $matchedVendors->map(fn (array $vendor): array => $this->presentVendor($vendor))->all(),
             ]);
         })->values()->all();
+
+        $planVendors = collect($costing)->pluck('vendors')->flatten(1)->unique('id')->values()->all();
 
         $recommendationSource = collect($summary['recommendations'] ?? []);
         if ($recommendationSource->isEmpty()) {
@@ -109,25 +117,56 @@ class PlanPresentationService
             'answer_details' => $answerDetails,
             'content' => array_merge($this->defaultDisplayContent($summary, $answers, $plan), (array) ($summary['display_content'] ?? [])),
             'comparison' => (array) ($summary['comparison'] ?? []),
+            'plan_vendors' => $planVendors,
         ];
     }
 
-    private function defaultBreakdown(string $category, float $amount): array
+    private function vendorsForCategory($vendors, string $category)
     {
-        $key = strtolower($category);
-        $parts = match (true) {
-            str_contains($key, 'venue') => [['Venue rental', .55], ['Guest facilities and seating', .20], ['Service staff', .15], ['Utilities and contingency', .10]],
-            str_contains($key, 'cater') || str_contains($key, 'food') => [['Menu and ingredients', .62], ['Kitchen and serving team', .18], ['Live counters and presentation', .12], ['Service contingency', .08]],
-            str_contains($key, 'decor') || str_contains($key, 'style') => [['Mandap or stage structure', .38], ['Flowers and fabrics', .27], ['Lighting and installation', .22], ['Transport and dismantling', .13]],
-            str_contains($key, 'photo') || str_contains($key, 'media') => [['Photography team', .36], ['Cinematography', .32], ['Editing and album', .20], ['Equipment and travel', .12]],
-            default => [['Core service', .60], ['Staff and coordination', .25], ['Logistics and reserve', .15]],
-        };
+        $category = strtolower($category);
+        $groups = [
+            ['venue', 'stay', 'hotel', 'banquet', 'resort'],
+            ['cater', 'food', 'menu'],
+            ['decor', 'style', 'florist', 'flower', 'mandap'],
+            ['photo', 'media', 'video', 'entertainment', 'dj', 'sound'],
+            ['planning', 'contingency', 'transport', 'travel', 'coordination'],
+        ];
+        $selectedGroup = collect($groups)->first(fn (array $group): bool => collect($group)->contains(fn (string $word): bool => str_contains($category, $word)));
 
-        return collect($parts)->map(fn (array $part): array => [
-            'name' => $part[0],
-            'value' => 'Indicative allocation',
-            'cost' => round($amount * $part[1], 2),
-        ])->all();
+        return collect($vendors)->filter(function (array $vendor) use ($category, $selectedGroup): bool {
+            $vendorText = strtolower((string) ($vendor['category'] ?? '').' '.(string) ($vendor['name'] ?? ''));
+            if ($selectedGroup) {
+                return collect($selectedGroup)->contains(fn (string $word): bool => str_contains($vendorText, $word));
+            }
+
+            return collect(preg_split('/[^a-z0-9]+/', $category) ?: [])->filter(fn (string $word): bool => strlen($word) > 3)
+                ->contains(fn (string $word): bool => str_contains($vendorText, $word));
+        })->sortBy(function (array $vendor) use ($selectedGroup): int {
+            if (! $selectedGroup) {
+                return 0;
+            }
+            $vendorText = strtolower((string) ($vendor['category'] ?? '').' '.(string) ($vendor['name'] ?? ''));
+
+            return (int) (collect($selectedGroup)->search(fn (string $word): bool => str_contains($vendorText, $word)) ?: 0);
+        })->values();
+    }
+
+    private function presentVendor(array $vendor): array
+    {
+        $priceAttribute = collect((array) ($vendor['attributes'] ?? []))->first(function ($attribute, $key): bool {
+            if (is_array($attribute)) {
+                return strtolower((string) ($attribute['key'] ?? $attribute['label'] ?? '')) === 'price';
+            }
+
+            return strtolower((string) $key) === 'price';
+        });
+
+        return [
+            'id' => (int) ($vendor['id'] ?? 0),
+            'name' => (string) ($vendor['name'] ?? 'Vendor'),
+            'category' => (string) ($vendor['category'] ?? 'Vendor'),
+            'price' => max(0, (float) (is_array($priceAttribute) ? ($priceAttribute['value'] ?? 0) : $priceAttribute)),
+        ];
     }
 
     private function displayValue(mixed $value): string
