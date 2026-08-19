@@ -14,6 +14,13 @@ class EventRequirementQuestionSeeder extends Seeder
         $catalog = app(VendorAttributeCatalogService::class)->catalog();
         $definitions = [
             [
+                'question' => 'What type of event are you planning?',
+                'question_code' => 'event_category',
+                'question_type' => 'radio',
+                'options' => ['Grand Wedding & Sangeet'],
+                'is_required' => true,
+            ],
+            [
                 'question' => 'What is your total estimated wedding budget?',
                 'question_code' => 'wedding_budget',
                 'question_type' => 'number',
@@ -92,6 +99,6 @@ class EventRequirementQuestionSeeder extends Seeder
             }
         });
 
-        $this->command?->info('Seven wedding planning questions seeded.');
+        $this->command?->info('Eight event planning questions seeded.');
     }
 }

@@ -26,23 +26,23 @@
 
     <!-- Desktop Navigation Links with Floating Pill Hover Animation -->
     <nav class="hidden lg:flex items-center space-x-1 bg-white/70 backdrop-blur-md p-1.5 rounded-full border border-rose-200/50 shadow-xs">
-        <a href="#categories" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#categories" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>Categories</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="#how-it-works" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#how-it-works" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>How It Works</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="#problem-vs-solution" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#problem-vs-solution" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>Why Shaadi Sense</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="#estimator" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#estimator" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>AI Estimator</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="#testimonials" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#testimonials" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>Reviews</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
@@ -93,23 +93,23 @@
         class="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-2xl shadow-2xl border-t border-rose-100/80 p-6 flex flex-col space-y-3 lg:hidden z-50 rounded-b-3xl"
         style="display: none;"
     >
-        <a @click="mobileMenuOpen = false" href="#categories" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#categories" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>Categories</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
-        <a @click="mobileMenuOpen = false" href="#how-it-works" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#how-it-works" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>How It Works</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
-        <a @click="mobileMenuOpen = false" href="#problem-vs-solution" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#problem-vs-solution" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>Why Shaadi Sense</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
-        <a @click="mobileMenuOpen = false" href="#estimator" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#estimator" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>AI Estimator</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
-        <a @click="mobileMenuOpen = false" href="#testimonials" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#testimonials" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>Reviews</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>

@@ -33,7 +33,7 @@ class EventPlanningFlowTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('Grand Wedding', false)
-            ->assertSeeText('50 – 150 Guests');
+            ->assertSeeText('150 Guests');
 
         $this->get(route('ai-planner', ['type' => 'wedding', 'guests' => 300]))
             ->assertOk()
@@ -41,7 +41,8 @@ class EventPlanningFlowTest extends TestCase
             ->assertSee('How many guests will celebrate with you?')
             ->assertSee('foodItems: []', false)
             ->assertSee('answers[food_menu_items]', false)
-            ->assertSee('6: this.planner.foodItems.length', false)
+            ->assertSee('plannerSteps:', false)
+            ->assertSee('totalSteps:', false)
             ->assertDontSee('currentStep === 5 && this.planner.foodItems', false);
     }
 
@@ -102,7 +103,7 @@ class EventPlanningFlowTest extends TestCase
         $plan = UserEventPlan::whereNull('parent_plan_id')->firstOrFail();
         $response->assertRedirect(route('user.plans.show', $plan));
         $this->assertCount(6, $plan->suggestions);
-        $this->assertSame('4 saved requirements', data_get($plan->summary, 'display_content.selection_eyebrow'));
+        $this->assertSame('5 saved requirements', data_get($plan->summary, 'display_content.selection_eyebrow'));
         $this->assertSame('Essential option', data_get($plan->suggestions->firstWhere('title', 'Essential Wedding Plan')?->summary, 'comparison.tier'));
         $catering = collect($plan->summary['costing'])->firstWhere('category', 'Catering');
         $this->assertSame(35000.0, (float) $catering['amount']);
@@ -180,6 +181,111 @@ class EventPlanningFlowTest extends TestCase
             ->assertSee('fixed inset-0 z-[120]', false)
             ->assertSee('Crafting your celebration')
             ->assertSee('Matching vendors');
+    }
+
+    public function test_planner_exposes_option_images_and_custom_ceremony_choice(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+        EventRequirementQuestion::where('question_code', 'wedding_tradition')->update([
+            'options' => ['Garden Wedding', 'Palace Wedding'],
+            'option_images' => ['question-options/garden.jpg', null],
+        ]);
+
+        $response = $this->get(route('ai-planner'))
+            ->assertOk()
+            ->assertSee('Add your own ceremony or custom choice')
+            ->assertSee('addCustomCeremony()', false);
+
+        $this->assertSame(
+            asset('storage/question-options/garden.jpg'),
+            data_get($response->viewData('plannerOptions'), 'wedding_tradition.images.0')
+        );
+    }
+
+    public function test_admin_questions_drive_homepage_dropdowns_and_dynamic_planner_tabs(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+        EventRequirementQuestion::where('question_code', 'event_category')->update([
+            'options' => ['Wedding Celebration', 'Birthday Party'],
+        ]);
+        EventRequirementQuestion::where('question_code', 'guest_capacity')->update([
+            'options' => ['500', '800', '1200', '1600'],
+            'vendor_attribute_values' => ['50', '150', '300', '600'],
+        ]);
+        EventRequirementQuestion::where('question_code', 'food_type')->update([
+            'options' => ['Butter Chicken', 'Masala Dosa'],
+            'option_vendor_values' => ['food_1', 'food_2'],
+            'vendor_attribute_values' => ['legacy_food_1', 'legacy_food_2'],
+            'option_images' => ['question-options/butter-chicken.jpg', 'question-options/masala-dosa.jpg'],
+            'option_metadata' => [
+                'food_1' => ['category' => 'Main Course', 'cost' => 350],
+                'food_2' => ['category' => 'Live Counters', 'cost' => 140],
+            ],
+        ]);
+        EventRequirementQuestion::create([
+            'question' => 'Which music style do you prefer?',
+            'question_code' => 'music_style',
+            'question_type' => 'radio',
+            'options' => ['Live Band', 'DJ Night'],
+            'option_images' => ['question-options/live-band.jpg', null],
+            'option_metadata' => [
+                'Live Band' => ['subtitle' => 'Live musicians for your celebration', 'icon' => 'fa-solid fa-music'],
+                'DJ Night' => ['subtitle' => 'A high-energy dance experience', 'icon' => 'fa-solid fa-star'],
+            ],
+            'is_required' => true,
+            'display_order' => 50,
+            'status' => true,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Birthday Party')
+            ->assertSee('500 Guests')
+            ->assertSee('1600 Guests');
+
+        $response = $this->get(route('ai-planner', ['type' => 'Birthday Party', 'guests' => 1200]))
+            ->assertOk()
+            ->assertSee('Which music style do you prefer?')
+            ->assertSee('Live Band')
+            ->assertSee('DJ Night')
+            ->assertSee('Live musicians for your celebration')
+            ->assertSee('fa-solid fa-music', false)
+            ->assertSee("cateringMode: 'custom'", false)
+            ->assertSee('Admin Food Options')
+            ->assertSee('answers[${step.code}]', false);
+
+        $steps = collect($response->viewData('plannerSteps'));
+        $plannerOptions = $response->viewData('plannerOptions');
+        $this->assertSame('event_category', $steps->first()['code']);
+        $this->assertSame(9, $steps->count());
+        $this->assertSame('generic', $steps->firstWhere('code', 'music_style')['renderer']);
+        $this->assertSame('Live musicians for your celebration', $steps->firstWhere('code', 'music_style')['option_details'][0]['subtitle']);
+        $this->assertSame(['500', '800', '1200', '1600'], data_get($plannerOptions, 'guest_capacity.options'));
+        $this->assertSame('Butter Chicken', data_get($plannerOptions, 'food_type.options.0.title'));
+        $this->assertSame('food_1', data_get($plannerOptions, 'food_type.options.0.id'));
+        $this->assertSame(asset('storage/question-options/butter-chicken.jpg'), data_get($plannerOptions, 'food_type.options.0.image'));
+        $this->assertSame(
+            asset('storage/question-options/live-band.jpg'),
+            $steps->firstWhere('code', 'music_style')['images'][0]
+        );
+    }
+
+    public function test_shared_navigation_links_return_to_homepage_sections(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+
+        $this->get(route('ai-planner'))
+            ->assertOk()
+            ->assertSee(route('home').'#categories', false)
+            ->assertSee(route('home').'#how-it-works', false)
+            ->assertSee(route('home').'#estimator', false)
+            ->assertSee(route('home').'#testimonials', false)
+            ->assertDontSee('history.replaceState(null, null, window.location.pathname)', false);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('id="categories"', false)
+            ->assertSee('id="site-footer"', false);
     }
 
     public function test_user_dashboard_and_pdf_download_are_available(): void

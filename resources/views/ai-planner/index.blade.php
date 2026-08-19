@@ -3,9 +3,22 @@
 @section('title', 'AI Wedding Planner Studio - Shaadi Sense')
 
 @section('content')
-<div class="min-h-screen bg-[#FAF7F2] text-slate-800 pt-24 md:pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans-ui relative overflow-hidden" x-data="{
+@php
+    $genericInitialAnswers = collect($plannerSteps)
+        ->where('renderer', 'generic')
+        ->mapWithKeys(function (array $step) use ($category): array {
+            $multiple = in_array($step['type'], ['checkbox', 'multi_select'], true);
+            $value = $step['code'] === 'event_category'
+                ? $category
+                : ($multiple ? [] : ($step['options'][0] ?? ''));
+            return [$step['code'] => $value];
+        })->all();
+@endphp
+<div class="min-h-screen bg-[#FAF7F2] text-slate-800 pt-24 md:pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans-ui relative overflow-x-hidden" x-data="{
     currentStep: 1,
-    totalSteps: 7,
+    totalSteps: {{ count($plannerSteps) }},
+    plannerSteps: @js($plannerSteps),
+    dynamicAnswers: @js($genericInitialAnswers),
     maxVisitedStep: 1,
     isCalculating: false,
     calculationStage: 0,
@@ -42,9 +55,8 @@
                 pkg.locations.includes(loc) || pkg.locations.includes('All Mumbai')
             );
 
-            // 4. Tradition Check (Temporarily disabled)
-            // const traditionOk = !currentCulture || !pkg.traditions || !pkg.traditions.length || !pkg.traditions[0] || pkg.traditions.some(t => t.toLowerCase().includes(currentCulture.toLowerCase()) || currentCulture.toLowerCase().includes(t.toLowerCase()));
-            const traditionOk = true;
+            // 4. Tradition Check
+            const traditionOk = !currentCulture || !pkg.traditions || !pkg.traditions.length || !pkg.traditions[0] || pkg.traditions.some(t => t.toLowerCase().includes(currentCulture.toLowerCase()) || currentCulture.toLowerCase().includes(t.toLowerCase()));
 
             // 5. Venue Setting Category Check (Must match clicked environment e.g. Sea-Facing, Lawn, Ballroom, Heritage)
             const settingOk = !currentSetting || !pkg.category || pkg.category.toLowerCase().includes(currentSetting.toLowerCase()) || currentSetting.toLowerCase().includes(pkg.category.toLowerCase());
@@ -58,7 +70,29 @@
     },
     imageFor(code, index, fallback) {
         const images = this.managedOptions[code]?.images || [];
-        return images.length ? images[index % images.length] : fallback;
+        return images[index] || fallback;
+    },
+    hasImage(code, index) {
+        return Boolean((this.managedOptions[code]?.images || [])[index]);
+    },
+    selectGenericOption(code, value, multiple = false) {
+        if (!multiple) {
+            this.dynamicAnswers[code] = value;
+        } else {
+            const selected = Array.isArray(this.dynamicAnswers[code]) ? this.dynamicAnswers[code] : [];
+            this.dynamicAnswers[code] = selected.includes(value)
+                ? selected.filter(item => item !== value)
+                : [...selected, value];
+        }
+        this.plannerError = '';
+    },
+    isGenericSelected(code, value) {
+        const answer = this.dynamicAnswers[code];
+        return Array.isArray(answer) ? answer.includes(value) : answer === value;
+    },
+    serializedGenericAnswer(code) {
+        const value = this.dynamicAnswers[code];
+        return Array.isArray(value) ? JSON.stringify(value) : (value ?? '');
     },
     foodOptions() {
         return this.optionsFor('food_type', []).map(value => typeof value === 'object' ? value : ({ id: value, title: value, category: 'Menu Items', cost: 0 }));
@@ -220,12 +254,16 @@
         };
     },
     guestLabel(value) {
-        const count = Number(String(value).replace(/\D/g, ''));
-        if (count <= 50) return 'Under 50 Guests';
-        if (count <= 150) return '50 - 150 Guests';
-        if (count <= 300) return '150 - 300 Guests';
-        if (count <= 600) return '300 - 600 Guests';
-        return '600+ Guests';
+        const label = String(typeof value === 'object' ? (value.title || value.name || value.id || '') : value).trim();
+        return /guest/i.test(label) ? label : `${label} Guests`;
+    },
+    guestNumber(value) {
+        const matches = String(typeof value === 'object' ? (value.id || value.title || value.name || '') : value).match(/\d[\d,]*/g) || [];
+        return Number((matches.at(-1) || '150').replace(/,/g, '')) || 150;
+    },
+    syncGuestOption() {
+        this.planner.guestCount = String(this.planner.exactGuest || '');
+        this.plannerError = '';
     },
     planner: {
         budget: {{ request('guests') ? 25 : 20 }},
@@ -234,8 +272,9 @@
         culture: @js($plannerOptions['wedding_tradition']['options'][0] ?? 'Maharashtrian Lagna'),
         decorTheme: @js($plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
         ceremonies: ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'],
+        customCeremony: '',
         selectedVendorId: null,
-        cateringMode: 'package',
+        cateringMode: 'custom',
         selectedFoodPackageId: 'deluxe_menu',
         selectedFoodExtras: ['chinese_counter', 'chat_counter'],
         foodType: '',
@@ -307,18 +346,31 @@
         };
         return map[this.planner.culture] || ['Haldi & Mehendi', 'Sangeet & Cocktail', 'Main Ceremony', 'Grand Reception'];
     },
+    addCustomCeremony() {
+        const ceremony = this.planner.customCeremony.trim();
+        if (!ceremony || this.planner.ceremonies.includes(ceremony)) return;
+        this.planner.ceremonies.push(ceremony);
+        this.planner.customCeremony = '';
+        this.plannerError = '';
+    },
     plannerError: '',
     validateCurrentStep() {
-        const messages = {
-            1: Number(this.planner.budget) > 0 ? '' : 'Choose your wedding budget to continue.',
-            2: Number(this.planner.exactGuest) >= 10 ? '' : 'Enter a valid guest count to continue.',
-            3: this.planner.locations.length > 0 ? '' : 'Select at least one preferred location to continue.',
-            4: this.planner.culture ? '' : 'Select a wedding tradition to continue.',
-            5: this.planner.setting ? '' : 'Select a venue vibe or mandap decor to continue.',
-            6: (this.planner.cateringMode === 'package' && this.planner.selectedFoodPackageId) || (this.planner.cateringMode === 'custom' && this.planner.foodItems.length > 0) ? '' : 'Please select a catering package or custom menu items to continue.',
-            7: this.planner.timeline ? '' : 'Select your event timeline to generate the plan.'
+        const step = this.plannerSteps[this.currentStep - 1];
+        if (!step) return false;
+        const valid = {
+            wedding_budget: Number(this.planner.budget) > 0,
+            guest_capacity: Number(this.planner.exactGuest) >= 10,
+            service_area: this.planner.locations.length > 0,
+            wedding_tradition: Boolean(this.planner.culture),
+            decoration_type: Boolean(this.planner.setting),
+            food_type: (this.planner.cateringMode === 'package' && this.planner.selectedFoodPackageId) || (this.planner.cateringMode === 'custom' && this.planner.foodItems.length > 0),
+            event_timeline: Boolean(this.planner.timeline)
         };
-        this.plannerError = messages[this.currentStep] || '';
+        if (!(step.code in valid)) {
+            const answer = this.dynamicAnswers[step.code];
+            valid[step.code] = !step.required || (Array.isArray(answer) ? answer.length > 0 : String(answer ?? '').trim() !== '');
+        }
+        this.plannerError = valid[step.code] ? '' : `Please answer “${step.question}” to continue.`;
         return this.plannerError === '';
     },
     goToStep(step) {
@@ -328,16 +380,16 @@
         this.scrollToPlanner();
     },
     scrollToPlanner() {
-        this.$nextTick(() => window.scrollTo({ top: Math.max(0, this.$root.offsetTop - 100), behavior: 'smooth' }));
+        this.$nextTick(() => requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' })));
     },
     nextStep() {
         if (!this.validateCurrentStep()) return;
-        if (this.currentStep < 7) {
+        if (this.currentStep < this.totalSteps) {
             this.currentStep++;
             this.maxVisitedStep = Math.max(this.maxVisitedStep, this.currentStep);
             this.plannerError = '';
             this.scrollToPlanner();
-        } else if (this.currentStep === 7) {
+        } else if (this.currentStep === this.totalSteps) {
             this.generatePlan();
         }
     },
@@ -379,7 +431,7 @@
     <div class="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative z-10">
 
         <!-- Sidebar Navigation (Psychological Visual Progress & Steps list) -->
-        <div class="lg:col-span-4 xl:col-span-3 bg-gradient-to-b from-[#850625] to-[#63041b] text-white rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-hidden space-y-6">
+        <div class="lg:sticky lg:top-28 lg:col-span-4 xl:col-span-3 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto bg-gradient-to-b from-[#850625] to-[#63041b] text-white rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-x-hidden space-y-6 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,.35)_transparent]">
             <!-- Background Ambient Glow -->
             <div class="absolute -top-16 -left-16 w-48 h-48 bg-[#D4AF37]/20 rounded-full blur-2xl pointer-events-none"></div>
 
@@ -388,7 +440,7 @@
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     <span>Shaadi Sense AI</span>
                 </div>
-                <h1 class="text-xl sm:text-2xl font-extrabold font-serif-luxury leading-snug">Two minutes, seven steps.</h1>
+                <h1 class="text-xl sm:text-2xl font-extrabold font-serif-luxury leading-snug">Two minutes, <span x-text="totalSteps"></span> steps.</h1>
                 <p class="text-[11px] text-rose-100/80 leading-relaxed">Design your dream wedding seamlessly. Our AI allocates your budget dynamically.</p>
             </div>
 
@@ -396,31 +448,23 @@
             <div class="space-y-1 relative z-10 bg-white/10 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
                 <div class="flex justify-between text-[10px] font-bold">
                     <span class="text-rose-200">Plan Completeness</span>
-                    <span class="text-[#D4AF37]" x-text="Math.round((currentStep > 7 ? 7 : currentStep) / 7 * 100) + '%'"></span>
+                    <span class="text-[#D4AF37]" x-text="Math.round(Math.min(currentStep, totalSteps) / totalSteps * 100) + '%'"></span>
                 </div>
                 <div class="w-full h-1.5 bg-rose-950/60 rounded-full overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-[#D4AF37] to-amber-300 transition-all duration-500" :style="'width: ' + ((currentStep > 7 ? 7 : currentStep) / 7 * 100) + '%'"></div>
+                    <div class="h-full bg-gradient-to-r from-[#D4AF37] to-amber-300 transition-all duration-500" :style="'width: ' + (Math.min(currentStep, totalSteps) / totalSteps * 100) + '%'"></div>
                 </div>
             </div>
 
             <!-- Steps Progress List -->
             <div class="space-y-1.5 relative z-10 border-t border-rose-100/15 pt-4">
-                <template x-for="(step, index) in [
-                    { num: 1, name: 'Budget Allocation' },
-                    { num: 2, name: 'Guest Capacity' },
-                    { num: 3, name: 'Mumbai Location & Vibe' },
-                    { num: 4, name: 'Wedding Tradition' },
-                    { num: 5, name: 'Decor & Mandap Visualizer' },
-                    { num: 6, name: 'Food & Catering' },
-                    { num: 7, name: 'Dates & Timeline' }
-                ]">
-                    <div @click="goToStep(step.num)"
+                <template x-for="step in plannerSteps" :key="step.code">
+                    <div @click="goToStep(step.number)"
                         class="flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer text-xs"
-                        :class="currentStep === step.num ? 'bg-white/15 text-white font-bold backdrop-blur-md shadow-sm border border-white/20' : (step.num <= maxVisitedStep ? 'text-rose-200 hover:bg-white/5' : 'text-rose-200/40 cursor-not-allowed')">
+                        :class="currentStep === step.number ? 'bg-white/15 text-white font-bold backdrop-blur-md shadow-sm border border-white/20' : (step.number <= maxVisitedStep ? 'text-rose-200 hover:bg-white/5' : 'text-rose-200/40 cursor-not-allowed')">
                         <div class="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold transition-all shrink-0"
-                            :class="currentStep === step.num ? 'bg-[#D4AF37] text-slate-950 shadow-sm' : (currentStep > step.num ? 'bg-rose-900/80 text-rose-200 border border-rose-700' : 'bg-rose-950/40 text-rose-300/40')">
-                            <span x-show="currentStep <= step.num" x-text="step.num"></span>
-                            <i x-show="currentStep > step.num" class="fa-solid fa-check text-[9px]"></i>
+                            :class="currentStep === step.number ? 'bg-[#D4AF37] text-slate-950 shadow-sm' : (currentStep > step.number ? 'bg-rose-900/80 text-rose-200 border border-rose-700' : 'bg-rose-950/40 text-rose-300/40')">
+                            <span x-show="currentStep <= step.number" x-text="step.number"></span>
+                            <i x-show="currentStep > step.number" class="fa-solid fa-check text-[9px]"></i>
                         </div>
                         <span class="truncate" x-text="step.name"></span>
                     </div>
@@ -451,7 +495,7 @@
         </div>
 
         <!-- Main Interactive Questionnaire & Steps Area -->
-        <div class="lg:col-span-8 xl:col-span-9 bg-white/90 backdrop-blur-xl rounded-3xl p-5 sm:p-7 shadow-lg border border-rose-100/80 min-h-[480px] flex flex-col justify-between relative overflow-hidden">
+        <div class="lg:col-span-8 xl:col-span-9 bg-white/90 backdrop-blur-xl rounded-3xl p-5 sm:p-7 shadow-lg border border-rose-100/80 min-h-[480px] flex flex-col justify-between relative overflow-hidden scroll-mt-28">
 
             
             <!-- Steps Content Include -->
@@ -463,12 +507,12 @@
                 @include('ai-planner.steps.step-7-setting')
                 @include('ai-planner.steps.step-4-food')
                 @include('ai-planner.steps.step-6-timeline')
-                @include('ai-planner.steps.step-8-summary')
+                @include('ai-planner.steps.generic-question')
             </div>
 
             <!-- Action Controls (Back / Continue Buttons) -->
-            <p x-show="plannerError && currentStep !== 6" x-text="plannerError" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700"></p>
-            <div x-show="currentStep <= 7" class="pt-8 border-t border-slate-100 flex items-center justify-between gap-4 mt-8">
+            <p x-show="plannerError" x-text="plannerError" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700"></p>
+            <div x-show="currentStep <= totalSteps" class="pt-8 border-t border-slate-100 flex items-center justify-between gap-4 mt-8">
                 <button type="button" 
                     @click="prevStep()" 
                     x-show="currentStep > 1" 
@@ -481,7 +525,7 @@
 
                 <button type="button" 
                     @click="nextStep()" 
-                    x-show="currentStep < 7" 
+                    x-show="currentStep < totalSteps"
                     class="px-8 py-3.5 rounded-full bg-[#850625] hover:bg-[#6b041e] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#850625]/20 hover:shadow-xl transition-all flex items-center gap-2.5 ml-auto cursor-pointer">
                     <span>Continue</span>
                     <i class="fa-solid fa-arrow-right"></i>
@@ -489,7 +533,7 @@
 
                 <button type="button" 
                     @click="generatePlan()" 
-                    x-show="currentStep === 7" 
+                    x-show="currentStep === totalSteps"
                     class="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#D4AF37] to-amber-400 hover:from-amber-400 hover:to-[#D4AF37] text-slate-950 text-xs sm:text-sm font-extrabold shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 ml-auto cursor-pointer">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     <span>Generate AI Plan</span>
@@ -555,7 +599,7 @@
 
     <form x-ref="planForm" method="POST" action="{{ route('ai-planner.generate') }}" class="hidden">
         @csrf
-        <input type="hidden" name="category" value="wedding">
+        <input type="hidden" name="category" value="{{ $category }}">
         <input type="hidden" name="guest_count" :value="planner.exactGuest">
         <input type="hidden" name="answers[wedding_budget]" :value="planner.budget">
         <input type="hidden" name="answers[guest_capacity]" :value="planner.exactGuest">
@@ -567,6 +611,9 @@
         <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.foodItems)">
         <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
+        <template x-for="step in plannerSteps.filter(item => item.renderer === 'generic')" :key="step.code">
+            <input type="hidden" :name="`answers[${step.code}]`" :value="serializedGenericAnswer(step.code)">
+        </template>
     </form>
 
     <!-- Package Details Interactive Popup Modal -->

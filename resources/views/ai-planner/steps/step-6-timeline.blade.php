@@ -1,9 +1,9 @@
 <!-- Step 7: Dates, Reference Event Date & Timeline Selection -->
-<div x-show="currentStep === 7" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+<div x-show="currentStep === {{ $stepNumbers['event_timeline'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
     <div class="space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-calendar-star text-[10px]"></i>
-            <span>Step 07 / 07 • Timeline & Event Date</span>
+            <span>Step {{ str_pad((string) ($stepNumbers['event_timeline'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Timeline & Event Date</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('event_timeline')?->question ?? 'When is the big day planned?' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Helps vendors verify seasonal availability, lock early-bird pricing, and reserve mandap slots.</p>
@@ -134,19 +134,33 @@
         <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider block">Or Choose Your Approximate Planning Window</span>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <template x-for="time in [
-                { id: 'Next 30 Days', title: 'Next 30 Days', tag: 'Fast-Track Setup', badge: 'Urgent Booking', icon: 'fa-solid fa-bolt', desc: 'Express priority vendor allocation & instant mandap slot confirmation.' },
-                { id: 'Next 3 Months', title: 'Next 1 – 3 Months', tag: 'Optimal Prep Window', badge: 'Recommended', icon: 'fa-solid fa-calendar-week', desc: 'Ideal timeframe for menu tastings, designer fittings & invitation printing.' },
-                { id: '3 - 6 Months', title: '3 – 6 Months', tag: 'Peak Wedding Season', badge: 'Most Popular', icon: 'fa-solid fa-heart', desc: 'Full custom decor styling, VVIP catering counters & prime weekend slots.' },
-                { id: '6+ Months', title: '6+ Months Ahead', tag: 'Early Bird Savings', badge: 'Best Price Lock', icon: 'fa-solid fa-gem', desc: 'Lock in current rates, early bird discounts & priority palace venue bookings.' }
-            ]" :key="time.id">
+            <template x-for="time in optionsFor('event_timeline', []).map((value, index) => {
+                const title = String(typeof value === 'object' ? (value.title || value.name || value.id) : value);
+                return {
+                    id: String(typeof value === 'object' ? (value.id || title) : value),
+                    title,
+                    tag: 'Admin-managed planning window',
+                    badge: planner.timeline === String(typeof value === 'object' ? (value.id || title) : value) ? 'Selected' : 'Available',
+                    icon: ['fa-solid fa-bolt', 'fa-solid fa-calendar-week', 'fa-solid fa-heart', 'fa-solid fa-gem'][index % 4],
+                    desc: 'This timeline option is configured in the event requirement question.',
+                    image: imageFor('event_timeline', index, null)
+                };
+            })" :key="time.id">
                 
                 <div @click="planner.timeline = time.id"
                     :class="planner.timeline === time.id ? 'border-[#850625] bg-rose-50/30 shadow-2xl ring-2 ring-[#850625]/25 scale-[1.02]' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-lg'"
-                    class="p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 relative group select-none">
+                    class="p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 relative group select-none overflow-hidden min-h-[210px]">
+
+                    <template x-if="time.image">
+                        <div class="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                            :class="planner.timeline === time.id ? '!opacity-100' : ''">
+                            <img :src="time.image" :alt="time.title" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-white via-white/70 to-white/5"></div>
+                        </div>
+                    </template>
 
                     <!-- Selected Indicator -->
-                    <div class="flex items-center justify-between">
+                    <div class="relative z-10 flex items-center justify-between">
                         <div class="w-10 h-10 rounded-2xl flex items-center justify-center transition-colors"
                             :class="planner.timeline === time.id ? 'bg-[#850625] text-white shadow-md' : 'bg-rose-50 text-[#850625] group-hover:bg-[#850625] group-hover:text-white'">
                             <i :class="time.icon" class="text-base"></i>
@@ -158,19 +172,22 @@
                         </span>
                     </div>
 
-                    <div class="space-y-1">
+                    <div class="relative z-10 space-y-1">
                         <h4 class="font-extrabold text-slate-900 text-base leading-snug" x-text="time.title"></h4>
                         <span class="text-[11px] font-bold text-[#850625] block" x-text="time.tag"></span>
                         <p class="text-xs text-slate-500 leading-relaxed pt-1" x-text="time.desc"></p>
                     </div>
 
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold"
+                    <div class="relative z-10 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold"
                         :class="planner.timeline === time.id ? 'text-[#850625]' : 'text-slate-400 group-hover:text-[#850625]'">
                         <span x-text="planner.timeline === time.id ? 'Active Selection' : 'Select Window'"></span>
                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </div>
                 </div>
             </template>
+        </div>
+        <div x-show="optionsFor('event_timeline', []).length === 0" class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+            Timeline options have not been configured by the administrator.
         </div>
     </div>
 

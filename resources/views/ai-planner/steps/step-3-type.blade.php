@@ -1,9 +1,9 @@
 <!-- Step 4: Wedding Tradition & Ceremony Selection -->
-<div x-show="currentStep === 4" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+<div x-show="currentStep === {{ $stepNumbers['wedding_tradition'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
     <div class="space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-hands-praying text-[10px]"></i>
-            <span>Step 04 / 07 • Cultural Traditions & Ceremonies</span>
+            <span>Step {{ str_pad((string) ($stepNumbers['wedding_tradition'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Cultural Traditions & Ceremonies</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('wedding_tradition')?->question ?? 'What type of wedding celebration is this?' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Selecting your tradition customizes ceremonial requirements, decor color palettes, and mandap/stage styling.</p>
@@ -47,21 +47,18 @@
                 planner.decorTheme = culture.defaultDecor;
                 planner.ceremonies = getCeremonies().slice(0, 3);
             "
-                :class="planner.culture === culture.id ? 'border-[#850625] ring-2 ring-[#850625]/20 shadow-xl scale-[1.01] text-white' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-md text-slate-900'"
+                :class="planner.culture === culture.id ? 'border-[#850625] ring-2 ring-[#850625]/20 shadow-xl scale-[1.01]' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-md'"
                 class="p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 relative overflow-hidden group select-none min-h-[150px]">
                 
-                <!-- Background Image & Dark Overlay (Appears ONLY on click/selection) -->
-                <template x-if="planner.culture === culture.id">
-                    <div class="absolute inset-0 w-full h-full pointer-events-none">
-                        <img :src="culture.image" :alt="culture.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-[#850625]/80 mix-blend-multiply"></div>
-                        <div class="absolute inset-0 bg-slate-950/70"></div>
-                    </div>
-                </template>
+                <div class="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    :class="planner.culture === culture.id ? '!opacity-100' : ''">
+                    <img :src="culture.image" :alt="culture.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-white via-white/65 to-white/5"></div>
+                </div>
 
                 <div class="relative z-10 flex items-center justify-between">
                     <div class="w-10 h-10 rounded-2xl flex items-center justify-center shadow-xs transition-colors"
-                        :class="planner.culture === culture.id ? 'bg-white/20 backdrop-blur-md text-white border border-white/30' : 'bg-rose-50 text-[#850625] group-hover:bg-[#850625] group-hover:text-white'">
+                        :class="planner.culture === culture.id ? 'bg-white/85 backdrop-blur-md text-[#850625] border border-white' : 'bg-rose-50 text-[#850625] group-hover:bg-[#850625] group-hover:text-white'">
                         <i :class="culture.icon" class="text-lg"></i>
                     </div>
                     <span x-show="planner.culture === culture.id" class="text-xs font-extrabold text-white bg-[#850625] px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
@@ -70,12 +67,8 @@
                 </div>
 
                 <div class="relative z-10 space-y-1">
-                    <h4 class="font-bold text-sm sm:text-base leading-snug" 
-                        :class="planner.culture === culture.id ? 'text-white drop-shadow-sm' : 'text-slate-900'" 
-                        x-text="culture.name"></h4>
-                    <p class="text-[11px] font-medium mt-1" 
-                        :class="planner.culture === culture.id ? 'text-rose-100' : 'text-[#850625]'" 
-                        x-text="culture.tag"></p>
+                    <h4 class="font-bold text-slate-950 text-sm sm:text-base leading-snug" x-text="culture.name"></h4>
+                    <p class="text-[11px] font-medium mt-1 text-[#850625]" x-text="culture.tag"></p>
                 </div>
             </div>
         </template>
@@ -101,6 +94,20 @@
                     class="px-4 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5">
                     <i class="fa-solid" :class="planner.ceremonies.includes(ceremony) ? 'fa-check-circle text-amber-300' : 'fa-plus text-slate-400'"></i>
                     <span x-text="ceremony"></span>
+                </button>
+            </template>
+        </div>
+        <div class="flex flex-col gap-2 border-t border-rose-100 pt-4 sm:flex-row">
+            <label class="sr-only" for="custom-ceremony">Add your own ceremony</label>
+            <input id="custom-ceremony" type="text" x-model="planner.customCeremony" @keydown.enter.prevent="addCustomCeremony()" maxlength="255" placeholder="Add your own ceremony or custom choice" class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-800 outline-none transition focus:border-[#850625] focus:bg-white focus:ring-2 focus:ring-[#850625]/10">
+            <button type="button" @click="addCustomCeremony()" :disabled="!planner.customCeremony.trim()" class="rounded-xl bg-[#850625] px-4 py-2.5 text-xs font-extrabold text-white transition hover:bg-[#6b041e] disabled:cursor-not-allowed disabled:opacity-40">
+                <i class="fa-solid fa-plus mr-1"></i> Add custom choice
+            </button>
+        </div>
+        <div x-show="planner.ceremonies.some(ceremony => !getCeremonies().includes(ceremony))" class="flex flex-wrap gap-2">
+            <template x-for="ceremony in planner.ceremonies.filter(item => !getCeremonies().includes(item))" :key="ceremony">
+                <button type="button" @click="planner.ceremonies = planner.ceremonies.filter(item => item !== ceremony)" class="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900" :title="'Remove ' + ceremony">
+                    <span x-text="ceremony"></span><i class="fa-solid fa-xmark"></i>
                 </button>
             </template>
         </div>

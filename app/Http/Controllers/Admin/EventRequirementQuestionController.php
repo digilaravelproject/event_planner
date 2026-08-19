@@ -8,6 +8,7 @@ use App\Models\AdminModuleOption;
 use App\Models\EventRequirementQuestion;
 use App\Services\VendorAttributeCatalogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EventRequirementQuestionController extends Controller
 {
@@ -33,27 +34,9 @@ class EventRequirementQuestionController extends Controller
     public function store(StoreEventQuestionRequest $request)
     {
         $data = $this->vendorAttributes->applyMapping($request->validated());
-        $categoryOptions = $request->input('category_options', []);
-        
-        if (!empty($categoryOptions)) {
-            $options = [];
-            $images = [];
-            foreach ($categoryOptions as $index => $opt) {
-                $name = trim((string) ($opt['name'] ?? ''));
-                if ($name === '') continue;
-                $options[] = $name;
+        $data = $this->applyCategoryOptions($request, $data);
 
-                if ($request->hasFile("category_options.{$index}.image") && $request->file("category_options.{$index}.image")->isValid()) {
-                    $images[$index] = $request->file("category_options.{$index}.image")->store('question-options', 'public');
-                } else {
-                    $images[$index] = $opt['existing_image'] ?? null;
-                }
-            }
-            $data['options'] = array_values($options);
-            $data['vendor_attribute_images'] = array_values(array_filter($images));
-        }
-
-        EventRequirementQuestion::create($data);
+        DB::transaction(fn () => EventRequirementQuestion::create($data));
 
         return to_route('admin.event-questions.index')->with('success', 'Question created.');
     }
@@ -71,27 +54,9 @@ class EventRequirementQuestionController extends Controller
     public function update(StoreEventQuestionRequest $request, EventRequirementQuestion $eventQuestion)
     {
         $data = $this->vendorAttributes->applyMapping($request->validated(), $eventQuestion);
-        $categoryOptions = $request->input('category_options', []);
+        $data = $this->applyCategoryOptions($request, $data);
 
-        if (!empty($categoryOptions)) {
-            $options = [];
-            $images = [];
-            foreach ($categoryOptions as $index => $opt) {
-                $name = trim((string) ($opt['name'] ?? ''));
-                if ($name === '') continue;
-                $options[] = $name;
-
-                if ($request->hasFile("category_options.{$index}.image") && $request->file("category_options.{$index}.image")->isValid()) {
-                    $images[$index] = $request->file("category_options.{$index}.image")->store('question-options', 'public');
-                } else {
-                    $images[$index] = $opt['existing_image'] ?? null;
-                }
-            }
-            $data['options'] = array_values($options);
-            $data['vendor_attribute_images'] = array_values(array_filter($images));
-        }
-
-        $eventQuestion->update($data);
+        DB::transaction(fn () => $eventQuestion->update($data));
 
         return to_route('admin.event-questions.index')->with('success', 'Question updated.');
     }
@@ -100,6 +65,49 @@ class EventRequirementQuestionController extends Controller
     {
         $eventQuestion->delete();
 
-        return to_route('admin.event-questions.index')->with('success','Question deleted.');
+        return to_route('admin.event-questions.index')->with('success', 'Question deleted.');
+    }
+
+    private function applyCategoryOptions(StoreEventQuestionRequest $request, array $data): array
+    {
+        $categoryOptions = $request->input('category_options', []);
+        if ($categoryOptions === []) {
+            return $data;
+        }
+
+        $options = [];
+        $images = [];
+        $vendorValues = [];
+        $optionMetadata = [];
+        $existingMetadata = (array) ($data['option_metadata'] ?? []);
+        $mappedValues = array_values($data['vendor_attribute_values'] ?? []);
+        foreach ($categoryOptions as $index => $option) {
+            $name = trim((string) ($option['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $options[] = $name;
+            $upload = $request->file("category_options.{$index}.image");
+            $images[] = $upload?->isValid()
+                ? $upload->store('question-options', 'public')
+                : (($option['existing_image'] ?? null) ?: null);
+            $vendorValue = ($option['vendor_value'] ?? null) ?: ($mappedValues[$index] ?? null);
+            $vendorValues[] = $vendorValue;
+            $metadataKey = (string) ($vendorValue ?: $name);
+            $details = (array) ($existingMetadata[$metadataKey] ?? $existingMetadata[$name] ?? []);
+            $optionMetadata[$metadataKey] = array_merge($details, [
+                'label' => $name,
+                'subtitle' => trim((string) ($option['subtitle'] ?? '')),
+                'icon' => trim((string) ($option['icon'] ?? '')) ?: 'fa-solid fa-star',
+            ]);
+        }
+
+        $data['options'] = $options;
+        $data['option_images'] = $images;
+        $data['option_vendor_values'] = $vendorValues;
+        $data['option_metadata'] = $optionMetadata;
+
+        return $data;
     }
 }

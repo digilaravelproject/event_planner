@@ -16,10 +16,12 @@ use App\Services\OpenRouterService;
 use Database\Seeders\AdminModulesSeeder;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminModulesTest extends TestCase
@@ -186,6 +188,72 @@ class AdminModulesTest extends TestCase
         $this->assertDatabaseMissing('event_requirement_questions', ['question_code' => 'invalid_area']);
     }
 
+    public function test_question_options_can_be_edited_and_keep_their_own_images(): void
+    {
+        Storage::fake('public');
+
+        $this->post(route('admin.event-questions.store'), [
+            'question' => 'Choose a celebration style',
+            'question_code' => 'celebration_style',
+            'question_type' => 'radio',
+            'category_options' => [
+                ['name' => 'Garden Celebration', 'subtitle' => 'Fresh outdoor celebration', 'icon' => 'fa-solid fa-leaf', 'image' => UploadedFile::fake()->image('garden.jpg')],
+                ['name' => 'Royal Ballroom', 'subtitle' => 'Elegant indoor celebration', 'icon' => 'fa-solid fa-crown', 'image' => UploadedFile::fake()->image('ballroom.jpg')],
+            ],
+            'display_order' => 4,
+            'status' => 1,
+        ])->assertRedirect(route('admin.event-questions.index'));
+
+        $question = EventRequirementQuestion::where('question_code', 'celebration_style')->firstOrFail();
+        $this->assertSame(['Garden Celebration', 'Royal Ballroom'], $question->options);
+        $this->assertSame('Fresh outdoor celebration', data_get($question->option_metadata, 'Garden Celebration.subtitle'));
+        $this->assertSame('fa-solid fa-leaf', data_get($question->option_metadata, 'Garden Celebration.icon'));
+        $this->assertCount(2, $question->option_images);
+        Storage::disk('public')->assertExists($question->option_images[0]);
+        Storage::disk('public')->assertExists($question->option_images[1]);
+
+        $this->put(route('admin.event-questions.update', $question), [
+            'question' => 'Choose your celebration style',
+            'question_code' => 'celebration_style',
+            'question_type' => 'radio',
+            'category_options' => [
+                ['name' => 'Intimate Garden', 'subtitle' => 'A private garden gathering', 'icon' => 'fa-solid fa-leaf', 'existing_image' => $question->option_images[0]],
+                ['name' => 'Royal Ballroom', 'subtitle' => 'Elegant indoor celebration', 'icon' => 'fa-solid fa-crown', 'existing_image' => $question->option_images[1]],
+                ['name' => 'Beach Sunset', 'subtitle' => 'A sunset by the sea', 'icon' => 'fa-solid fa-star'],
+            ],
+            'display_order' => 4,
+            'status' => 1,
+        ])->assertRedirect(route('admin.event-questions.index'));
+
+        $question->refresh();
+        $this->assertSame(['Intimate Garden', 'Royal Ballroom', 'Beach Sunset'], $question->options);
+        $this->assertSame([$question->option_images[0], $question->option_images[1], null], $question->option_images);
+        $this->assertSame('A private garden gathering', data_get($question->option_metadata, 'Intimate Garden.subtitle'));
+    }
+
+    public function test_mapped_question_accepts_a_custom_user_facing_label_without_losing_mapping(): void
+    {
+        $this->createDynamicVendor('Mapped Venue', [
+            ['key' => 'area', 'label' => 'Area', 'type' => 'dropdown', 'value' => 'Pune'],
+        ]);
+
+        $this->post(route('admin.event-questions.store'), [
+            'question' => 'Choose an area',
+            'question_code' => 'mapped_area_label',
+            'question_type' => 'radio',
+            'vendor_attribute_key' => 'area',
+            'vendor_attribute_values' => ['Pune'],
+            'category_options' => [['name' => 'Pune & nearby']],
+            'display_order' => 8,
+            'status' => 1,
+        ])->assertRedirect(route('admin.event-questions.index'));
+
+        $question = EventRequirementQuestion::where('question_code', 'mapped_area_label')->firstOrFail();
+        $this->assertSame(['Pune'], $question->vendor_attribute_values);
+        $this->assertSame(['Pune & nearby'], $question->options);
+        $this->assertSame(['Pune'], $question->option_vendor_values);
+    }
+
     public function test_food_question_saves_category_and_per_person_cost_for_menu_items(): void
     {
         $this->createDynamicVendor('Wedding Caterer', [
@@ -235,7 +303,8 @@ class AdminModulesTest extends TestCase
         $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'wedding_budget', 'question_type' => 'number']);
         $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'guest_capacity', 'is_required' => true]);
         $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'decoration_type', 'vendor_attribute_key' => 'decoration_type']);
-        $this->assertDatabaseCount('event_requirement_questions', 7);
+        $this->assertDatabaseHas('event_requirement_questions', ['question_code' => 'event_category', 'display_order' => 1]);
+        $this->assertDatabaseCount('event_requirement_questions', 8);
     }
 
     public function test_notification_creation_syncs_recipients_using_the_correct_pivot_keys(): void

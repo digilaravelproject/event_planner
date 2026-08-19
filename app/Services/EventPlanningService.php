@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AiSetting;
+use App\Models\EventRequirementQuestion;
 use App\Models\User;
 use App\Models\UserEventPlan;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
@@ -17,8 +18,8 @@ class EventPlanningService
     {
         $answers = Arr::wrap($requirements['answers'] ?? []);
         $guestCount = max(1, min(5000, (int) ($requirements['guest_count'] ?? 150)));
-        $category = 'wedding';
-        $vendors = $this->vendorSnapshot();
+        $category = trim((string) ($requirements['category'] ?? 'wedding')) ?: 'wedding';
+        $vendors = $this->vendorSnapshot($answers);
         $prompt = $this->prompt($category, $guestCount, $answers, $vendors);
         $model = (string) AiSetting::getValue('openrouter_model', 'openrouter/auto');
 
@@ -60,22 +61,75 @@ class EventPlanningService
         return $plan->fresh(['suggestions']);
     }
 
-    private function vendorSnapshot(): array
+    private function vendorSnapshot(array $answers): array
     {
+        $criteria = $this->mappedVendorCriteria($answers);
+
         return DynamicVendor::query()
             ->whereRaw('LOWER(status) = ?', ['active'])
             ->latest('id')
             ->limit(200)
             ->get()
-            ->map(fn (DynamicVendor $vendor): array => [
-                'id' => $vendor->id,
-                'name' => $vendor->name,
-                'category' => $vendor->category,
-                'attributes' => collect((array) data_get($vendor->vendor_json, 'attributes', []))
-                    ->map(fn ($value) => is_scalar($value) || is_array($value) ? $value : null)
+            ->map(function (DynamicVendor $vendor) use ($criteria): array {
+                $attributes = collect((array) data_get($vendor->vendor_json, 'attributes', []))
+                    ->filter(fn ($attribute): bool => is_array($attribute) && trim((string) ($attribute['key'] ?? '')) !== '')
+                    ->mapWithKeys(fn (array $attribute): array => [
+                        (string) $attribute['key'] => $attribute['value'] ?? null,
+                    ])
                     ->filter(fn ($value) => $value !== null && $value !== '' && $value !== [])
-                    ->take(15)->all(),
-            ])->values()->all();
+                    ->take(30)
+                    ->all();
+                $matches = collect($criteria)->filter(
+                    fn (array $values, string $key): bool => $this->attributeMatches($attributes[$key] ?? null, $values)
+                )->keys()->values()->all();
+
+                return [
+                    'id' => $vendor->id,
+                    'name' => $vendor->name,
+                    'category' => $vendor->category,
+                    'attributes' => $attributes,
+                    'matched_requirement_keys' => $matches,
+                    'match_score' => count($matches),
+                ];
+            })
+            ->sortByDesc('match_score')
+            ->values()
+            ->all();
+    }
+
+    private function mappedVendorCriteria(array $answers): array
+    {
+        return EventRequirementQuestion::enabled()
+            ->whereNotNull('vendor_attribute_key')
+            ->get()
+            ->mapWithKeys(function (EventRequirementQuestion $question) use ($answers): array {
+                $answer = $answers[$question->question_code] ?? null;
+                if ($answer === null || $answer === '' || $answer === []) {
+                    return [];
+                }
+
+                $selected = collect(is_array($answer) ? $answer : [$answer])->map('strval');
+                $options = collect($question->options ?? [])->map('strval');
+                $mapped = collect($question->option_vendor_values ?? $question->vendor_attribute_values ?? [])->map('strval');
+                $values = $selected->map(function (string $value) use ($options, $mapped): string {
+                    $index = $options->search($value, true);
+
+                    return $index !== false ? (string) ($mapped[$index] ?? $value) : $value;
+                })->filter()->unique()->values()->all();
+
+                return $values === [] ? [] : [$question->vendor_attribute_key => $values];
+            })->all();
+    }
+
+    private function attributeMatches(mixed $attributeValue, array $selectedValues): bool
+    {
+        $available = collect(is_array($attributeValue) ? $attributeValue : [$attributeValue])
+            ->map(fn ($value): string => mb_strtolower(trim((string) $value)))
+            ->filter();
+
+        return collect($selectedValues)
+            ->map(fn ($value): string => mb_strtolower(trim((string) $value)))
+            ->contains(fn (string $value): bool => $available->contains($value));
     }
 
     private function prompt(string $category, int $guestCount, array $answers, array $vendors): string

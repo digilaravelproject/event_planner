@@ -1,23 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\SubscriptionController;
-use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\AiSettingController;
 use App\Http\Controllers\Admin\EventRequirementQuestionController;
 use App\Http\Controllers\Admin\FeedbackController;
+use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PageController;
-use App\Http\Controllers\Admin\LandingContentController;
-use App\Http\Controllers\Admin\VendorAnalyticsController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\SubscriptionController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserPlanController;
+use App\Http\Controllers\Admin\VendorAnalyticsController;
+use App\Http\Controllers\AiPlannerController;
 use App\Http\Controllers\User\UserAuthController;
-use App\Http\Controllers\User\UserSubscriptionController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserNotificationController;
-use App\Http\Controllers\AiPlannerController;
+use App\Http\Controllers\User\UserSubscriptionController;
+use App\Models\EventRequirementQuestion;
+use App\Models\LandingContent;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 // Redirect /admin to /admin/dashboard
 Route::redirect('/admin', '/admin/dashboard');
@@ -32,9 +36,9 @@ Route::prefix('admin')->group(function () {
     // Authenticated Admin Routes
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-        
+
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-        
+
         // Subscription Manager
         Route::resource('/subscriptions', SubscriptionController::class)->except(['create', 'show', 'edit'])->names('admin.subscriptions');
 
@@ -54,7 +58,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/notifications/{notification}/send', [NotificationController::class, 'send'])->name('admin.notifications.send');
         Route::resource('/notifications', NotificationController::class)->names('admin.notifications');
         Route::resource('/pages', PageController::class)->names('admin.pages');
-        Route::prefix('/landing-content/{type}')->whereIn('type', array_keys(\App\Models\LandingContent::TYPES))->group(function () {
+        Route::prefix('/landing-content/{type}')->whereIn('type', array_keys(LandingContent::TYPES))->group(function () {
             Route::get('/', [LandingContentController::class, 'index'])->name('admin.landing-content.index');
             Route::get('/create', [LandingContentController::class, 'create'])->name('admin.landing-content.create');
             Route::post('/', [LandingContentController::class, 'store'])->name('admin.landing-content.store');
@@ -65,25 +69,25 @@ Route::prefix('admin')->group(function () {
         Route::resource('/feedback', FeedbackController::class)->only(['index', 'show', 'update', 'destroy'])->names('admin.feedback');
 
         // User Management CRUD
-        Route::post('/users/{id}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('admin.users.toggle-status');
+        Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('admin.users.toggle-status');
         Route::get('/users/{user}/plans', [UserPlanController::class, 'index'])->name('admin.users.plans.index');
         Route::get('/user-plans/{plan}', [UserPlanController::class, 'show'])->name('admin.users.plans.show');
         Route::get('/user-plans/{plan}/download', [UserPlanController::class, 'download'])->name('admin.users.plans.download');
-        Route::resource('/users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show', 'store'])->names('admin.users');
+        Route::resource('/users', UserController::class)->except(['create', 'show', 'store'])->names('admin.users');
     });
 });
 
 // Location helper routes (Accessible publicly/by AJAX)
-Route::get('/locations/states', function() {
+Route::get('/locations/states', function () {
     return response()->json(State::orderBy('name')->get());
 })->name('locations.states');
-Route::get('/locations/states/{state}/cities', function($stateId) {
+Route::get('/locations/states/{state}/cities', function ($stateId) {
     return response()->json(City::where('state_id', $stateId)->orderBy('name')->get());
 })->name('locations.cities');
-Route::get('/locations/cities/{city}/areas', function($cityId) {
+Route::get('/locations/cities/{city}/areas', function ($cityId) {
     return response()->json(Area::where('city_id', $cityId)->orderBy('name')->get());
 })->name('locations.areas');
-Route::get('/locations/areas/{area}/subareas', function($areaId) {
+Route::get('/locations/areas/{area}/subareas', function ($areaId) {
     return response()->json(Subarea::where('area_id', $areaId)->orderBy('name')->get());
 })->name('locations.subareas');
 
@@ -123,31 +127,36 @@ Route::prefix('user')->group(function () {
 });
 
 Route::get('/', function () {
-    $content = fn (string $type) => \Illuminate\Support\Facades\Schema::hasTable('landing_contents')
-        ? \App\Models\LandingContent::where('type', $type)->published()->get()
+    $content = fn (string $type) => Schema::hasTable('landing_contents')
+        ? LandingContent::where('type', $type)->published()->get()
         : collect();
 
-    $guestQuestion = \Illuminate\Support\Facades\Schema::hasTable('event_requirement_questions')
-        ? \App\Models\EventRequirementQuestion::enabled()->where('question_code', 'guest_capacity')->first()
+    $guestQuestion = Schema::hasTable('event_requirement_questions')
+        ? EventRequirementQuestion::enabled()->where('question_code', 'guest_capacity')->first()
         : null;
     $guestOptions = collect($guestQuestion?->options ?: ['50', '150', '300', '600'])
         ->mapWithKeys(function ($value): array {
-            $number = (int) preg_replace('/\D+/', '', (string) $value);
-            $label = match (true) {
-                $number <= 50 => 'Under 50 Guests',
-                $number <= 150 => '50 – 150 Guests',
-                $number <= 300 => '150 – 300 Guests',
-                $number <= 600 => '300 – 600 Guests',
-                default => '600+ Guests',
-            };
+            $label = trim((string) $value);
+            preg_match_all('/\d+/', $label, $matches);
+            $number = (int) (end($matches[0]) ?: 0);
+            $label = preg_match('/guest/i', $label) ? $label : $label.' Guests';
+
             return [(string) $number => $label];
         })->filter(fn ($label, $value) => (int) $value > 0);
+    $categoryQuestion = Schema::hasTable('event_requirement_questions')
+        ? EventRequirementQuestion::enabled()->where('question_code', 'event_category')->first()
+        : null;
+    $eventCategoryOptions = collect($categoryQuestion?->options ?: ['Grand Wedding & Sangeet'])
+        ->map(fn ($value): string => trim((string) $value))
+        ->filter()
+        ->mapWithKeys(fn (string $value): array => [$value => $value]);
 
     return view('web.index', [
         'howItWorks' => $content('how-it-works'),
         'comparisons' => $content('comparisons'),
         'testimonials' => $content('testimonials'),
         'guestOptions' => $guestOptions,
+        'eventCategoryOptions' => $eventCategoryOptions,
     ]);
 })->name('home');
 

@@ -5,6 +5,7 @@
 @section('content')
 <!-- SECTION 1: HERO SECTION -->
 <section id="hero-section" class="group relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-4 sm:px-8 md:px-12 lg:px-16 overflow-hidden">
+    <span id="categories" class="pointer-events-none absolute top-0 scroll-mt-24" aria-hidden="true"></span>
     <!-- Full-Width Hero Background Video with Hover Scale -->
     <video 
         id="hero-bg-video"
@@ -77,10 +78,10 @@
         <!-- Interactive Quick Selector Widget (Col 5) -->
         <div class="lg:col-span-5 bg-white/92 backdrop-blur-xl border border-[#850625]/15 p-5 sm:p-6.5 rounded-3xl shadow-[0_25px_60px_-15px_rgba(133,6,37,0.12),0_10px_25px_-5px_rgba(0,0,0,0.03)] relative"
              x-data="{ 
-                selectedType: 'wedding',
-                selectedTypeLabel: '💍 Grand Wedding & Sangeet',
-                selectedGuest: @js($guestOptions->has('150') ? '150' : (string) $guestOptions->keys()->first()),
-                selectedGuestLabel: @js($guestOptions->get('150') ?: $guestOptions->first()),
+                selectedType: @js((string) $eventCategoryOptions->keys()->first()),
+                selectedTypeLabel: @js((string) $eventCategoryOptions->first()),
+                selectedGuest: @js((string) $guestOptions->keys()->first()),
+                selectedGuestLabel: @js($guestOptions->first()),
                 typeOpen: false,
                 guestOpen: false
              }"
@@ -125,10 +126,12 @@
                         class="absolute left-0 right-0 top-full mt-1.5 bg-white/95 backdrop-blur-2xl border border-[#850625]/15 rounded-2xl shadow-[0_20px_45px_-10px_rgba(133,6,37,0.18)] p-1.5 z-50 space-y-0.5"
                         style="display: none;"
                     >
-                        <button type="button" @click="selectedType = 'wedding'; selectedTypeLabel = '💍 Grand Wedding & Sangeet'; typeOpen = false" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between bg-[#850625]/10 text-[#850625] font-semibold">
-                            <span>💍 Grand Wedding & Sangeet</span>
-                            <i class="fa-solid fa-check text-[10px] text-[#850625]"></i>
-                        </button>
+                        @foreach($eventCategoryOptions as $value => $label)
+                            <button type="button" @click="selectedType = @js((string) $value); selectedTypeLabel = @js($label); typeOpen = false" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedType === @js((string) $value) ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
+                                <span>🎉 {{ $label }}</span>
+                                <i x-show="selectedType === @js((string) $value)" class="fa-solid fa-check text-[10px] text-[#850625]"></i>
+                            </button>
+                        @endforeach
                     </div>
                 </div>
 
