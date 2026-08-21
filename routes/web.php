@@ -69,6 +69,8 @@ Route::prefix('admin')->group(function () {
         Route::resource('/feedback', FeedbackController::class)->only(['index', 'show', 'update', 'destroy'])->names('admin.feedback');
 
         // User Management CRUD
+        Route::get('/users/export/pdf', [UserController::class, 'exportPdf'])->name('admin.users.export.pdf');
+        Route::get('/users/export/excel', [UserController::class, 'exportExcel'])->name('admin.users.export.excel');
         Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('admin.users.toggle-status');
         Route::get('/users/{user}/plans', [UserPlanController::class, 'index'])->name('admin.users.plans.index');
         Route::get('/user-plans/{plan}', [UserPlanController::class, 'show'])->name('admin.users.plans.show');
@@ -106,6 +108,9 @@ Route::prefix('user')->group(function () {
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('user.logout');
         Route::get('/dashboard', [UserDashboardController::class, 'dashboard'])->name('user.dashboard');
         Route::get('/plans', [AiPlannerController::class, 'history'])->name('user.plans.index');
+        Route::get('/plans/{plan}/edit', [AiPlannerController::class, 'edit'])->name('user.plans.edit');
+        Route::put('/plans/{plan}', [AiPlannerController::class, 'update'])->name('user.plans.update');
+        Route::post('/plans/{plan}/share', [AiPlannerController::class, 'share'])->name('user.plans.share');
         Route::get('/plans/{plan}', [AiPlannerController::class, 'show'])->name('user.plans.show');
         Route::get('/plans/{plan}/download', [AiPlannerController::class, 'download'])->name('user.plans.download');
         Route::get('/planner/resume', [AiPlannerController::class, 'resume'])->name('ai-planner.resume');

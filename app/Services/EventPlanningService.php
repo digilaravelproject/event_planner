@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserEventPlan;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class EventPlanningService
@@ -59,6 +60,51 @@ class EventPlanningService
         $this->createSuggestions($plan);
 
         return $plan->fresh(['suggestions']);
+    }
+
+    public function update(UserEventPlan $plan, array $requirements): UserEventPlan
+    {
+        $answers = Arr::wrap($requirements['answers'] ?? []);
+        $guestCount = max(1, min(5000, (int) ($requirements['guest_count'] ?? 150)));
+        $category = trim((string) ($requirements['category'] ?? 'wedding')) ?: 'wedding';
+        $vendors = $this->vendorSnapshot($answers);
+        $prompt = $this->prompt($category, $guestCount, $answers, $vendors);
+        $model = (string) AiSetting::getValue('openrouter_model', 'openrouter/auto');
+        $errorMessage = null;
+
+        try {
+            $response = $this->openRouter->chat([
+                ['role' => 'user', 'content' => $prompt],
+            ], $model);
+            $summary = $this->parseSummary((string) data_get($response, 'choices.0.message.content', ''), $answers, $guestCount, $vendors);
+        } catch (\Throwable $exception) {
+            report($exception);
+            $summary = $this->fallbackSummary($answers, $guestCount, $vendors);
+            $errorMessage = Str::limit($exception->getMessage(), 1000);
+        }
+
+        $summary = $this->applySelectedFoodCosting($summary, $answers, $guestCount);
+        $summary['display_content'] = $this->displayContent($summary, $answers, $guestCount, $category);
+
+        return DB::transaction(function () use ($plan, $answers, $guestCount, $category, $vendors, $prompt, $model, $summary, $errorMessage): UserEventPlan {
+            $plan->suggestions()->delete();
+            $plan->fill([
+                'title' => (string) ($summary['title'] ?? $plan->title),
+                'category' => $category,
+                'guest_count' => $guestCount,
+                'answers' => $answers,
+                'requirement_prompt' => $prompt,
+                'vendor_snapshot' => $vendors,
+                'summary' => $summary,
+                'total_cost' => (float) $summary['total_cost'],
+                'model' => $model,
+                'status' => 'completed',
+                'error_message' => $errorMessage,
+            ])->save();
+            $this->createSuggestions($plan);
+
+            return $plan->fresh(['suggestions']);
+        });
     }
 
     private function vendorSnapshot(array $answers): array

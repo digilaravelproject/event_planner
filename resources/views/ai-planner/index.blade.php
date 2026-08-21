@@ -4,13 +4,23 @@
 
 @section('content')
 @php
+    $savedAnswers = (array) ($initialAnswers ?? []);
+    $savedArray = function (string $key, array $fallback = []) use ($savedAnswers): array {
+        $value = $savedAnswers[$key] ?? $fallback;
+        if (is_string($value) && str_starts_with(trim($value), '[')) {
+            $value = json_decode($value, true) ?: $fallback;
+        }
+        return is_array($value) ? $value : $fallback;
+    };
     $genericInitialAnswers = collect($plannerSteps)
         ->where('renderer', 'generic')
-        ->mapWithKeys(function (array $step) use ($category): array {
+        ->mapWithKeys(function (array $step) use ($category, $savedAnswers): array {
             $multiple = in_array($step['type'], ['checkbox', 'multi_select'], true);
-            $value = $step['code'] === 'event_category'
+            $value = array_key_exists($step['code'], $savedAnswers)
+                ? $savedAnswers[$step['code']]
+                : ($step['code'] === 'event_category'
                 ? $category
-                : ($multiple ? [] : ($step['options'][0] ?? ''));
+                : ($multiple ? [] : ($step['options'][0] ?? '')));
             return [$step['code'] => $value];
         })->all();
 @endphp
@@ -266,24 +276,24 @@
         this.plannerError = '';
     },
     planner: {
-        budget: {{ request('guests') ? 25 : 20 }},
+        budget: @js((float) ($savedAnswers['wedding_budget'] ?? (request('guests') ? 25 : 20))),
         guestCount: @js((string) $initialGuestCount),
         exactGuest: {{ $initialGuestCount }},
-        culture: @js($plannerOptions['wedding_tradition']['options'][0] ?? 'Maharashtrian Lagna'),
-        decorTheme: @js($plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
-        ceremonies: ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'],
+        culture: @js($savedAnswers['wedding_tradition'] ?? $plannerOptions['wedding_tradition']['options'][0] ?? 'Maharashtrian Lagna'),
+        decorTheme: @js($savedAnswers['decoration_type'] ?? $plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
+        ceremonies: @js($savedArray('ceremonies', ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'])),
         customCeremony: '',
         selectedVendorId: null,
         cateringMode: 'custom',
-        selectedFoodPackageId: 'deluxe_menu',
-        selectedFoodExtras: ['chinese_counter', 'chat_counter'],
+        selectedFoodPackageId: @js(data_get($savedAnswers, 'selected_food_package.id', 'deluxe_menu')),
+        selectedFoodExtras: @js($savedArray('selected_food_extras', ['chinese_counter', 'chat_counter'])),
         foodType: '',
-        foodItems: [],
-        locations: [],
+        foodItems: @js($savedArray('food_menu_items')),
+        locations: @js($savedArray('service_area')),
         subarea: 'Juhu Beach',
-        timeline: @js($plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
-        eventDate: '',
-        setting: 'Indoor AC Banquet'
+        timeline: @js($savedAnswers['event_timeline'] ?? $plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
+        eventDate: @js($savedAnswers['event_date'] ?? ''),
+        setting: @js($savedAnswers['venue_setting'] ?? 'Indoor AC Banquet')
     },
     calendarMonth: 10,
     calendarYear: 2026,
@@ -536,7 +546,7 @@
                     x-show="currentStep === totalSteps"
                     class="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#D4AF37] to-amber-400 hover:from-amber-400 hover:to-[#D4AF37] text-slate-950 text-xs sm:text-sm font-extrabold shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 ml-auto cursor-pointer">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>Generate AI Plan</span>
+                    <span>{{ $editingPlan ? 'Update Plan' : 'Generate AI Plan' }}</span>
                 </button>
             </div>
 
@@ -597,9 +607,10 @@
         </div>
     </template>
 
-    <form x-ref="planForm" method="POST" action="{{ route('ai-planner.generate') }}" class="hidden">
+    <form x-ref="planForm" method="POST" action="{{ $editingPlan ? route('user.plans.update', $editingPlan) : route('ai-planner.generate') }}" class="hidden">
         @csrf
-        <input type="hidden" name="category" value="{{ $category }}">
+        @if($editingPlan) @method('PUT') @endif
+        <input type="hidden" name="category" :value="dynamicAnswers.event_category || @js($category)">
         <input type="hidden" name="guest_count" :value="planner.exactGuest">
         <input type="hidden" name="answers[wedding_budget]" :value="planner.budget">
         <input type="hidden" name="answers[guest_capacity]" :value="planner.exactGuest">
@@ -609,8 +620,11 @@
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
         <input type="hidden" name="answers[food_type]" :value="planner.foodItems.map(item => item.title).join(', ')">
         <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.foodItems)">
+        <input type="hidden" name="answers[selected_food_package]" :value="JSON.stringify(getSelectedPackage())">
+        <input type="hidden" name="answers[selected_food_extras]" :value="JSON.stringify(planner.selectedFoodExtras)">
         <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
+        <input type="hidden" name="answers[event_date]" :value="planner.eventDate">
         <template x-for="step in plannerSteps.filter(item => item.renderer === 'generic')" :key="step.code">
             <input type="hidden" :name="`answers[${step.code}]`" :value="serializedGenericAnswer(step.code)">
         </template>

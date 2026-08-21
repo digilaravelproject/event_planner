@@ -9,6 +9,10 @@
             <p class="text-sm text-slate-500 mt-1 font-semibold">Manage user accounts, view active subscriptions, and moderate login statuses.</p>
             @include('admin.partials.alerts')
         </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('admin.users.export.pdf') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#850625] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#6f041f]"><i class="fa-solid fa-file-pdf"></i> Download PDF</a>
+            <a href="{{ route('admin.users.export.excel') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"><i class="fa-solid fa-file-excel"></i> Download Excel</a>
+        </div>
     </div>
 
     <!-- Users Table -->

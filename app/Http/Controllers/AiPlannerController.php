@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SharedPlanMail;
 use App\Models\EventRequirementQuestion;
 use App\Models\UserEventPlan;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
@@ -9,6 +10,7 @@ use App\Services\EventPlanningService;
 use App\Services\PlanPdfService;
 use App\Services\PlanPresentationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -17,9 +19,11 @@ class AiPlannerController extends Controller
 {
     public function index(Request $request)
     {
+        /** @var UserEventPlan|null $editingPlan */
+        $editingPlan = $request->attributes->get('editingPlan');
         $orderedQuestions = EventRequirementQuestion::enabled()->get();
         $questions = $orderedQuestions->keyBy('question_code');
-        $guestCount = max(10, min(5000, (int) $request->integer('guests', 150)));
+        $guestCount = max(10, min(5000, (int) ($editingPlan?->guest_count ?? $request->integer('guests', 150))));
         $plannerSteps = $this->plannerSteps($orderedQuestions);
         $stepNumbers = $plannerSteps->pluck('number', 'code')->all();
 
@@ -130,62 +134,24 @@ class AiPlannerController extends Controller
                 'required' => $question->is_required,
             ])->all(),
             'initialGuestCount' => $guestCount,
-            'category' => $this->selectedCategory($questions->get('event_category'), (string) $request->query('type', '')),
+            'category' => $editingPlan?->category ?: $this->selectedCategory($questions->get('event_category'), (string) $request->query('type', '')),
+            'editingPlan' => $editingPlan,
+            'initialAnswers' => (array) ($editingPlan?->answers ?? []),
         ]);
+    }
+
+    public function edit(Request $request, UserEventPlan $plan)
+    {
+        $plan = $plan->parent ?: $plan;
+        abort_unless($plan->user_id === $request->user()->id, 403);
+        $request->attributes->set('editingPlan', $plan);
+
+        return $this->index($request);
     }
 
     public function generate(Request $request, EventPlanningService $planning)
     {
-        $answers = (array) $request->input('answers', []);
-        foreach ($answers as $answerKey => $value) {
-            if (is_string($value) && str_starts_with(trim($value), '[')) {
-                $answers[$answerKey] = json_decode($value, true) ?: [];
-            }
-        }
-        if (! array_key_exists('event_category', $answers)) {
-            $answers['event_category'] = (string) $request->input('category', 'wedding');
-        }
-        $request->merge(['answers' => $answers]);
-
-        $questions = EventRequirementQuestion::enabled()->get();
-        $categoryOptions = collect($questions->firstWhere('question_code', 'event_category')?->options ?? [])->map('strval')->filter()->values();
-        $answerRules = [];
-        foreach ($questions as $question) {
-            $base = $question->is_required ? ['required'] : ['nullable'];
-            $answerRules['answers.'.$question->question_code] = match ($question->question_type) {
-                'number' => [...$base, 'numeric'],
-                'checkbox', 'multi_select' => [...$base, 'array', 'max:100'],
-                default => [...$base, 'string', 'max:2000'],
-            };
-        }
-
-        $validated = $request->validate(array_merge($answerRules, [
-            'category' => ['required', 'string', 'max:255', Rule::in($categoryOptions->prepend('wedding')->unique()->all())],
-            'guest_count' => ['required', 'integer', 'min:10', 'max:5000'],
-            'answers' => ['required', 'array'],
-            'answers.wedding_budget' => ['required', 'numeric', 'min:1', 'max:500'],
-            'answers.guest_capacity' => ['nullable', 'integer', 'min:10', 'max:5000'],
-            'answers.wedding_tradition' => ['nullable', 'string', 'max:255'],
-            'answers.decoration_type' => ['nullable', 'string', 'max:255'],
-            'answers.venue_setting' => ['nullable', 'string', 'max:255'],
-            'answers.food_type' => ['nullable', 'string', 'max:2000'],
-            'answers.service_area' => ['nullable', 'array', 'max:50'],
-            'answers.service_area.*' => ['string', 'max:255'],
-            'answers.event_timeline' => ['nullable', 'string', 'max:255'],
-            'answers.event_date' => ['nullable', 'date'],
-            'answers.food_menu_items' => ['nullable', 'array', 'max:100'],
-            'answers.food_menu_items.*.id' => ['required', 'string', 'max:255'],
-            'answers.food_menu_items.*.title' => ['required', 'string', 'max:255'],
-            'answers.food_menu_items.*.category' => ['required', 'string', 'max:100'],
-            'answers.food_menu_items.*.cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'answers.selected_food_package' => ['nullable', 'array'],
-            'answers.selected_food_extras' => ['nullable', 'array'],
-            'answers.ceremonies' => ['nullable', 'array', 'max:50'],
-            'answers.ceremonies.*' => ['string', 'max:255'],
-        ]));
-        if (! empty($validated['answers']['food_menu_items'])) {
-            $validated['answers']['food_menu_items'] = $this->validatedFoodMenuItems($validated['answers']['food_menu_items']);
-        }
+        $validated = $this->validatedRequirements($request);
 
         $request->session()->put('pending_event_plan', $validated);
 
@@ -195,6 +161,36 @@ class AiPlannerController extends Controller
         }
 
         return $this->finishPending($request, $planning);
+    }
+
+    public function update(Request $request, UserEventPlan $plan, EventPlanningService $planning)
+    {
+        $plan = $plan->parent ?: $plan;
+        abort_unless($plan->user_id === $request->user()->id, 403);
+        $validated = $this->validatedRequirements($request);
+
+        try {
+            $plan = $planning->update($plan, $validated);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return back()->withInput()->withErrors(['planner' => 'We could not update your plan. Please try again.']);
+        }
+
+        return redirect()->route('user.plans.show', $plan)->with('success', 'Your plan was updated successfully.');
+    }
+
+    public function share(Request $request, UserEventPlan $plan, PlanPresentationService $presenter, PlanPdfService $pdf)
+    {
+        abort_unless($plan->user_id === $request->user()->id, 403);
+        $validated = $request->validate(['email' => ['required', 'email:rfc', 'max:255']]);
+        $plan->load('user');
+        Mail::to($validated['email'])->send(new SharedPlanMail(
+            $plan,
+            $pdf->render($plan, $presenter->present($plan))
+        ));
+
+        return back()->with('success', 'The plan PDF was emailed to '.$validated['email'].'.');
     }
 
     public function resume(Request $request, EventPlanningService $planning)
@@ -377,6 +373,60 @@ class AiPlannerController extends Controller
         }
 
         return (string) ($options->first() ?? 'wedding');
+    }
+
+    private function validatedRequirements(Request $request): array
+    {
+        $answers = (array) $request->input('answers', []);
+        foreach ($answers as $answerKey => $value) {
+            if (is_string($value) && str_starts_with(trim($value), '[')) {
+                $answers[$answerKey] = json_decode($value, true) ?: [];
+            }
+        }
+        $answers['event_category'] ??= (string) $request->input('category', 'wedding');
+        $request->merge(['answers' => $answers]);
+
+        $questions = EventRequirementQuestion::enabled()->get();
+        $categoryOptions = collect($questions->firstWhere('question_code', 'event_category')?->options ?? [])->map('strval')->filter()->values();
+        $answerRules = [];
+        foreach ($questions as $question) {
+            $base = $question->is_required ? ['required'] : ['nullable'];
+            $answerRules['answers.'.$question->question_code] = match ($question->question_type) {
+                'number' => [...$base, 'numeric'],
+                'checkbox', 'multi_select' => [...$base, 'array', 'max:100'],
+                default => [...$base, 'string', 'max:2000'],
+            };
+        }
+
+        $validated = $request->validate(array_merge($answerRules, [
+            'category' => ['required', 'string', 'max:255', Rule::in($categoryOptions->prepend('wedding')->unique()->all())],
+            'guest_count' => ['required', 'integer', 'min:10', 'max:5000'],
+            'answers' => ['required', 'array'],
+            'answers.wedding_budget' => ['required', 'numeric', 'min:1', 'max:500'],
+            'answers.guest_capacity' => ['nullable', 'integer', 'min:10', 'max:5000'],
+            'answers.wedding_tradition' => ['nullable', 'string', 'max:255'],
+            'answers.decoration_type' => ['nullable', 'string', 'max:255'],
+            'answers.venue_setting' => ['nullable', 'string', 'max:255'],
+            'answers.food_type' => ['nullable', 'string', 'max:2000'],
+            'answers.service_area' => ['nullable', 'array', 'max:50'],
+            'answers.service_area.*' => ['string', 'max:255'],
+            'answers.event_timeline' => ['nullable', 'string', 'max:255'],
+            'answers.event_date' => ['nullable', 'date'],
+            'answers.food_menu_items' => ['nullable', 'array', 'max:100'],
+            'answers.food_menu_items.*.id' => ['required', 'string', 'max:255'],
+            'answers.food_menu_items.*.title' => ['required', 'string', 'max:255'],
+            'answers.food_menu_items.*.category' => ['required', 'string', 'max:100'],
+            'answers.food_menu_items.*.cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'answers.selected_food_package' => ['nullable', 'array'],
+            'answers.selected_food_extras' => ['nullable', 'array'],
+            'answers.ceremonies' => ['nullable', 'array', 'max:50'],
+            'answers.ceremonies.*' => ['string', 'max:255'],
+        ]));
+        if (! empty($validated['answers']['food_menu_items'])) {
+            $validated['answers']['food_menu_items'] = $this->validatedFoodMenuItems($validated['answers']['food_menu_items']);
+        }
+
+        return $validated;
     }
 
     private function validatedFoodMenuItems(array $selectedItems): array
