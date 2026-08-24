@@ -188,6 +188,15 @@
     </div>
 </section>
 
+<!-- VENDOR PORTAL CTA -->
+<section class="bg-[#FFFDF9] px-4 py-10 sm:px-8 md:px-12 lg:px-16">
+    <div class="relative mx-auto flex max-w-[1500px] flex-col items-start justify-between gap-7 overflow-hidden rounded-[2rem] border border-[#D4AF37]/40 px-7 py-9 text-white shadow-2xl shadow-rose-950/20 md:flex-row md:items-center md:px-10" style="background:linear-gradient(120deg,#2f0612 0%,#850625 58%,#9b6a1a 100%);">
+        <div class="absolute -right-14 -top-28 h-72 w-72 rounded-full border-[45px] border-white/[.06]"></div>
+        <div class="relative z-10 max-w-3xl"><p class="text-[10px] font-extrabold uppercase tracking-[.25em] text-[#F3D77A]">For event professionals</p><h2 class="mt-2 font-serif-luxury text-3xl font-bold sm:text-4xl">Showcase your business. Reach more celebrations.</h2><p class="mt-3 max-w-2xl text-sm leading-6 text-rose-100">Join the Shaadi Sense vendor network and manage your services, custom attributes, packages, images and business profile from your own dashboard.</p></div>
+        <div class="relative z-10 flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row"><a href="{{ route('vendor.login') }}" class="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-center text-sm font-extrabold backdrop-blur hover:bg-white/20">Vendor Login</a><a href="{{ route('vendor.register') }}" class="rounded-xl bg-[#D4AF37] px-6 py-3 text-center text-sm font-extrabold text-[#3b0915] shadow-lg hover:bg-[#edcf6c]">Register as Vendor →</a></div>
+    </div>
+</section>
+
 @include('web.partials.how-it-works', ['items' => $howItWorks])
 @if(false)
 <!-- SECTION 2: HOW IT WORKS (SHUBH AARAMBH PROCESS) -->

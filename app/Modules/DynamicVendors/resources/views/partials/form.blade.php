@@ -17,18 +17,19 @@
     })->all());
     if (count($formAttributes) === 0) $formAttributes = $blankAttribute;
     $existingImages = old('existing_images', data_get($document, 'media.images', []));
+    $routePrefix = $routePrefix ?? 'admin.dynamic-vendors';
 @endphp
 
 <div class="admin-page">
     @include('admin.partials.alerts')
     <div class="admin-hero mb-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div class="relative z-10">
-            <a href="{{ route('admin.dynamic-vendors.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-100 transition hover:text-white">← Dynamic Vendors</a>
+            <a href="{{ route($routePrefix.'.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-100 transition hover:text-white">← My Businesses</a>
             <h1 class="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{{ $title }}</h1>
             <p class="mt-1 text-sm text-blue-100">{{ $subtitle }}</p>
         </div>
         @if($vendor)
-            <a href="{{ route('admin.dynamic-vendors.show', $vendor) }}" class="relative z-10 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">View record</a>
+            <a href="{{ route($routePrefix.'.show', $vendor) }}" class="relative z-10 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">View record</a>
         @endif
     </div>
 
@@ -63,8 +64,8 @@
                 <div><h2 class="text-lg font-extrabold text-slate-900">Dynamic attributes</h2><p class="text-sm text-slate-500">Drag rows to reorder. Names are unrestricted.</p></div>
                 <div class="flex flex-wrap gap-2">
                     <input id="attribute-search" type="search" placeholder="Search attributes" class="w-44 rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                    <a href="{{ route('admin.dynamic-vendors.attribute-sheet.sample') }}" class="inline-flex items-center rounded-xl border border-[#3950a2]/20 bg-indigo-50 px-4 py-2 text-sm font-bold text-[#3950a2] transition hover:bg-indigo-100">Download Sample Sheet</a>
-                    <button type="button" id="upload-attribute-sheet" data-import-url="{{ route('admin.dynamic-vendors.attribute-sheet.import') }}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100">Upload Attribute Sheet</button>
+                    <a href="{{ route($routePrefix.'.attribute-sheet.sample') }}" class="inline-flex items-center rounded-xl border border-[#3950a2]/20 bg-indigo-50 px-4 py-2 text-sm font-bold text-[#3950a2] transition hover:bg-indigo-100">Download Sample Sheet</a>
+                    <button type="button" id="upload-attribute-sheet" data-import-url="{{ route($routePrefix.'.attribute-sheet.import') }}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100">Upload Attribute Sheet</button>
                     <input id="attribute-sheet-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden">
                     <button type="button" id="add-attribute" class="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5">+ Add Attribute</button>
                 </div>
@@ -336,7 +337,7 @@
         </section>
 
         <div class="flex items-center justify-end gap-3 pt-2">
-            <a href="{{ route('admin.dynamic-vendors.index') }}" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700">Cancel</a>
+            <a href="{{ route($routePrefix.'.index') }}" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700">Cancel</a>
             <button class="admin-primary-button rounded-xl px-6 py-2.5 text-sm font-bold text-white">{{ $vendor ? 'Save New Version' : 'Create Vendor' }}</button>
         </div>
     </form>

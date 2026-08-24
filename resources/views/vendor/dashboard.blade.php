@@ -1,0 +1,10 @@
+@extends('vendor.layout')
+@section('title', 'Dashboard') @section('page-title', 'Dashboard')
+@section('content')
+<section class="admin-hero p-7 text-white sm:p-9"><p class="text-xs font-bold uppercase tracking-[.22em] text-amber-200">Welcome back</p><h2 class="relative z-10 mt-2 text-3xl font-extrabold">{{ auth('vendor')->user()->business_name }}</h2><p class="relative z-10 mt-2 max-w-xl text-sm text-blue-100">Keep your services fresh and help customers discover everything your business offers.</p><a href="{{ route('vendor.vendors.create') }}" class="relative z-10 mt-6 inline-block rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-[#30448b]">+ Add Business Details</a></section>
+<div class="mt-6 grid gap-5 sm:grid-cols-3">
+@foreach([['All listings',$totalVendors,'#850625'],['Active',$activeVendors,'#0f8c6b'],['Drafts',$draftVendors,'#b7791f']] as [$label,$value,$colour])<div class="admin-card p-6"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">{{ $label }}</p><p class="mt-2 text-3xl font-extrabold" style="color:{{ $colour }}">{{ $value }}</p></div>@endforeach
+</div>
+<section class="admin-card mt-6 overflow-hidden"><div class="flex items-center justify-between border-b border-slate-100 p-5"><div><h3 class="font-extrabold">Recent listings</h3><p class="text-xs text-slate-500">Your latest business details</p></div><a href="{{ route('vendor.vendors.index') }}" class="text-xs font-bold text-[#3950a2]">View all</a></div>
+@forelse($recentVendors as $vendor)<a href="{{ route('vendor.vendors.show',$vendor) }}" class="flex items-center justify-between border-b border-slate-100 px-5 py-4 last:border-0 hover:bg-slate-50"><div><p class="text-sm font-bold">{{ $vendor->name }}</p><p class="text-xs text-slate-500">{{ $vendor->category }}</p></div><span class="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-extrabold uppercase text-slate-600">{{ $vendor->status }}</span></a>@empty<div class="p-10 text-center text-sm text-slate-500">No listings yet. Add your first business details to get started.</div>@endforelse</section>
+@endsection

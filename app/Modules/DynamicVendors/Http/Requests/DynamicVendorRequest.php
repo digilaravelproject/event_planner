@@ -17,7 +17,7 @@ abstract class DynamicVendorRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user('admin') !== null;
+        return $this->user('admin') !== null || $this->user('vendor') !== null;
     }
 
     public function rules(): array

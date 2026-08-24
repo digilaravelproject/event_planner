@@ -8,6 +8,7 @@ use App\Modules\DynamicVendors\Repositories\DynamicVendorRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -15,12 +16,13 @@ class DynamicVendorService
 {
     public function __construct(private readonly DynamicVendorRepositoryInterface $vendors) {}
 
-    public function create(array $input, array $files, ?int $adminId): DynamicVendor
+    public function create(array $input, array $files, ?int $adminId, ?int $vendorAccountId = null): DynamicVendor
     {
-        return DB::transaction(function () use ($input, $files, $adminId): DynamicVendor {
+        return DB::transaction(function () use ($input, $files, $adminId, $vendorAccountId): DynamicVendor {
             $vendor = $this->vendors->create([
                 'vendor_json' => $this->buildDocument($input, $files),
                 'status' => $input['status'],
+                'vendor_account_id' => $vendorAccountId,
                 'created_by' => $adminId,
                 'updated_by' => $adminId,
             ]);
@@ -116,7 +118,7 @@ class DynamicVendorService
             $allowedExistingAttributeImages = collect($existingAttribute['images'] ?? [])
                 ->filter(fn ($path) => is_string($path));
             $seededAttributeImages = collect($attribute['images'] ?? [])
-                ->filter(fn ($path) => is_string($path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($path));
+                ->filter(fn ($path) => is_string($path) && Storage::disk('public')->exists($path));
             $attributeImages = collect($input['existing_attribute_images'][$position] ?? [])
                 ->intersect($allowedExistingAttributeImages)->values()->all();
             $attributeImages = array_merge($attributeImages, $seededAttributeImages->all());
@@ -162,7 +164,9 @@ class DynamicVendorService
         $offerings = [];
         foreach ($input['offerings'] ?? [] as $offeringInput) {
             $offName = trim((string) ($offeringInput['name'] ?? ''));
-            if ($offName === '') continue;
+            if ($offName === '') {
+                continue;
+            }
 
             $offLocations = array_filter(array_map('trim', explode(',', (string) ($offeringInput['locations'] ?? ''))));
             $offTraditions = array_filter(array_map('trim', explode(',', (string) ($offeringInput['traditions'] ?? ''))));
@@ -183,10 +187,12 @@ class DynamicVendorService
         $foodPackages = [];
         foreach ($input['food_packages'] ?? [] as $pkg) {
             $pkgName = trim((string) ($pkg['name'] ?? ''));
-            if ($pkgName === '') continue;
+            if ($pkgName === '') {
+                continue;
+            }
             $items = is_array($pkg['items'] ?? null) ? $pkg['items'] : array_filter(array_map('trim', explode(',', (string) ($pkg['items'] ?? ''))));
             $foodPackages[] = [
-                'id' => $pkg['id'] ?? \Illuminate\Support\Str::slug($pkgName, '_'),
+                'id' => $pkg['id'] ?? Str::slug($pkgName, '_'),
                 'name' => $pkgName,
                 'min_price_per_plate' => isset($pkg['min_price_per_plate']) && $pkg['min_price_per_plate'] !== '' ? (float) $pkg['min_price_per_plate'] : 700,
                 'max_price_per_plate' => isset($pkg['max_price_per_plate']) && $pkg['max_price_per_plate'] !== '' ? (float) $pkg['max_price_per_plate'] : 1000,
@@ -198,9 +204,11 @@ class DynamicVendorService
         $foodExtras = [];
         foreach ($input['food_extras'] ?? [] as $extra) {
             $exName = trim((string) ($extra['name'] ?? ''));
-            if ($exName === '') continue;
+            if ($exName === '') {
+                continue;
+            }
             $foodExtras[] = [
-                'id' => $extra['id'] ?? \Illuminate\Support\Str::slug($exName, '_'),
+                'id' => $extra['id'] ?? Str::slug($exName, '_'),
                 'name' => $exName,
                 'min_price' => isset($extra['min_price']) && $extra['min_price'] !== '' ? (float) $extra['min_price'] : 90,
                 'max_price' => isset($extra['max_price']) && $extra['max_price'] !== '' ? (float) $extra['max_price'] : 120,

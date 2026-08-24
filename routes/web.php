@@ -18,6 +18,8 @@ use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UserSubscriptionController;
+use App\Http\Controllers\Vendor\VendorAuthController;
+use App\Http\Controllers\Vendor\VendorPanelController;
 use App\Models\EventRequirementQuestion;
 use App\Models\LandingContent;
 use Illuminate\Support\Facades\Route;
@@ -128,6 +130,30 @@ Route::prefix('user')->group(function () {
             Route::put('/profile/update', [UserDashboardController::class, 'updateProfile'])->name('user.profile.update');
             Route::put('/profile/password', [UserDashboardController::class, 'updatePassword'])->name('user.password.update');
         });
+    });
+});
+
+// Vendor Portal Routes
+Route::prefix('vendor')->name('vendor.')->group(function () {
+    Route::middleware('guest:vendor')->group(function () {
+        Route::get('/register', [VendorAuthController::class, 'showRegister'])->name('register');
+        Route::post('/register', [VendorAuthController::class, 'register'])->name('register.submit');
+        Route::get('/login', [VendorAuthController::class, 'showLogin'])->name('login');
+        Route::post('/login', [VendorAuthController::class, 'login'])->name('login.submit');
+    });
+
+    Route::middleware('auth:vendor')->group(function () {
+        Route::post('/logout', [VendorAuthController::class, 'logout'])->name('logout');
+        Route::get('/dashboard', [VendorPanelController::class, 'dashboard'])->name('dashboard');
+        Route::get('/profile', [VendorPanelController::class, 'profile'])->name('profile');
+        Route::put('/profile', [VendorPanelController::class, 'updateProfile'])->name('profile.update');
+        Route::put('/password', [VendorPanelController::class, 'updatePassword'])->name('password.update');
+        Route::get('/businesses/attribute-sheet/sample', [VendorPanelController::class, 'downloadAttributeSample'])->name('vendors.attribute-sheet.sample');
+        Route::post('/businesses/attribute-sheet/import', [VendorPanelController::class, 'importAttributes'])->name('vendors.attribute-sheet.import');
+        Route::resource('/businesses', VendorPanelController::class)
+            ->parameters(['businesses' => 'dynamic_vendor'])
+            ->names('vendors')
+            ->except(['dashboard', 'profile']);
     });
 });
 
