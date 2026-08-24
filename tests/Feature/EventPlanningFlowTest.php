@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Admin;
 use App\Models\AiSetting;
 use App\Models\EventRequirementQuestion;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserEventPlan;
 use App\Services\PlanPresentationService;
@@ -57,7 +58,8 @@ class EventPlanningFlowTest extends TestCase
                 'Gulab Jamun' => ['label' => 'Gulab Jamun', 'category' => 'Desserts', 'cost' => 50],
             ],
         ]);
-        $user = User::factory()->create(['status' => true, 'password' => 'password']);
+        $subscription = Subscription::create(['name' => 'Test Plan', 'price' => 0, 'interval' => 'free', 'features' => []]);
+        $user = User::factory()->create(['status' => true, 'password' => 'password', 'subscription_id' => $subscription->id, 'subscription_ends_at' => now()->addMonth()]);
         AiSetting::setValue('openrouter_api_key', Crypt::encryptString('test-key'));
         AiSetting::setValue('openrouter_model', 'openrouter/auto');
 
@@ -119,6 +121,7 @@ class EventPlanningFlowTest extends TestCase
     {
         $owner = User::factory()->create();
         $other = User::factory()->create();
+        $this->subscribe($other);
         $plan = UserEventPlan::create([
             'user_id' => $owner->id,
             'title' => 'Private plan',
@@ -137,6 +140,7 @@ class EventPlanningFlowTest extends TestCase
     public function test_legacy_fallback_plan_shows_database_vendors_without_static_allocations(): void
     {
         $user = User::factory()->create();
+        $this->subscribe($user);
         $plan = UserEventPlan::create([
             'user_id' => $user->id,
             'title' => 'Readable vendor plan',
@@ -291,6 +295,7 @@ class EventPlanningFlowTest extends TestCase
     public function test_user_dashboard_and_pdf_download_are_available(): void
     {
         $user = User::factory()->create();
+        $this->subscribe($user);
         $plan = $this->planFor($user);
 
         $this->actingAs($user)->get(route('user.dashboard'))

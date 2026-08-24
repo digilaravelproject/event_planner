@@ -28,10 +28,11 @@ class UserDashboardController extends Controller
     {
         $user = Auth::guard('web')->user();
         $subscription = Subscription::find($user->subscription_id);
-        $planName = $subscription ? str_replace(' Plan', '', $subscription->name) : 'Basic';
+        $planName = $subscription ? str_replace(' Plan', '', $subscription->name) : 'No plan';
         $priceLabel = $subscription ? '₹'.number_format($subscription->price, 0).'/mo' : 'Free';
+        $subscriptionFlag = $user->subscriptionFlag();
 
-        return view('user.profile', compact('user', 'planName', 'priceLabel'));
+        return view('user.profile', compact('user', 'planName', 'priceLabel', 'subscriptionFlag'));
     }
 
     public function updateProfile(Request $request)

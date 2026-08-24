@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Mail\SharedPlanMail;
 use App\Models\Admin;
 use App\Models\AiSetting;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserEventPlan;
+use App\Models\UserSubscription;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
@@ -22,6 +24,7 @@ class PlanActionsAndUserExportsTest extends TestCase
     {
         $this->seed(EventRequirementQuestionSeeder::class);
         $user = User::factory()->create();
+        $this->subscribe($user);
         $plan = $this->plan($user, ['wedding_budget' => 25, 'guest_capacity' => 200, 'wedding_tradition' => 'Maharashtrian Lagna']);
         AiSetting::setValue('openrouter_api_key', Crypt::encryptString('test-key'));
         Http::fake(['*/chat/completions' => Http::response([
@@ -59,6 +62,7 @@ class PlanActionsAndUserExportsTest extends TestCase
     {
         Mail::fake();
         $user = User::factory()->create();
+        $this->subscribe($user);
         $plan = $this->plan($user);
 
         $this->actingAs($user)->post(route('user.plans.share', $plan), ['email' => 'family@example.com'])
@@ -77,6 +81,52 @@ class PlanActionsAndUserExportsTest extends TestCase
         $this->assertStringStartsWith('%PDF-1.4', $pdf->getContent());
 
         $excel = $this->actingAs($admin, 'admin')->get(route('admin.users.export.excel'));
+        $excel->assertOk()->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $this->assertStringStartsWith('PK', $excel->getContent());
+    }
+
+    public function test_free_user_sees_disabled_edit_control_and_cannot_edit_plan(): void
+    {
+        $user = User::factory()->create();
+        $free = Subscription::create(['name' => 'Free Plan', 'price' => 0, 'interval' => 'free', 'features' => []]);
+        $user->update(['subscription_id' => $free->id, 'subscription_ends_at' => now()->addDays(30)]);
+        $plan = $this->plan($user);
+
+        $this->actingAs($user)->get(route('user.plans.show', $plan))
+            ->assertOk()
+            ->assertSee('Upgrade to a paid subscription to edit this plan.')
+            ->assertSee('disabled', false);
+        $this->actingAs($user)->get(route('user.plans.edit', $plan))->assertForbidden();
+        $this->actingAs($user)->put(route('user.plans.update', $plan), [])->assertForbidden();
+    }
+
+    public function test_admin_can_view_filter_and_export_payment_transactions(): void
+    {
+        $admin = Admin::create(['name' => 'Payment Admin', 'email' => 'payments@example.com', 'password' => 'password']);
+        $user = User::factory()->create(['name' => 'Payment Customer', 'email' => 'customer@example.com']);
+        $plan = Subscription::create(['name' => '6 Monthly Plan', 'price' => 4999, 'interval' => 'six_months', 'features' => []]);
+        UserSubscription::create([
+            'user_id' => $user->id,
+            'subscription_id' => $plan->id,
+            'billing_cycle' => 'six_months',
+            'amount' => 4999,
+            'currency' => 'INR',
+            'status' => 'active',
+            'razorpay_order_id' => 'order_export_1',
+            'razorpay_payment_id' => 'pay_export_1',
+            'starts_at' => now(),
+            'ends_at' => now()->addMonths(6),
+            'paid_at' => now(),
+        ]);
+
+        $this->actingAs($admin, 'admin')->get(route('admin.transactions.index', ['search' => 'Payment Customer', 'status' => 'active']))
+            ->assertOk()->assertSee('Payment Customer')->assertSee('pay_export_1')->assertSee('<table', false);
+
+        $pdf = $this->actingAs($admin, 'admin')->get(route('admin.transactions.export.pdf'));
+        $pdf->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-1.4', $pdf->getContent());
+
+        $excel = $this->actingAs($admin, 'admin')->get(route('admin.transactions.export.excel'));
         $excel->assertOk()->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $this->assertStringStartsWith('PK', $excel->getContent());
     }

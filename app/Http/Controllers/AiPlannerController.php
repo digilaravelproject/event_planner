@@ -142,6 +142,7 @@ class AiPlannerController extends Controller
 
     public function edit(Request $request, UserEventPlan $plan)
     {
+        abort_unless($request->user()->hasPaidSubscription(), 403, 'A paid subscription is required to edit plans.');
         $plan = $plan->parent ?: $plan;
         abort_unless($plan->user_id === $request->user()->id, 403);
         $request->attributes->set('editingPlan', $plan);
@@ -165,6 +166,7 @@ class AiPlannerController extends Controller
 
     public function update(Request $request, UserEventPlan $plan, EventPlanningService $planning)
     {
+        abort_unless($request->user()->hasPaidSubscription(), 403, 'A paid subscription is required to update plans.');
         $plan = $plan->parent ?: $plan;
         abort_unless($plan->user_id === $request->user()->id, 403);
         $validated = $this->validatedRequirements($request);

@@ -24,7 +24,8 @@
                         <th class="px-6 py-4.5">User Details</th>
                         <th class="px-6 py-4.5">Mobile Number</th>
                         <th class="px-6 py-4.5">Subscription Plan</th>
-                        <th class="px-6 py-4.5">Ends At</th>
+                        <th class="px-6 py-4.5">Subscription Details</th>
+                        <th class="px-6 py-4.5">Subscription Flag</th>
                         <th class="px-6 py-4.5 text-center">Status</th>
                         <th class="px-6 py-4.5 text-right">Actions</th>
                     </tr>
@@ -63,13 +64,20 @@
                                 @endif
                             </td>
 
-                            <!-- Subscription Expiry -->
+                            <!-- Subscription details -->
                             <td class="px-6 py-4 text-xs font-bold text-slate-500">
                                 @if($user->subscription_ends_at)
-                                    {{ $user->subscription_ends_at->format('M d, Y H:i') }}
+                                    <div>{{ $user->hasActiveSubscription() ? 'Active' : 'Expired' }} · ends {{ $user->subscription_ends_at->format('M d, Y H:i') }}</div>
+                                    @if($latest = $user->subscriptionHistory->first())<div class="mt-1 font-normal text-slate-400">{{ ucfirst($latest->billing_cycle) }} · ₹{{ number_format($latest->amount, 2) }} · {{ $latest->razorpay_payment_id ?: 'Free plan' }}</div>@endif
                                 @else
                                     N/A
                                 @endif
+                            </td>
+
+                            <!-- Subscription flag -->
+                            <td class="px-6 py-4">
+                                @php $subscriptionFlag = $user->subscriptionFlag(); @endphp
+                                <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide {{ $subscriptionFlag === 'subscribed' ? 'bg-emerald-50 text-emerald-700' : ($subscriptionFlag === 'expired' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600') }}">{{ $subscriptionFlag }}</span>
                             </td>
 
                             <!-- Status Toggle -->
@@ -137,7 +145,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-10 text-center text-slate-400 font-semibold">No users registered yet.</td>
+                            <td colspan="7" class="px-6 py-10 text-center text-slate-400 font-semibold">No users registered yet.</td>
                         </tr>
                     @endforelse
                 </tbody>

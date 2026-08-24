@@ -4,20 +4,23 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AiSettingController;
 use App\Http\Controllers\Admin\EventRequirementQuestionController;
-use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SubscriptionController;
+use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserQueryController as AdminUserQueryController;
 use App\Http\Controllers\Admin\UserPlanController;
 use App\Http\Controllers\Admin\VendorAnalyticsController;
 use App\Http\Controllers\AiPlannerController;
+use App\Http\Controllers\PublicQueryController;
 use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserNotificationController;
 use App\Http\Controllers\User\UserSubscriptionController;
+use App\Http\Controllers\User\UserQueryController;
 use App\Http\Controllers\Vendor\VendorAuthController;
 use App\Http\Controllers\Vendor\VendorPanelController;
 use App\Models\EventRequirementQuestion;
@@ -43,6 +46,9 @@ Route::prefix('admin')->group(function () {
 
         // Subscription Manager
         Route::resource('/subscriptions', SubscriptionController::class)->except(['create', 'show', 'edit'])->names('admin.subscriptions');
+        Route::get('/transactions/export/pdf', [TransactionController::class, 'exportPdf'])->name('admin.transactions.export.pdf');
+        Route::get('/transactions/export/excel', [TransactionController::class, 'exportExcel'])->name('admin.transactions.export.excel');
+        Route::get('/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
 
         // Profile Settings
         Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');
@@ -68,8 +74,6 @@ Route::prefix('admin')->group(function () {
             Route::put('/{landingContent}', [LandingContentController::class, 'update'])->name('admin.landing-content.update');
             Route::delete('/{landingContent}', [LandingContentController::class, 'destroy'])->name('admin.landing-content.destroy');
         });
-        Route::resource('/feedback', FeedbackController::class)->only(['index', 'show', 'update', 'destroy'])->names('admin.feedback');
-
         // User Management CRUD
         Route::get('/users/export/pdf', [UserController::class, 'exportPdf'])->name('admin.users.export.pdf');
         Route::get('/users/export/excel', [UserController::class, 'exportExcel'])->name('admin.users.export.excel');
@@ -78,6 +82,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/user-plans/{plan}', [UserPlanController::class, 'show'])->name('admin.users.plans.show');
         Route::get('/user-plans/{plan}/download', [UserPlanController::class, 'download'])->name('admin.users.plans.download');
         Route::resource('/users', UserController::class)->except(['create', 'show', 'store'])->names('admin.users');
+        Route::post('/user-queries/{query}/reply', [AdminUserQueryController::class, 'reply'])->name('admin.user-queries.reply');
+        Route::resource('/user-queries', AdminUserQueryController::class)->only(['index', 'update', 'destroy'])->parameters(['user-queries' => 'query'])->names('admin.user-queries');
     });
 });
 
@@ -108,27 +114,31 @@ Route::prefix('user')->group(function () {
     // Authenticated User Routes
     Route::middleware('auth:web')->group(function () {
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('user.logout');
-        Route::get('/dashboard', [UserDashboardController::class, 'dashboard'])->name('user.dashboard');
-        Route::get('/plans', [AiPlannerController::class, 'history'])->name('user.plans.index');
-        Route::get('/plans/{plan}/edit', [AiPlannerController::class, 'edit'])->name('user.plans.edit');
-        Route::put('/plans/{plan}', [AiPlannerController::class, 'update'])->name('user.plans.update');
-        Route::post('/plans/{plan}/share', [AiPlannerController::class, 'share'])->name('user.plans.share');
-        Route::get('/plans/{plan}', [AiPlannerController::class, 'show'])->name('user.plans.show');
-        Route::get('/plans/{plan}/download', [AiPlannerController::class, 'download'])->name('user.plans.download');
-        Route::get('/planner/resume', [AiPlannerController::class, 'resume'])->name('ai-planner.resume');
-        Route::get('/notifications', [UserNotificationController::class, 'index'])->name('user.notifications.index');
-        Route::patch('/notifications/read-all', [UserNotificationController::class, 'readAll'])->name('user.notifications.read-all');
-        Route::patch('/notifications/{notification}/read', [UserNotificationController::class, 'read'])->name('user.notifications.read');
 
         // Subscription tier choosing & payment verification
         Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('user.subscription');
+        Route::post('/subscribe/order', [UserSubscriptionController::class, 'createOrder'])->name('user.subscribe.order');
         Route::post('/subscribe/verify', [UserSubscriptionController::class, 'verifyPayment'])->name('user.subscribe.verify');
+        Route::get('/profile', [UserDashboardController::class, 'profile'])->name('user.profile');
+        Route::put('/profile/update', [UserDashboardController::class, 'updateProfile'])->name('user.profile.update');
+        Route::put('/profile/password', [UserDashboardController::class, 'updatePassword'])->name('user.password.update');
 
-        // Account pages for subscribed users
         Route::middleware('subscribed')->group(function () {
-            Route::get('/profile', [UserDashboardController::class, 'profile'])->name('user.profile');
-            Route::put('/profile/update', [UserDashboardController::class, 'updateProfile'])->name('user.profile.update');
-            Route::put('/profile/password', [UserDashboardController::class, 'updatePassword'])->name('user.password.update');
+            Route::get('/dashboard', [UserDashboardController::class, 'dashboard'])->name('user.dashboard');
+            Route::get('/plans', [AiPlannerController::class, 'history'])->name('user.plans.index');
+            Route::get('/plans/{plan}/edit', [AiPlannerController::class, 'edit'])->name('user.plans.edit');
+            Route::put('/plans/{plan}', [AiPlannerController::class, 'update'])->name('user.plans.update');
+            Route::post('/plans/{plan}/share', [AiPlannerController::class, 'share'])->name('user.plans.share');
+            Route::get('/plans/{plan}', [AiPlannerController::class, 'show'])->name('user.plans.show');
+            Route::get('/plans/{plan}/download', [AiPlannerController::class, 'download'])->name('user.plans.download');
+            Route::get('/planner/resume', [AiPlannerController::class, 'resume'])->name('ai-planner.resume');
+            Route::get('/notifications', [UserNotificationController::class, 'index'])->name('user.notifications.index');
+            Route::patch('/notifications/read-all', [UserNotificationController::class, 'readAll'])->name('user.notifications.read-all');
+            Route::patch('/notifications/{notification}/read', [UserNotificationController::class, 'read'])->name('user.notifications.read');
+            Route::get('/queries', [UserQueryController::class, 'index'])->name('user.queries.index');
+            Route::post('/queries', [UserQueryController::class, 'store'])->name('user.queries.store');
+            Route::put('/queries/{query}', [UserQueryController::class, 'update'])->name('user.queries.update');
+            Route::delete('/queries/{query}', [UserQueryController::class, 'destroy'])->name('user.queries.destroy');
         });
     });
 });
@@ -193,3 +203,4 @@ Route::get('/', function () {
 
 Route::get('/ai-planner', [AiPlannerController::class, 'index'])->name('ai-planner');
 Route::post('/ai-planner/generate', [AiPlannerController::class, 'generate'])->name('ai-planner.generate');
+Route::post('/queries', [PublicQueryController::class, 'store'])->name('queries.store');

@@ -6,7 +6,6 @@ use App\Models\Admin;
 use App\Models\AdminNotification;
 use App\Models\AiSetting;
 use App\Models\EventRequirementQuestion;
-use App\Models\Feedback;
 use App\Models\LandingContent;
 use App\Models\Page;
 use App\Models\User;
@@ -38,7 +37,8 @@ class AdminModulesTest extends TestCase
 
     public function test_all_new_admin_module_pages_render(): void
     {
-        foreach (['admin.vendor-analytics.index', 'admin.ai.manage', 'admin.event-questions.index', 'admin.notifications.index', 'admin.pages.index', 'admin.feedback.index'] as $route) {
+        $this->assertFalse(Route::has('admin.feedback.index'));
+        foreach (['admin.vendor-analytics.index', 'admin.ai.manage', 'admin.event-questions.index', 'admin.notifications.index', 'admin.pages.index', 'admin.transactions.index'] as $route) {
             $this->get(route($route))->assertOk();
         }
 
@@ -64,8 +64,6 @@ class AdminModulesTest extends TestCase
         $this->createDynamicVendor('Dashboard Caterer', [
             ['key' => 'service_area', 'label' => 'Service Area', 'type' => 'dropdown', 'value' => 'Mumbai'],
         ]);
-        Feedback::create(['user_id' => $user->id, 'subject' => 'Plan', 'message' => 'Useful', 'rating' => 4, 'status' => 'pending']);
-
         $this->get(route('admin.dashboard'))
             ->assertOk()
             ->assertSee('Live platform overview')

@@ -7,20 +7,23 @@
     <div class="max-w-[1600px] mx-auto relative z-10 space-y-12">
         <!-- TOP CTA / NEWSLETTER SECTION (Ref Image 2 Top Section) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-rose-100/80 pb-12">
-            <!-- Left: Headline & Email Form (Col 4) -->
-            <div class="lg:col-span-4 space-y-4">
+            <!-- Left: Any query form -->
+            <div id="query-form" class="lg:col-span-4 space-y-4 scroll-mt-28">
                 <h2 class="text-slate-900 text-2xl md:text-3xl lg:text-4xl font-extrabold font-serif-luxury leading-tight">
-                    Stay ahead with <span class="text-[#850625]">Shaadi Sense.</span>
+                    Have <span class="text-[#850625]">any query?</span>
                 </h2>
                 <p class="text-slate-600 text-xs md:text-sm max-w-sm leading-relaxed font-medium">
-                    Join thousands of couples and planners who trust Shaadi Sense for smart, transparent, and stress-free wedding planning.
+                    Share your details and question. Our team will reply to your email and user panel.
                 </p>
-
-                <!-- Email Input & Button -->
-                <form action="#" method="POST" onsubmit="event.preventDefault();" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 max-w-md">
-                    <input type="email" placeholder="Enter your email" required class="flex-1 bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] shadow-xs transition-all">
+                @if(session('query_success'))<div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs font-bold text-emerald-700">{{ session('query_success') }}</div>@endif
+                <form action="{{ route('queries.store') }}" method="POST" class="grid grid-cols-2 gap-2.5 pt-2 max-w-md">@csrf
+                    <input name="name" value="{{ old('name', auth()->user()?->name) }}" placeholder="Your name" required class="bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">
+                    <input name="email" type="email" value="{{ old('email', auth()->user()?->email) }}" placeholder="Email address" required class="bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">
+                    <input name="phone" value="{{ old('phone', auth()->user()?->mobile_number) }}" placeholder="Phone number" class="bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">
+                    <input name="subject" value="{{ old('subject') }}" placeholder="Subject" required class="bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">
+                    <textarea name="message" rows="3" placeholder="Write your query" required class="col-span-2 bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">{{ old('message') }}</textarea>
                     <button type="submit" class="bg-[#850625] hover:bg-[#6b041e] text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 shrink-0">
-                        <span>Subscribe</span>
+                        <span>Submit Query</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </form>

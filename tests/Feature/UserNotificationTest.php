@@ -15,6 +15,7 @@ class UserNotificationTest extends TestCase
     {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
+        $this->subscribe($user);
         $visible = AdminNotification::create(['title' => 'Menu update', 'message' => 'New menu prices are available.', 'notification_type' => 'information', 'status' => 'sent', 'sent_at' => now()]);
         $draft = AdminNotification::create(['title' => 'Draft update', 'message' => 'Not delivered.', 'notification_type' => 'information', 'status' => 'draft']);
         $other = AdminNotification::create(['title' => 'Other user update', 'message' => 'Private.', 'notification_type' => 'information', 'status' => 'sent', 'sent_at' => now()]);
@@ -32,6 +33,7 @@ class UserNotificationTest extends TestCase
     public function test_user_can_mark_all_delivered_notifications_read(): void
     {
         $user = User::factory()->create();
+        $this->subscribe($user);
         $notifications = collect(range(1, 2))->map(fn (int $number) => AdminNotification::create(['title' => "Update {$number}", 'message' => 'Message', 'notification_type' => 'success', 'status' => 'sent', 'sent_at' => now()]));
         $notifications->each(fn (AdminNotification $notification) => $notification->users()->attach($user->id));
 

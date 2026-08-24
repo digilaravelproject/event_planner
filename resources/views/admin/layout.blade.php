@@ -154,6 +154,12 @@
             </a>
 
             <!-- Independent Dynamic Vendor Management -->
+            <a href="{{ route('admin.user-queries.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.user-queries') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400">UQ</span>
+                User Queries
+            </a>
+
+            <!-- Independent Dynamic Vendor Management -->
             <a href="{{ route('admin.dynamic-vendors.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.dynamic-vendors') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.dynamic-vendors') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -173,12 +179,16 @@
                 Subscription Manager
             </a>
 
+            <a href="{{ route('admin.transactions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.transactions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ str_starts_with($currentRoute, 'admin.transactions') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">TX</span>
+                Transactions
+            </a>
+
             <!-- Manage AI -->
             @foreach([
                 ['admin.vendor-analytics.index', 'admin.vendor-analytics', 'Vendor Analytics', 'VA'],
                 ['admin.event-questions.index', 'admin.event-questions', 'Event Requirement Questions', 'EQ'],
                 ['admin.notifications.index', 'admin.notifications', 'Notification Management', 'NM'],
-                ['admin.feedback.index', 'admin.feedback', 'User Feedback', 'UF'],
             ] as [$menuRoute, $routePrefix, $menuLabel, $menuIcon])
                 <a href="{{ route($menuRoute) }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, $routePrefix) ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                     <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ str_starts_with($currentRoute, $routePrefix) ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">{{ $menuIcon }}</span>

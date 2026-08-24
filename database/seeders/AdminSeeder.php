@@ -26,23 +26,29 @@ class AdminSeeder extends Seeder
         // 2. Seed Subscriptions
         $plans = [
             [
-                'name' => 'Starter Plan',
-                'price' => 1999.00,
-                'interval' => 'monthly',
-                'features' => ['Profile Access', 'Email Support', 'Notification Updates', 'Feedback Access', 'Secure Account'],
+                'name' => 'Free Plan',
+                'price' => 0,
+                'interval' => 'free',
+                'features' => ['Profile Access', 'Email Support', 'Notification Updates', 'Query Support', 'Secure Account'],
             ],
             [
-                'name' => 'Professional Plan',
+                'name' => '3 Monthly Plan',
+                'price' => 2999.00,
+                'interval' => 'three_months',
+                'features' => ['Profile Access', 'Priority Support', 'Notification Updates', 'Query Support', 'Team Members (Up to 5)'],
+            ],
+            [
+                'name' => '6 Monthly Plan',
                 'price' => 4999.00,
-                'interval' => 'monthly',
-                'features' => ['Profile Access', 'Priority Support', 'Notification Updates', 'Feedback Access', 'Team Members (Up to 5)'],
+                'interval' => 'six_months',
+                'features' => ['Enterprise Account', '24/7 Phone Support', 'Advanced Analytics Reports', 'SLA Guarantee', 'Dedicated Support', 'API Integration Access'],
             ],
             [
-                'name' => 'Enterprise Plan',
-                'price' => 9999.00,
-                'interval' => 'monthly',
-                'features' => ['Enterprise Account', '24/7 Phone Support', 'Advanced Analytics Reports', 'SLA Guarantee', 'Dedicated Support', 'API Integration Access'],
-            ]
+                'name' => 'Yearly Plan',
+                'price' => 8999.00,
+                'interval' => 'yearly',
+                'features' => ['All planner tools', 'Priority Support', 'Advanced Analytics Reports', 'Unlimited Query Support', 'Exportable Plans'],
+            ],
         ];
 
         foreach ($plans as $p) {

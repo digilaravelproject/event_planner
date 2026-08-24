@@ -50,11 +50,6 @@
 
     <!-- Right Side CTA / Auth Actions with Animated Buttons -->
     <div class="hidden lg:flex items-center space-x-3">
-        @auth('vendor')
-            <a href="{{ route('vendor.dashboard') }}" class="rounded-full border border-[#850625]/20 bg-rose-50 px-4 py-2.5 text-xs font-bold text-[#850625] transition hover:bg-rose-100">Vendor Dashboard</a>
-        @else
-            <a href="{{ route('vendor.login') }}" class="rounded-full border border-[#850625]/20 bg-white px-4 py-2.5 text-xs font-bold text-[#850625] transition hover:bg-rose-50">Vendor Login</a>
-        @endauth
         @auth('web')
             @include('user.partials.notification-bell')
             <a href="{{ route('user.dashboard') }}" class="px-5 py-2.5 rounded-full text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex items-center gap-2">

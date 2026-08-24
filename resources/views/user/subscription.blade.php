@@ -17,32 +17,13 @@
         </p>
     </div>
 
-    <!-- Billing Cycle Toggle (Only enabled/visible if user does not have an active subscription) -->
     @php
-        $userActivePlanId = Auth::user()->subscription_id;
-        $hasActivePlan = !is_null($userActivePlanId);
+        $userActivePlanId = $user->subscription_id;
+        $hasActivePlan = $user->hasActiveSubscription();
     @endphp
 
-    @if(!$hasActivePlan)
-        <div class="flex items-center justify-start pt-2">
-            <div class="bg-slate-100 p-1 rounded-full inline-flex items-center relative border border-slate-200/50">
-                <button type="button" id="btn-monthly" onclick="setBillingCycle('monthly')"
-                    class="px-5 py-2 text-xs font-semibold rounded-full transition duration-150 focus:outline-none bg-white text-slate-800 shadow-sm">
-                    Monthly billing
-                </button>
-                <button type="button" id="btn-yearly" onclick="setBillingCycle('yearly')"
-                    class="px-5 py-2 text-xs font-semibold rounded-full transition duration-150 focus:outline-none text-slate-500 hover:text-slate-800 flex items-center gap-1.5">
-                    Yearly billing
-                    <span class="bg-[#850625] text-white text-[9px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase scale-90">
-                        Save 20%
-                    </span>
-                </button>
-            </div>
-        </div>
-    @endif
-
     <!-- Pricing Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch max-w-5xl pt-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch pt-4">
         
         @foreach($plans as $plan)
             @php
@@ -87,17 +68,15 @@
                     <!-- Price -->
                     <div class="my-6">
                         <div class="flex items-baseline text-slate-900">
-                            <span class="text-3xl font-extrabold serif-title">₹</span>
-                            <span class="text-5xl font-extrabold serif-title tracking-tight plan-price" 
-                                data-monthly="{{ number_format($plan->price, 0) }}"
-                                data-yearly="{{ number_format($plan->price * 12 * 0.8, 0) }}">
-                                {{ number_format($plan->price, 0) }}
+                            @unless($plan->isFree())<span class="text-3xl font-extrabold serif-title">₹</span>@endunless
+                            <span class="text-5xl font-extrabold serif-title tracking-tight">
+                                {{ $plan->isFree() ? 'Free' : number_format($plan->price, 0) }}
                             </span>
-                            <span class="text-slate-400 text-xs ml-1 font-medium select-none billing-cycle-label">/mo</span>
                         </div>
-                        @if($isActive && Auth::user()->subscription_ends_at)
+                        <div class="mt-1 text-xs font-semibold text-slate-400">{{ $plan->durationLabel() }}</div>
+                        @if($isActive && $user->subscription_ends_at)
                             <div class="text-[10px] font-semibold text-slate-400 mt-2">
-                                Renewing/Expiring on: {{ Auth::user()->subscription_ends_at->format('M d, Y') }}
+                                Expires on: {{ $user->subscription_ends_at->format('M d, Y') }}
                             </div>
                         @endif
                     </div>
@@ -130,12 +109,12 @@
                             Locked
                         </button>
                     @else
-                        <button type="button" onclick="checkout('{{ $plan->id }}', '{{ $plan->name }}', {{ $plan->price }})"
+                        <button type="button" onclick="checkout('{{ $plan->id }}')"
                             class="w-full py-3.5 px-4 rounded-xl text-xs font-bold tracking-wide transition duration-150 focus:outline-none active:scale-[0.99]
                             {{ $isPremium 
                                 ? 'bg-[#850625] hover:bg-[#6b041e] text-white shadow-md shadow-[#850625]/10' 
                                 : 'bg-slate-550 border border-slate-200 text-slate-700 hover:bg-slate-100' }}">
-                            Buy Now
+                            {{ $plan->price == 0 ? 'Activate Free Plan' : 'Pay with Razorpay' }}
                         </button>
                     @endif
                 </div>
@@ -143,82 +122,39 @@
         @endforeach
 
     </div>
+
+    <div class="rounded-3xl bg-white border border-slate-200/60 overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-100"><h2 class="text-lg font-bold text-slate-900">Subscription history</h2><p class="text-xs text-slate-500 mt-1">Payment, plan, billing cycle, status and validity details.</p></div>
+        <div class="overflow-x-auto"><table class="min-w-full text-xs"><thead class="bg-slate-50 text-slate-500"><tr><th class="p-4 text-left">Plan</th><th class="p-4 text-left">Cycle</th><th class="p-4 text-left">Amount</th><th class="p-4 text-left">Status</th><th class="p-4 text-left">Payment ID</th><th class="p-4 text-left">Validity</th></tr></thead><tbody class="divide-y divide-slate-100">
+        @forelse($history as $entry)<tr><td class="p-4 font-bold">{{ $entry->plan->name }}</td><td class="p-4">{{ $entry->plan->durationLabel() }}</td><td class="p-4">₹{{ number_format($entry->amount, 2) }}</td><td class="p-4 capitalize">{{ $entry->status }}</td><td class="p-4">{{ $entry->razorpay_payment_id ?: 'Free / pending' }}</td><td class="p-4">{{ $entry->starts_at?->format('d M Y') ?? '—' }} – {{ $entry->ends_at?->format('d M Y') ?? '—' }}</td></tr>
+        @empty<tr><td colspan="6" class="p-8 text-center text-slate-400">No subscription history yet.</td></tr>@endforelse
+        </tbody></table></div>
+    </div>
 </div>
 
 <!-- Javascript Actions -->
 <script>
-    let billingCycle = 'monthly';
-
-    function setBillingCycle(cycle) {
-        billingCycle = cycle;
-        
-        const btnMonthly = document.getElementById('btn-monthly');
-        const btnYearly = document.getElementById('btn-yearly');
-        
-        if (cycle === 'monthly') {
-            btnMonthly.className = "px-5 py-2 text-xs font-semibold rounded-full transition duration-150 focus:outline-none bg-white text-slate-800 shadow-sm";
-            btnYearly.className = "px-5 py-2 text-xs font-semibold rounded-full transition duration-150 focus:outline-none text-slate-500 hover:text-slate-800 flex items-center gap-1.5";
-        } else {
-            btnMonthly.className = "px-5 py-2 text-xs font-semibold rounded-full transition duration-150 focus:outline-none text-slate-500 hover:text-slate-800";
-            btnYearly.className = "px-5 py-2 text-xs font-semibold rounded-full transition duration-150 focus:outline-none bg-white text-slate-800 shadow-sm flex items-center gap-1.5";
-        }
-
-        // Update displayed prices
-        const priceElements = document.querySelectorAll('.plan-price');
-        const cycleLabels = document.querySelectorAll('.billing-cycle-label');
-        
-        priceElements.forEach(el => {
-            const monthlyPrice = el.getAttribute('data-monthly');
-            const yearlyPrice = el.getAttribute('data-yearly');
-            el.innerText = cycle === 'monthly' ? monthlyPrice : yearlyPrice;
-        });
-
-        cycleLabels.forEach(el => {
-            el.innerText = cycle === 'monthly' ? '/mo' : '/yr';
-        });
-    }
-
-    function checkout(planId, planName, price) {
-        // Free plan checkout
-        if (price === 0) {
-            axios.post("{{ route('user.subscribe.verify') }}", {
-                plan_id: planId,
-                razorpay_payment_id: 'free_trial_' + Math.random().toString(36).substr(2, 9),
-                billing_cycle: billingCycle
-            })
-            .then(response => {
-                if (response.data.success) {
-                    window.location.href = response.data.redirect;
-                }
-            })
-            .catch(err => {
-                alert('Checkout failed. Please try again.');
-            });
-            return;
-        }
-
-        // Calculate checkout amount
-        let finalPrice = price;
-        if (billingCycle === 'yearly') {
-            finalPrice = price * 12 * 0.8; // 20% discount
-        }
-
-        const rzpKey = "{{ env('RAZORPAY_KEY_ID', 'rzp_test_dummykey12345') }}";
-        
-        const options = {
-            "key": rzpKey,
-            "amount": finalPrice * 100, // in paise
-            "currency": "INR",
+    async function checkout(planId) {
+        try {
+            const orderResponse = await axios.post("{{ route('user.subscribe.order') }}", { plan_id: planId });
+            const order = orderResponse.data;
+            if (order.free) {
+                window.location.href = order.redirect;
+                return;
+            }
+            const options = {
+            "key": order.key,
+            "amount": order.amount,
+            "currency": order.currency,
+            "order_id": order.order_id,
             "name": "Shaadi Sense",
-            "description": "Subscription to " + planName,
+            "description": "Subscription to " + order.plan_name,
             "image": "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='40' fill='%23850625'/></svg>",
             "handler": function (response){
                 axios.post("{{ route('user.subscribe.verify') }}", {
-                    plan_id: planId,
                     razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id: response.razorpay_order_id || 'order_' + Math.random().toString(36).substr(2, 9),
-                    razorpay_signature: response.razorpay_signature || 'signature_' + Math.random().toString(36).substr(2, 9),
-                    billing_cycle: billingCycle
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
                 })
                 .then(res => {
                     if (res.data.success) {
@@ -230,17 +166,21 @@
                 });
             },
             "prefill": {
-                "name": "{{ Auth::user()->name }}",
-                "email": "{{ Auth::user()->email }}",
-                "contact": "{{ Auth::user()->mobile_number }}"
+            "name": @json($user->name),
+            "email": @json($user->email),
+            "contact": @json($user->mobile_number)
             },
             "theme": {
                 "color": "#850625"
             }
         };
         
-        const rzp = new Razorpay(options);
-        rzp.open();
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', response => alert(response.error.description || 'Payment failed.'));
+            rzp.open();
+        } catch (error) {
+            alert(error.response?.data?.message || error.response?.data?.errors?.payment?.[0] || 'Checkout failed. Please try again.');
+        }
     }
 </script>
 @endsection

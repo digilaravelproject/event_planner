@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserQuery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -43,10 +44,7 @@ class UserAuthController extends Controller
         ]);
 
         Auth::guard('web')->login($user);
-
-        if ($request->session()->has('pending_event_plan')) {
-            return redirect()->route('ai-planner.resume');
-        }
+        UserQuery::whereNull('user_id')->where('email', $user->email)->update(['user_id' => $user->id]);
 
         return redirect()->route('user.subscription')
             ->with('success', 'Account created successfully! Please select a subscription plan to continue.');
@@ -87,12 +85,13 @@ class UserAuthController extends Controller
             }
 
             $request->session()->regenerate();
+            UserQuery::whereNull('user_id')->where('email', $user->email)->update(['user_id' => $user->id]);
 
-            if ($request->session()->has('pending_event_plan')) {
+            if ($request->session()->has('pending_event_plan') && $user->hasActiveSubscription()) {
                 return redirect()->route('ai-planner.resume');
             }
 
-            if ($user->subscription_id && (!$user->subscription_ends_at || $user->subscription_ends_at->isFuture())) {
+            if ($user->hasActiveSubscription()) {
                 return redirect()->route('user.dashboard')
                     ->with('success', 'Welcome back!');
             }

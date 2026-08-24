@@ -78,4 +78,38 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserEventPlan::class);
     }
+
+    public function subscriptionHistory()
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
+
+    public function queries()
+    {
+        return $this->hasMany(UserQuery::class);
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscription_id !== null
+            && ($this->subscription_ends_at === null || $this->subscription_ends_at->isFuture());
+    }
+
+    public function subscriptionFlag(): string
+    {
+        if ($this->subscription_id !== null && $this->subscription_ends_at?->isPast()) {
+            return 'expired';
+        }
+
+        if ($this->subscription_id === null || (float) ($this->subscription?->price ?? 0) === 0.0) {
+            return 'free';
+        }
+
+        return 'subscribed';
+    }
+
+    public function hasPaidSubscription(): bool
+    {
+        return $this->hasActiveSubscription() && ! $this->subscription?->isFree();
+    }
 }

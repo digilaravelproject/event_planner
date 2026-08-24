@@ -14,7 +14,6 @@ class AdminModulesSeeder extends Seeder
         $groups = [
             'question_type' => ['Textbox', 'Textarea', 'Dropdown', 'Radio', 'Checkbox', 'Number', 'Date'],
             'notification_type' => ['Information', 'Success', 'Warning', 'Promotion', 'Reminder'],
-            'feedback_status' => ['Pending', 'Reviewed', 'Resolved', 'Rejected'],
         ];
         foreach ($groups as $group => $values) {
             foreach ($values as $order => $label) {

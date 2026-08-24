@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class SubscriptionController extends Controller
 {
@@ -26,12 +28,12 @@ class SubscriptionController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0'],
-            'interval' => ['required', 'string', 'in:monthly,yearly,lifetime'],
+            'interval' => ['required', 'string', Rule::in(array_keys(Subscription::INTERVALS))],
             'features' => ['required', 'array'],
             'features.*' => ['required', 'string', 'max:255'],
         ]);
 
-        // Clean up empty feature lines
+        $this->validatePrice($validated);
         $validated['features'] = array_filter($validated['features']);
 
         Subscription::create($validated);
@@ -48,11 +50,12 @@ class SubscriptionController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0'],
-            'interval' => ['required', 'string', 'in:monthly,yearly,lifetime'],
+            'interval' => ['required', 'string', Rule::in(array_keys(Subscription::INTERVALS))],
             'features' => ['required', 'array'],
             'features.*' => ['required', 'string', 'max:255'],
         ]);
 
+        $this->validatePrice($validated);
         $validated['features'] = array_filter($validated['features']);
 
         $subscription->update($validated);
@@ -70,5 +73,16 @@ class SubscriptionController extends Controller
 
         return redirect()->route('admin.subscriptions.index')
             ->with('success', 'Subscription plan deleted successfully!');
+    }
+
+    private function validatePrice(array &$validated): void
+    {
+        if ($validated['interval'] === 'free') {
+            $validated['price'] = 0;
+            return;
+        }
+        if ((float) $validated['price'] <= 0) {
+            throw ValidationException::withMessages(['price' => 'Paid plans must have a price greater than zero.']);
+        }
     }
 }

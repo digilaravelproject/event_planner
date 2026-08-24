@@ -47,11 +47,11 @@
 
                             <div>
                                 <label for="interval" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Billing Interval</label>
-                                <select name="interval" id="interval" required
+                                <select name="interval" id="interval" required onchange="syncFreePrice(this)"
                                     class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
-                                    <option value="monthly" {{ $editingPlan->interval == 'monthly' ? 'selected' : '' }}>Monthly</option>
-                                    <option value="yearly" {{ $editingPlan->interval == 'yearly' ? 'selected' : '' }}>Yearly</option>
-                                    <option value="lifetime" {{ $editingPlan->interval == 'lifetime' ? 'selected' : '' }}>Lifetime</option>
+                                    @foreach(\App\Models\Subscription::INTERVALS as $value => $label)
+                                        <option value="{{ $value }}" @selected(old('interval', $editingPlan->interval) === $value)>{{ $label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -97,11 +97,11 @@
 
                         <div>
                             <label for="interval" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Billing Interval</label>
-                            <select name="interval" id="interval" required
+                            <select name="interval" id="interval" required onchange="syncFreePrice(this)"
                                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
-                                <option value="monthly">Monthly</option>
-                                <option value="yearly">Yearly</option>
-                                <option value="lifetime">Lifetime</option>
+                                @foreach(\App\Models\Subscription::INTERVALS as $value => $label)
+                                    <option value="{{ $value }}" @selected(old('interval') === $value)>{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
 
@@ -154,9 +154,9 @@
                                 {{ $plan->name }}
                             </span>
                             <div class="mt-4 flex items-baseline text-slate-900">
-                                <span class="text-3xl font-extrabold tracking-tight">₹{{ number_format($plan->price) }}</span>
-                                <span class="ml-1 text-sm font-semibold text-slate-400">/{{ $plan->interval == 'monthly' ? 'mo' : ($plan->interval == 'yearly' ? 'yr' : 'life') }}</span>
+                                <span class="text-3xl font-extrabold tracking-tight">{{ $plan->isFree() ? 'Free' : '₹'.number_format($plan->price) }}</span>
                             </div>
+                            <div class="mt-1 text-xs font-semibold text-slate-400">{{ $plan->durationLabel() }}</div>
                         </div>
 
                         <!-- Features list -->
@@ -181,4 +181,12 @@
 
     </div>
 </div>
+<script>
+    function syncFreePrice(select) {
+        const price = select.closest('form').querySelector('input[name="price"]');
+        if (select.value === 'free') {
+            price.value = '0';
+        }
+    }
+</script>
 @endsection
