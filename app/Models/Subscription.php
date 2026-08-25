@@ -10,10 +10,10 @@ class Subscription extends Model
     use HasFactory;
 
     public const INTERVALS = [
-        'free' => 'Free',
-        'three_months' => '3 Monthly',
-        'six_months' => '6 Monthly',
-        'yearly' => 'Yearly',
+        'free' => 'free',
+        'three_months' => '3-monthly',
+        'six_months' => '6-monthly',
+        'yearly' => 'yearly',
     ];
 
     protected $fillable = [
@@ -38,10 +38,6 @@ class Subscription extends Model
 
     public function durationLabel(): string
     {
-        if ($this->isFree()) {
-            return '30 days';
-        }
-
         return self::INTERVALS[$this->interval] ?? str($this->interval)->replace('_', ' ')->headline();
     }
 

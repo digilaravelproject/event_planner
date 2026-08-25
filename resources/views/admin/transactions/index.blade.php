@@ -13,15 +13,15 @@
         </div>
     </div>
 
-    <form method="GET" class="grid gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-[1fr_220px_auto]">
-        <input name="search" value="{{ request('search') }}" placeholder="User, email, phone, plan or gateway ID" class="rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-[#3950a2] focus:outline-none">
-        <select name="status" class="rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-600 focus:border-[#3950a2] focus:outline-none">
+    <form method="GET" class="flex flex-col md:flex-row gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <input name="search" value="{{ request('search') }}" placeholder="User, email, phone, plan or gateway ID" class="flex-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-[#3950a2] focus:outline-none">
+        <select name="status" class="w-full md:w-56 rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-600 focus:border-[#3950a2] focus:outline-none">
             <option value="">All statuses</option>
             @foreach(['created', 'active', 'failed', 'expired'] as $status)
                 <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst($status) }}</option>
             @endforeach
         </select>
-        <button class="rounded-xl bg-[#3950a2] px-6 py-3 text-sm font-bold text-white hover:bg-[#2c3e80]">Filter</button>
+        <button class="w-full md:w-auto rounded-xl bg-[#3950a2] px-6 py-3 text-sm font-bold text-white hover:bg-[#2c3e80]">Filter</button>
     </form>
 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

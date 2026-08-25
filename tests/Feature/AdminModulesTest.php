@@ -14,6 +14,7 @@ use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Services\OpenRouterService;
 use Database\Seeders\AdminModulesSeeder;
 use Database\Seeders\EventRequirementQuestionSeeder;
+use Database\Seeders\StandardSubscriptionPlansSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
@@ -45,6 +46,20 @@ class AdminModulesTest extends TestCase
         foreach (array_keys(LandingContent::TYPES) as $type) {
             $this->get(route('admin.landing-content.index', $type))->assertOk();
         }
+    }
+
+    public function test_transaction_filters_stay_on_one_row_and_standard_plans_are_seeded(): void
+    {
+        $this->seed(StandardSubscriptionPlansSeeder::class);
+
+        $this->get(route('admin.transactions.index'))
+            ->assertOk()
+            ->assertSee('md:flex-row', false);
+
+        $this->assertDatabaseHas('subscriptions', ['name' => 'free', 'interval' => 'free', 'price' => 0]);
+        $this->assertDatabaseHas('subscriptions', ['name' => '3-monthly', 'interval' => 'three_months']);
+        $this->assertDatabaseHas('subscriptions', ['name' => '6-monthly', 'interval' => 'six_months']);
+        $this->assertDatabaseHas('subscriptions', ['name' => 'yearly', 'interval' => 'yearly']);
     }
 
     public function test_admin_dashboard_uses_current_platform_records(): void

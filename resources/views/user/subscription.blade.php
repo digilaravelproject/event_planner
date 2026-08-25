@@ -20,6 +20,7 @@
     @php
         $userActivePlanId = $user->subscription_id;
         $hasActivePlan = $user->hasActiveSubscription();
+        $hasActivePaidPlan = $user->hasPaidSubscription();
     @endphp
 
     <!-- Pricing Grid -->
@@ -28,8 +29,8 @@
         @foreach($plans as $plan)
             @php
                 $isActive = $hasActivePlan && ($userActivePlanId == $plan->id);
-                $isLocked = $hasActivePlan && !$isActive;
-                $isPremium = $plan->name === 'Premium Plan';
+                $isLocked = $hasActivePaidPlan && !$isActive;
+                $isPremium = $plan->interval === 'three_months';
             @endphp
 
             <!-- Card container -->
