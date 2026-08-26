@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Mail\UserWelcomeMail;
 use App\Models\User;
 use App\Models\UserQuery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserAuthController extends Controller
 {
@@ -19,6 +21,7 @@ class UserAuthController extends Controller
         if (Auth::guard('web')->check()) {
             return redirect()->route('user.dashboard');
         }
+
         return view('user.auth.register');
     }
 
@@ -45,6 +48,7 @@ class UserAuthController extends Controller
 
         Auth::guard('web')->login($user);
         UserQuery::whereNull('user_id')->where('email', $user->email)->update(['user_id' => $user->id]);
+        Mail::to($user->email)->send(new UserWelcomeMail($user));
 
         return redirect()->route('user.subscription')
             ->with('success', 'Account created successfully! Please select a subscription plan to continue.');
@@ -58,6 +62,7 @@ class UserAuthController extends Controller
         if (Auth::guard('web')->check()) {
             return redirect()->route('user.dashboard');
         }
+
         return view('user.auth.login');
     }
 
@@ -76,9 +81,10 @@ class UserAuthController extends Controller
         if (Auth::guard('web')->attempt($credentials, $remember)) {
             $user = Auth::guard('web')->user();
 
-            if (!$user->status) {
+            if (! $user->status) {
                 Auth::guard('web')->logout();
                 $request->session()->regenerate();
+
                 return back()->withErrors([
                     'email' => 'Your account has been deactivated. Please contact the administrator.',
                 ])->onlyInput('email');

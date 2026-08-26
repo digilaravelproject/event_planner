@@ -17,6 +17,13 @@ class TransactionController extends Controller
         return view('admin.transactions.index', compact('transactions'));
     }
 
+    public function show(UserSubscription $transaction)
+    {
+        $transaction->load(['user', 'plan']);
+
+        return view('admin.transactions.show', compact('transaction'));
+    }
+
     public function exportPdf(Request $request, TransactionExportService $export)
     {
         return response($export->pdf($this->query($request)->get()))

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AdminVendorRegisteredMail;
 use App\Mail\VendorWelcomeMail;
 use App\Models\VendorAccount;
+use App\Support\EmailRecipients;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,6 +39,7 @@ class VendorAuthController extends Controller
 
         $vendor = VendorAccount::create($data);
         Mail::to($vendor->email)->send(new VendorWelcomeMail($vendor));
+        Mail::to(EmailRecipients::ADMIN)->send(new AdminVendorRegisteredMail($vendor));
         Auth::guard('vendor')->login($vendor);
         $request->session()->regenerate();
 

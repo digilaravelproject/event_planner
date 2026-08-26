@@ -31,26 +31,57 @@ class AdminUserExportService
     public function pdf(Collection $users): string
     {
         $rows = $this->rows($users);
-        $pages = array_chunk($rows, 26) ?: [[]];
+        $pages = array_chunk($rows, 20) ?: [[]];
         $streams = [];
+        $columns = [
+            ['label' => 'ID', 'index' => 0, 'width' => 28],
+            ['label' => 'NAME', 'index' => 1, 'width' => 90],
+            ['label' => 'EMAIL', 'index' => 2, 'width' => 130],
+            ['label' => 'MOBILE', 'index' => 3, 'width' => 75],
+            ['label' => 'SUBSCRIPTION', 'index' => 4, 'width' => 105],
+            ['label' => 'SUB ENDS', 'index' => 5, 'width' => 85],
+            ['label' => 'STATUS', 'index' => 6, 'width' => 50],
+            ['label' => 'PLANS', 'index' => 7, 'width' => 40],
+            ['label' => 'PLAN VALUE', 'index' => 8, 'width' => 75, 'format' => 'money'],
+            ['label' => 'REGISTERED', 'index' => 9, 'width' => 90],
+        ];
+        $tableX = 22;
+        $tableWidth = array_sum(array_column($columns, 'width'));
+
         foreach ($pages as $pageIndex => $pageRows) {
             $stream = "0.98 0.98 0.99 rg 0 0 842 595 re f\n";
             $stream .= "0.12 0.18 0.35 rg 0 535 842 60 re f\n";
             $stream .= $this->text(32, 563, 18, 'F2', '1 1 1', 'USER MANAGEMENT EXPORT');
             $stream .= $this->text(32, 544, 8, 'F1', '0.85 0.89 1', 'Generated '.now()->format('d M Y H:i').' | '.count($rows).' users');
-            $stream .= "0.23 0.31 0.64 rg 25 500 792 24 re f\n";
-            $stream .= $this->text(31, 508, 8, 'F2', '1 1 1', 'ID   NAME                 EMAIL                              MOBILE          SUBSCRIPTION         STATUS     PLANS   PLAN VALUE');
-            $y = 483;
+            $stream .= "0.23 0.31 0.64 rg {$tableX} 497 {$tableWidth} 27 re f\n";
+            $x = $tableX;
+            foreach ($columns as $column) {
+                $stream .= $this->cellText($x, 506, $column['width'], 5.7, 'F2', '1 1 1', $column['label']);
+                $x += $column['width'];
+            }
+            $y = 475;
             foreach ($pageRows as $index => $row) {
                 if ($index % 2 === 0) {
-                    $stream .= '0.95 0.96 0.99 rg 25 '.($y - 7)." 792 19 re f\n";
+                    $stream .= "0.95 0.96 0.99 rg {$tableX} ".($y - 7)." {$tableWidth} 22 re f\n";
                 }
-                $line = sprintf('%-4s %-20s %-34s %-15s %-20s %-10s %-7s Rs. %s',
-                    $row[0], $this->limit($row[1], 20), $this->limit($row[2], 34), $this->limit($row[3], 15),
-                    $this->limit($row[4], 20), $row[6], $row[7], number_format($row[8], 0)
-                );
-                $stream .= $this->text(31, $y, 7.2, 'F1', '0.12 0.16 0.24', $line);
-                $y -= 19;
+                $x = $tableX;
+                foreach ($columns as $column) {
+                    $value = $row[$column['index']];
+                    if (($column['format'] ?? null) === 'money') {
+                        $value = 'Rs. '.number_format((float) $value, 0);
+                    }
+                    $stream .= $this->cellText($x, $y, $column['width'], 5.7, 'F1', '0.12 0.16 0.24', (string) $value);
+                    $x += $column['width'];
+                }
+                $stream .= "0.86 0.88 0.92 RG 0.35 w {$tableX} ".($y - 8).' m '.($tableX + $tableWidth).' '.($y - 8)." l S\n";
+                $y -= 22;
+            }
+            $bottom = $y + 14;
+            $x = $tableX;
+            $stream .= "0.78 0.81 0.87 RG 0.45 w {$tableX} {$bottom} {$tableWidth} ".(524 - $bottom)." re S\n";
+            foreach ($columns as $column) {
+                $x += $column['width'];
+                $stream .= "{$x} {$bottom} m {$x} 524 l S\n";
             }
             $stream .= $this->text(740, 22, 7, 'F1', '0.4 0.45 0.55', 'Page '.($pageIndex + 1).' of '.count($pages));
             $streams[] = $stream;
@@ -104,6 +135,13 @@ class AdminUserExportService
     protected function text(float $x, float $y, float $size, string $font, string $color, string $text): string
     {
         return "BT /{$font} {$size} Tf {$color} rg {$x} {$y} Td (".$this->escape($this->ascii($text)).") Tj ET\n";
+    }
+
+    protected function cellText(float $x, float $y, float $width, float $size, string $font, string $color, string $text): string
+    {
+        $maxCharacters = max(1, (int) floor(($width - 8) / ($size * 0.6)));
+
+        return $this->text($x + 4, $y, $size, $font, $color, $this->limit($text, $maxCharacters));
     }
 
     protected function assemblePdf(array $streams): string
@@ -164,6 +202,6 @@ class AdminUserExportService
             $number = intdiv($number, 26);
         }
 
-return $name;
+        return $name;
     }
 }

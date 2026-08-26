@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Mail\AdminNewQueryMail;
 use App\Mail\UserQueryReplyMail;
 use App\Models\Admin;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserQuery;
+use App\Support\EmailRecipients;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -55,6 +57,7 @@ class SubscriptionAndQueryTest extends TestCase
         $admin = Admin::create(['name' => 'Admin', 'email' => 'admin@example.com', 'password' => 'password']);
         $this->actingAs($user)->from(route('user.queries.index'))->post(route('user.queries.store'), ['phone' => '9876543210', 'subject' => 'Need venue help', 'message' => 'Please suggest a venue.'])->assertRedirect(route('user.queries.index').'#query-form')->assertSessionHas('success');
         $query = UserQuery::firstOrFail();
+        Mail::assertSent(AdminNewQueryMail::class, fn ($mail) => $mail->hasTo(EmailRecipients::ADMIN));
 
         $this->actingAs($admin, 'admin')->get(route('admin.user-queries.index'))->assertOk()->assertSee('<table', false)->assertSee('Need venue help');
         $this->actingAs($admin, 'admin')->post(route('admin.user-queries.reply', $query), ['admin_reply' => 'We will share three options today.'])->assertSessionHas('success');

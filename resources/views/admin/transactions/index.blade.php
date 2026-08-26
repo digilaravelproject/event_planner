@@ -28,7 +28,7 @@
         <div class="overflow-x-auto">
             <table class="min-w-full text-left text-xs">
                 <thead class="bg-slate-50 uppercase tracking-wider text-slate-500">
-                    <tr><th class="p-4">User</th><th class="p-4">Plan</th><th class="p-4">Payment</th><th class="p-4">Gateway IDs</th><th class="p-4">Validity</th><th class="p-4">Status</th></tr>
+                    <tr><th class="p-4">User</th><th class="p-4">Plan</th><th class="p-4">Payment</th><th class="p-4">Gateway IDs</th><th class="p-4">Validity</th><th class="p-4">Status</th><th class="p-4 text-center">Action</th></tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($transactions as $transaction)
@@ -39,9 +39,10 @@
                             <td class="max-w-[230px] p-4 text-slate-500"><div class="break-all"><span class="font-bold text-slate-700">Order:</span> {{ $transaction->razorpay_order_id ?: 'N/A' }}</div><div class="mt-1 break-all"><span class="font-bold text-slate-700">Payment:</span> {{ $transaction->razorpay_payment_id ?: 'N/A' }}</div></td>
                             <td class="p-4 text-slate-500"><div>{{ $transaction->starts_at?->format('d M Y') ?? 'N/A' }}</div><div class="my-1 text-slate-300">to</div><div>{{ $transaction->ends_at?->format('d M Y') ?? 'N/A' }}</div></td>
                             <td class="p-4"><span class="inline-flex rounded-full px-3 py-1 font-bold uppercase {{ $transaction->status === 'active' ? 'bg-emerald-50 text-emerald-700' : ($transaction->status === 'failed' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700') }}">{{ $transaction->status }}</span></td>
+                            <td class="p-4 text-center"><a href="{{ route('admin.transactions.show', $transaction) }}" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-100 bg-indigo-50 text-[#3950a2] transition hover:bg-[#3950a2] hover:text-white" title="View transaction" aria-label="View transaction"><i class="fa-solid fa-eye"></i></a></td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="p-12 text-center font-semibold text-slate-400">No payment transactions found.</td></tr>
+                        <tr><td colspan="7" class="p-12 text-center font-semibold text-slate-400">No payment transactions found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

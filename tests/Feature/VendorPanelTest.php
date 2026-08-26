@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Mail\AdminVendorRegisteredMail;
 use App\Mail\VendorWelcomeMail;
 use App\Models\VendorAccount;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
+use App\Support\EmailRecipients;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -31,7 +33,8 @@ class VendorPanelTest extends TestCase
         $account = VendorAccount::firstOrFail();
         $this->assertAuthenticatedAs($account, 'vendor');
         Mail::assertSent(VendorWelcomeMail::class, fn (VendorWelcomeMail $mail) => $mail->vendor->is($account));
-        $this->get(route('vendor.dashboard'))->assertOk()->assertSee('Asha Celebrations');
+        Mail::assertSent(AdminVendorRegisteredMail::class, fn (AdminVendorRegisteredMail $mail) => $mail->hasTo(EmailRecipients::ADMIN) && $mail->vendor->is($account));
+        $this->get(route('vendor.dashboard'))->assertOk()->assertSee('Asha Celebrations')->assertDontSee('<aside', false)->assertSee('My Businesses');
     }
 
     public function test_vendor_can_manage_only_their_own_dynamic_business_details(): void

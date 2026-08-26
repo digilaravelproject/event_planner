@@ -27,6 +27,19 @@ use App\Models\EventRequirementQuestion;
 use App\Models\LandingContent;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Mail;
+
+Route::get('/send-mail', function () {
+
+    $to = 'darshankondekar01@gmail.com';
+
+    Mail::raw('This is a sample test email from the Event Planner project.', function ($message) use ($to) {
+        $message->to($to)
+                ->subject('Test Email - Event Planner');
+    });
+
+    return 'Email sent successfully!';
+});
 
 // Redirect /admin to /admin/dashboard
 Route::redirect('/admin', '/admin/dashboard');
@@ -49,6 +62,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/transactions/export/pdf', [TransactionController::class, 'exportPdf'])->name('admin.transactions.export.pdf');
         Route::get('/transactions/export/excel', [TransactionController::class, 'exportExcel'])->name('admin.transactions.export.excel');
         Route::get('/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
+        Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('admin.transactions.show');
 
         // Profile Settings
         Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');

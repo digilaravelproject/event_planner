@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SubscriptionActivatedMail;
 use App\Models\Subscription;
 use App\Models\UserSubscription;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class UserSubscriptionController extends Controller
@@ -18,6 +20,7 @@ class UserSubscriptionController extends Controller
         $user = $request->user();
         $plans = Subscription::orderBy('price')->get();
         $history = $user->subscriptionHistory()->with('plan')->latest()->get();
+
         return view('user.subscription', compact('plans', 'history', 'user'));
     }
 
@@ -28,6 +31,7 @@ class UserSubscriptionController extends Controller
         $amount = (float) $plan->price;
         if ($plan->isFree()) {
             $this->activateFree($request, $plan);
+
             return response()->json(['success' => true, 'free' => true, 'redirect' => route('user.dashboard')]);
         }
 
@@ -48,6 +52,7 @@ class UserSubscriptionController extends Controller
             'billing_cycle' => $plan->interval, 'amount' => $amount, 'status' => 'created',
             'razorpay_order_id' => $response['id'], 'gateway_payload' => $response,
         ]);
+
         return response()->json(['success' => true, 'key' => $keyId, 'order_id' => $response['id'], 'amount' => (int) round($amount * 100), 'currency' => 'INR', 'plan_name' => $plan->name]);
     }
 
@@ -67,16 +72,20 @@ class UserSubscriptionController extends Controller
             $record->update(['status' => 'active', 'razorpay_payment_id' => $validated['razorpay_payment_id'], 'starts_at' => now(), 'ends_at' => $endsAt, 'paid_at' => now()]);
             $request->user()->update(['subscription_id' => $record->subscription_id, 'subscription_ends_at' => $endsAt, 'razorpay_payment_id' => $validated['razorpay_payment_id'], 'razorpay_order_id' => $validated['razorpay_order_id']]);
         });
+        Mail::to($request->user()->email)->send(new SubscriptionActivatedMail($record->fresh(['user', 'plan'])));
+
         return response()->json(['success' => true, 'redirect' => route('user.dashboard'), 'message' => 'Subscription activated successfully.']);
     }
 
     private function activateFree(Request $request, Subscription $plan): void
     {
-        DB::transaction(function () use ($request, $plan): void {
+        $record = DB::transaction(function () use ($request, $plan): UserSubscription {
             $endsAt = now()->addDays(30);
-            UserSubscription::create(['user_id' => $request->user()->id, 'subscription_id' => $plan->id, 'billing_cycle' => 'free', 'amount' => 0, 'status' => 'active', 'starts_at' => now(), 'ends_at' => $endsAt, 'paid_at' => now()]);
+            $record = UserSubscription::create(['user_id' => $request->user()->id, 'subscription_id' => $plan->id, 'billing_cycle' => 'free', 'amount' => 0, 'status' => 'active', 'starts_at' => now(), 'ends_at' => $endsAt, 'paid_at' => now()]);
             $request->user()->update(['subscription_id' => $plan->id, 'subscription_ends_at' => $endsAt, 'razorpay_payment_id' => null, 'razorpay_order_id' => null]);
-        });
-    }
 
+            return $record;
+        });
+        Mail::to($request->user()->email)->send(new SubscriptionActivatedMail($record->load(['user', 'plan'])));
+    }
 }

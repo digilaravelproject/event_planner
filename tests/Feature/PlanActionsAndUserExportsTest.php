@@ -105,7 +105,7 @@ class PlanActionsAndUserExportsTest extends TestCase
         $admin = Admin::create(['name' => 'Payment Admin', 'email' => 'payments@example.com', 'password' => 'password']);
         $user = User::factory()->create(['name' => 'Payment Customer', 'email' => 'customer@example.com']);
         $plan = Subscription::create(['name' => '6 Monthly Plan', 'price' => 4999, 'interval' => 'six_months', 'features' => []]);
-        UserSubscription::create([
+        $transaction = UserSubscription::create([
             'user_id' => $user->id,
             'subscription_id' => $plan->id,
             'billing_cycle' => 'six_months',
@@ -125,6 +125,8 @@ class PlanActionsAndUserExportsTest extends TestCase
         $pdf = $this->actingAs($admin, 'admin')->get(route('admin.transactions.export.pdf'));
         $pdf->assertOk()->assertHeader('content-type', 'application/pdf');
         $this->assertStringStartsWith('%PDF-1.4', $pdf->getContent());
+        $this->actingAs($admin, 'admin')->get(route('admin.transactions.index'))->assertOk()->assertSee('fa-eye')->assertSee(route('admin.transactions.show', $transaction), false);
+        $this->actingAs($admin, 'admin')->get(route('admin.transactions.show', $transaction))->assertOk()->assertSee('Transaction #'.$transaction->id);
 
         $excel = $this->actingAs($admin, 'admin')->get(route('admin.transactions.export.excel'));
         $excel->assertOk()->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

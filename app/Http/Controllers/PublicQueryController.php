@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AdminNewQueryMail;
 use App\Models\UserQuery;
+use App\Support\EmailRecipients;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class PublicQueryController extends Controller
@@ -15,7 +18,9 @@ class PublicQueryController extends Controller
             return back()->withErrors($validator)->withInput()->withFragment('query-form');
         }
         $data = $validator->validated();
-        UserQuery::create(array_merge($data, ['user_id' => $request->user()?->id]));
+        $query = UserQuery::create(array_merge($data, ['user_id' => $request->user()?->id]));
+        Mail::to(EmailRecipients::ADMIN)->send(new AdminNewQueryMail($query));
+
         return back()->with('query_success', 'Thank you. Your query has been submitted.')->withFragment('query-form');
     }
 }
