@@ -139,6 +139,11 @@ class DynamicVendorService
                 'label' => trim((string) $attribute['label']),
                 'type' => $type,
                 'value' => $value,
+                'pricing' => (($attribute['pricing_rate'] ?? '') !== '' && ($attribute['pricing_rate'] ?? null) !== null) || ($type === 'currency' && is_numeric($value) && isset($attribute['pricing_unit'])) ? [
+                    'rate' => round((float) (($attribute['pricing_rate'] ?? '') !== '' && ($attribute['pricing_rate'] ?? null) !== null ? $attribute['pricing_rate'] : $value), 2),
+                    'unit' => $attribute['pricing_unit'] ?? 'fixed',
+                    'quantity' => $this->nullableNumber($attribute['pricing_quantity'] ?? null),
+                ] : null,
                 'images' => array_values(array_unique($attributeImages)),
                 'validation' => array_filter([
                     'required' => filter_var($attribute['required'] ?? false, FILTER_VALIDATE_BOOL),

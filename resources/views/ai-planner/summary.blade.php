@@ -75,11 +75,26 @@
                             <div><div class="text-[10px] font-bold uppercase tracking-wider text-[#850625]">{{ number_format((float) ($item['percentage'] ?? 0), 0) }}% of plan</div><h3 class="mt-1 text-2xl font-bold font-serif-luxury text-slate-950">{{ $item['category'] }}</h3><p class="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">{{ $item['summary'] ?? '' }}</p></div>
                             <div class="shrink-0 rounded-2xl bg-rose-50 px-5 py-3 text-right"><div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">{{ $content['category_total_label'] }}</div><div class="text-2xl font-extrabold text-[#850625]">₹{{ number_format((float) $item['amount']) }}</div></div>
                         </div>
-                        <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-                            @foreach($item['attributes'] as $attribute)
-                                <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4"><div class="text-xs font-bold text-slate-800">{{ $attribute['name'] }}</div><div class="mt-1 text-[10px] text-slate-500">{{ $attribute['value'] }}</div><div class="mt-3 text-base font-extrabold text-[#850625]">₹{{ number_format((float) $attribute['cost']) }}</div></div>
-                            @endforeach
-                        </div>
+                        @if(($item['pricing_status'] ?? '') === 'quote_required')<p class="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">Quote required: unpriced services are excluded from the total.</p>@endif
+                        @if($item['cost_warning'])<p class="mt-4 text-xs text-amber-800">{{ $item['cost_warning'] }}</p>@endif
+                        @forelse($item['vendor_groups'] as $group)
+                            <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+                                <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-3"><h4 class="text-sm font-bold text-slate-900"><i class="fa-solid fa-store mr-2 text-[#850625]" aria-hidden="true"></i>{{ $group['name'] }}</h4><span class="text-xs font-bold text-[#850625]">Priced subtotal ₹{{ number_format($group['amount'], 2) }}</span></div>
+                                <div class="divide-y divide-slate-100">
+                                    @foreach($group['attributes'] as $attribute)
+                                        <div class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between">
+                                            <div class="min-w-0"><div class="text-sm font-bold text-slate-800">{{ $attribute['name'] }}</div><p class="mt-1 text-xs leading-relaxed text-slate-500">{{ $attribute['value'] }}</p>
+                                                @if(isset($attribute['unit_price']))<p class="mt-2 text-xs font-semibold text-slate-700">₹{{ number_format($attribute['unit_price'], 2) }} / {{ str_replace(['per_', '_'], ['', ' '], $attribute['unit'] ?? 'service') }} × {{ $attribute['quantity'] ?? 'quantity to confirm' }}</p>@endif
+                                                <p class="mt-1 text-[10px] text-slate-500">{{ ($attribute['source'] ?? '') === 'vendor_attribute' ? 'Saved vendor rate' : (($attribute['source'] ?? '') === 'configured_menu' ? 'Configured menu rate' : 'Saved estimate') }}</p>
+                                            </div>
+                                            <strong class="shrink-0 text-base text-[#850625]">{{ ($attribute['pricing_status'] ?? '') === 'quote_required' ? 'Quote required' : '₹'.number_format((float) $attribute['cost'], 2) }}</strong>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @empty
+                            <p class="mt-5 text-sm text-slate-500">No priced vendor services saved for this category.</p>
+                        @endforelse
                     </article>
                 @endforeach
             </section>

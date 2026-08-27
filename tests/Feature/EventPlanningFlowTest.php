@@ -9,7 +9,11 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserEventPlan;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
+use App\Services\EventPlanningService;
+use App\Services\OpenRouterService;
+use App\Services\PlanPdfService;
 use App\Services\PlanPresentationService;
+use App\Services\VendorCostingService;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
@@ -19,6 +23,135 @@ use Tests\TestCase;
 class EventPlanningFlowTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_vendor_rates_replace_ai_amounts_and_remain_unchanged_in_scenarios(): void
+    {
+        $user = User::factory()->create();
+        $vendor = DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+            'identity' => ['name' => 'Itemized Decor Studio', 'category' => 'Decorators'],
+            'attributes' => [
+                ['key' => 'price', 'label' => 'Price', 'type' => 'currency', 'value' => 90000],
+                ['key' => 'mandap', 'label' => 'Mandap', 'type' => 'currency', 'value' => 20000],
+                ['key' => 'chairs', 'label' => 'Chair decoration', 'type' => 'text', 'value' => 'Floral ties', 'pricing' => ['rate' => 25.5, 'unit' => 'per_guest']],
+                ['key' => 'lighting', 'label' => 'Lighting', 'type' => 'text', 'value' => 'Warm lights', 'pricing' => ['rate' => 500, 'unit' => 'per_hour', 'quantity' => 4]],
+            ],
+        ]]);
+        $this->mock(OpenRouterService::class)->shouldReceive('chat')->once()->andReturn(['choices' => [['message' => ['content' => json_encode([
+            'title' => 'Vendor grounded plan', 'overview' => 'Selected decor.',
+            'costing' => [['category' => 'Decor & Styling', 'amount' => 999999, 'vendor_ids' => [$vendor->id, 999999], 'attributes' => [['name' => 'Invented fee', 'cost' => 999999]]]],
+        ])]]]]);
+        $plan = app(EventPlanningService::class)->create($user, ['guest_count' => 100, 'answers' => []]);
+        $this->assertSame(24550.0, (float) $plan->total_cost);
+        $lines = $plan->summary['costing'][0]['attributes'];
+        $this->assertSame(['Mandap', 'Chair decoration', 'Lighting'], array_column($lines, 'name'));
+        $this->assertSame([20000, 2550, 2000], array_column($lines, 'cost'));
+        $this->assertSame([$vendor->id], $plan->summary['costing'][0]['vendor_ids']);
+        foreach ($plan->suggestions as $suggestion) {
+            $this->assertEquals($plan->total_cost, $suggestion->total_cost);
+            $this->assertSame($lines, $suggestion->summary['costing'][0]['attributes']);
+        }
+        $presentation = app(PlanPresentationService::class)->present($plan);
+        $this->assertSame('Itemized Decor Studio', $presentation['costing'][0]['vendor_groups'][0]['name']);
+        $this->assertEquals(24550, $presentation['costing'][0]['vendor_groups'][0]['amount']);
+    }
+
+    public function test_fallback_uses_saved_prices_and_excludes_insufficient_capacity(): void
+    {
+        $user = User::factory()->create();
+        foreach ([['Small Hall', 50, 1000], ['Suitable Hall', 500, 123456]] as [$name, $capacity, $price]) {
+            DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+                'identity' => ['name' => $name, 'category' => 'Venue'],
+                'attributes' => [['key' => 'guest_capacity', 'value' => $capacity], ['key' => 'price', 'value' => $price]],
+            ]]);
+        }
+        $this->mock(OpenRouterService::class)->shouldReceive('chat')->once()->andThrow(new \RuntimeException('Offline test'));
+        $plan = app(EventPlanningService::class)->create($user, ['guest_count' => 100, 'answers' => ['wedding_budget' => 25]]);
+        $this->assertEquals(123456, $plan->total_cost);
+        $this->assertSame('Suitable Hall', $plan->summary['costing'][0]['attributes'][0]['vendor_name']);
+        $this->assertSame('quote_required', $plan->summary['costing'][1]['pricing_status']);
+        $this->assertCount(1, $plan->vendor_snapshot);
+    }
+
+    public function test_unknown_quantities_are_not_invented_and_duplicate_categories_are_not_billed_twice(): void
+    {
+        $vendor = ['id' => 20, 'name' => 'Lighting Vendor', 'category' => 'Decor', 'attributes' => [
+            ['key' => 'light', 'label' => 'Lighting', 'pricing' => ['rate' => 100, 'unit' => 'per_hour']],
+        ]];
+        $summary = app(VendorCostingService::class)->ground(['costing' => [
+            ['category' => 'Decor'], ['category' => 'Floral Decor'],
+        ]], [$vendor], 200);
+        $this->assertSame(0.0, $summary['total_cost']);
+        $this->assertNull($summary['costing'][0]['attributes'][0]['quantity']);
+        $this->assertSame('quote_required', $summary['costing'][0]['attributes'][0]['pricing_status']);
+        $this->assertSame([], $summary['costing'][1]['attributes']);
+    }
+
+    public function test_saved_line_prices_are_not_rescaled_or_assigned_to_arbitrary_vendors(): void
+    {
+        $plan = $this->planFor(User::factory()->create());
+        $summary = $plan->summary;
+        $summary['costing'][0]['amount'] = 100;
+        $plan->summary = $summary;
+        $presentation = app(PlanPresentationService::class)->present($plan);
+        $this->assertSame(750000.0, $presentation['costing'][0]['attributes'][0]['cost']);
+        $this->assertSame('', $presentation['costing'][0]['attributes'][0]['vendor_name']);
+        $this->assertNotNull($presentation['costing'][0]['cost_warning']);
+    }
+
+    public function test_landing_signin_has_user_and_vendor_dialog_choices(): void
+    {
+        $this->get(route('home'))->assertOk()->assertSee('data-login-choice', false)
+            ->assertSee('id="login-choice"', false)->assertSee('User Login')->assertSee('Vendor Login')
+            ->assertSee('aria-labelledby="login-choice-title"', false);
+    }
+
+    public function test_ai_can_select_individual_attributes_without_double_billing_a_vendor(): void
+    {
+        $vendor = ['id' => 42, 'name' => 'One Decor Vendor', 'category' => 'Decor', 'attributes' => [
+            ['key' => 'mandap', 'type' => 'currency', 'value' => 10000],
+            ['key' => 'entrance', 'type' => 'currency', 'value' => 5000],
+            ['key' => 'unused', 'type' => 'currency', 'value' => 3000],
+        ]];
+        $summary = app(VendorCostingService::class)->ground(['costing' => [
+            ['category' => 'Ceremony setup', 'vendor_ids' => [42], 'attributes' => [['vendor_id' => 42, 'attribute_key' => 'mandap']]],
+            ['category' => 'Entrance setup', 'vendor_ids' => [42], 'attributes' => [['vendor_id' => 42, 'attribute_key' => 'entrance'], ['vendor_id' => 42, 'attribute_key' => 'mandap']]],
+        ]], [$vendor], 100);
+        $this->assertSame(15000.0, $summary['total_cost']);
+        $this->assertCount(1, $summary['costing'][1]['attributes']);
+        $this->assertSame('entrance', $summary['costing'][1]['attributes'][0]['attribute_key']);
+    }
+
+    public function test_food_package_costs_use_saved_rates_not_submitted_prices(): void
+    {
+        $vendor = ['id' => 42, 'name' => 'Package Caterer', 'food_packages' => [
+            ['id' => 'deluxe', 'name' => 'Deluxe menu', 'min_price_per_plate' => 800, 'max_price_per_plate' => 1000, 'items' => ['Live counter']],
+        ], 'food_extras' => [
+            ['id' => 'counter', 'name' => 'Live counter', 'min_price' => 100, 'max_price' => 150, 'unit' => 'per_plate'],
+            ['id' => 'dessert', 'name' => 'Dessert counter', 'min_price' => 50, 'max_price' => 70, 'unit' => 'per_plate'],
+        ]];
+        $lines = app(VendorCostingService::class)->foodPackageLines([
+            'selected_caterers' => [42], 'selected_food_package' => ['id' => 'deluxe', 'min_price_per_plate' => 1],
+            'selected_food_extras' => ['counter', 'dessert'],
+        ], [$vendor], 100);
+        $this->assertEquals([80000, 5000], array_column($lines, 'cost'));
+        $this->assertStringContainsString('starting rate', $lines[0]['value']);
+        $this->assertSame('quote_required', app(VendorCostingService::class)->foodPackageLines(['selected_food_package' => ['id' => 'deluxe']], [$vendor], 100)[0]['pricing_status']);
+    }
+
+    public function test_pdf_includes_itemized_vendor_rates_across_multiple_pages(): void
+    {
+        $plan = $this->planFor(User::factory()->create());
+        $presentation = app(PlanPresentationService::class)->present($plan);
+        $presentation['costing'][0]['attributes'] = array_map(fn ($i) => [
+            'name' => 'Service '.$i, 'vendor_name' => 'Saved Provider', 'value' => 'Confirmed database rate',
+            'unit_price' => 25, 'quantity' => 200, 'unit' => 'per_guest', 'cost' => 5000,
+        ], range(1, 30));
+        $pdf = app(PlanPdfService::class)->render($plan, $presentation);
+        $this->assertStringContainsString('Saved Provider', $pdf);
+        $this->assertStringContainsString('Service 30', $pdf);
+        $this->assertStringContainsString('x 200 guest', $pdf);
+        $this->assertGreaterThan(1, preg_match_all('/\/Type \/Page\b/', $pdf));
+    }
 
     public function test_landing_and_planner_use_managed_wedding_questions(): void
     {

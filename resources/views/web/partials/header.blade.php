@@ -63,7 +63,7 @@
                 </button>
             </form>
         @else
-            <a href="{{ route('user.login') }}" class="text-slate-700 hover:text-[#850625] text-xs font-bold px-4 py-2.5 rounded-full hover:bg-rose-50 transition-all duration-200">
+            <a href="{{ route('user.login') }}" data-login-choice aria-haspopup="dialog" aria-controls="login-choice" class="text-slate-700 hover:text-[#850625] text-xs font-bold px-4 py-2.5 rounded-full hover:bg-rose-50 transition-all duration-200">
                 Sign In
             </a>
             <a href="{{ route('user.register') }}" class="relative group overflow-hidden px-5 py-2.5 rounded-full text-white bg-gradient-to-r from-[#850625] to-[#a81036] hover:from-[#6b041e] hover:to-[#850625] text-xs font-bold shadow-md shadow-[#850625]/25 hover:shadow-lg transition-all duration-300 hover:scale-[1.03] flex items-center gap-2">
@@ -77,7 +77,7 @@
     </div>
 
     <!-- Mobile Menu Hamburger Button -->
-    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden text-slate-900 hover:text-[#850625] p-2 focus:outline-none transition-transform duration-200" :class="{ 'rotate-90': mobileMenuOpen }">
+    <button @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Toggle navigation" :aria-expanded="mobileMenuOpen" class="lg:hidden text-slate-900 hover:text-[#850625] p-2 focus:outline-none transition-transform duration-200" :class="{ 'rotate-90': mobileMenuOpen }">
         <i class="fa-solid" :class="mobileMenuOpen ? 'fa-xmark text-2xl text-[#850625]' : 'fa-bars-staggered text-2xl'"></i>
     </button>
 
@@ -126,7 +126,7 @@
                     <span>Dashboard</span>
                 </a>
             @else
-                <a @click="mobileMenuOpen = false" href="{{ route('user.login') }}" class="w-full text-center text-slate-800 border border-slate-200 hover:border-[#850625] px-4 py-2.5 rounded-full text-xs font-bold transition-all">
+                <a @click="mobileMenuOpen = false" href="{{ route('user.login') }}" data-login-choice aria-haspopup="dialog" aria-controls="login-choice" class="w-full text-center text-slate-800 border border-slate-200 hover:border-[#850625] px-4 py-2.5 rounded-full text-xs font-bold transition-all">
                     Sign In
                 </a>
                 <a @click="mobileMenuOpen = false" href="{{ route('user.register') }}" class="w-full text-center px-5 py-3 rounded-full text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2">
@@ -137,3 +137,6 @@
         </div>
     </div>
 </header>
+@guest('web')
+    @include('web.partials.login-choice')
+@endguest

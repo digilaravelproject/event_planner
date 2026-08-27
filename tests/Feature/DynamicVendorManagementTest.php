@@ -17,6 +17,20 @@ class DynamicVendorManagementTest extends TestCase
 
     private Admin $admin;
 
+    public function test_vendor_service_pricing_metadata_is_saved_and_validated(): void
+    {
+        $payload = $this->payload();
+        $payload['attributes'][0]['pricing_rate'] = 450.5;
+        $payload['attributes'][0]['pricing_unit'] = 'per_guest';
+        $this->actingAs($this->admin, 'admin')->post(route('admin.dynamic-vendors.store'), $payload)->assertRedirect();
+        $vendor = DynamicVendor::firstOrFail();
+        $this->assertSame(450.5, data_get($vendor->vendor_json, 'attributes.0.pricing.rate'));
+        $this->assertSame('per_guest', data_get($vendor->vendor_json, 'attributes.0.pricing.unit'));
+        $this->get(route('admin.dynamic-vendors.edit', $vendor))->assertOk()->assertSee('450.5')->assertSee('Planning cost');
+        $payload['attributes'][0]['pricing_rate'] = -1;
+        $this->post(route('admin.dynamic-vendors.store'), $payload)->assertSessionHasErrors('attributes.0.pricing_rate');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

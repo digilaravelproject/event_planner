@@ -12,37 +12,42 @@ class PlanPresentationService
     {
         $summary = $plan->summary ?? [];
         $vendors = collect($plan->vendor_snapshot ?? [])->keyBy('id');
-        $costing = collect($summary['costing'] ?? [])->map(function (array $item) use ($vendors): array {
+        $legacy = ($summary['pricing_version'] ?? 1) < 2;
+        $costing = collect($summary['costing'] ?? [])->map(function (array $item) use ($vendors, $legacy): array {
             $amount = (float) ($item['amount'] ?? 0);
             $matchedVendors = collect($item['vendor_ids'] ?? [])->map(fn ($id) => $vendors->get((int) $id))->filter()->values();
-            if ($matchedVendors->isEmpty()) {
+            if ($matchedVendors->isEmpty() && $legacy) {
                 $matchedVendors = $this->vendorsForCategory($vendors->values(), (string) ($item['category'] ?? ''))->take(3)->values();
             }
 
-            $attributes = collect($item['attributes'] ?? [])->map(function ($attribute, $index) use ($matchedVendors): array {
+            $savedAttributes = $item['attributes'] ?? [];
+            if ($savedAttributes === [] && $amount > 0) {
+                $savedAttributes = [['name' => 'Saved service estimate', 'value' => 'This older plan has no itemized vendor rates. Regenerate the plan for a current breakdown.', 'cost' => $amount, 'source' => 'legacy_estimate']];
+            }
+            $attributes = collect($savedAttributes)->map(function ($attribute) use ($vendors): array {
                 $savedValue = $this->cleanText((string) ($attribute['value'] ?? ''));
 
-                return [
+                return array_merge($attribute, [
                     'name' => $this->cleanText((string) ($attribute['name'] ?? 'Service item')),
                     'value' => strcasecmp($savedValue, 'Indicative allocation') === 0 ? '' : $savedValue,
-                    'vendor_name' => (string) data_get($matchedVendors->get(((int) $index) % max(1, $matchedVendors->count())), 'name', ''),
+                    'vendor_name' => (string) data_get($vendors->get((int) ($attribute['vendor_id'] ?? 0)), 'name', $attribute['vendor_name'] ?? ''),
                     'cost' => max(0, (float) ($attribute['cost'] ?? 0)),
-                ];
+                ]);
             })->filter(fn (array $attribute): bool => $attribute['name'] !== '')->values();
 
-            if (($attributeTotal = (float) $attributes->sum('cost')) > 0 && abs($attributeTotal - $amount) > 0.01) {
-                $attributes = $attributes->map(function (array $attribute) use ($amount, $attributeTotal): array {
-                    $attribute['cost'] = round($amount * ((float) $attribute['cost'] / $attributeTotal), 2);
-
-                    return $attribute;
-                });
-            }
+            $attributeTotal = (float) $attributes->sum('cost');
 
             return array_merge($item, [
                 'category' => $this->cleanText((string) ($item['category'] ?? 'Service')),
                 'summary' => $this->cleanText((string) ($item['summary'] ?? '')),
                 'amount' => $amount,
                 'attributes' => $attributes->all(),
+                'cost_warning' => abs($attributeTotal - $amount) > 0.01 ? 'Saved line items differ from this category total. Regenerate this older plan to reconcile the costing.' : null,
+                'vendor_groups' => $attributes->groupBy(fn ($attribute) => $attribute['vendor_id'] ?? 'unassigned')->map(fn ($lines) => [
+                    'name' => $lines->first()['vendor_name'] ?: 'Service estimate',
+                    'amount' => round((float) $lines->sum('cost'), 2),
+                    'attributes' => $lines->values()->all(),
+                ])->values()->all(),
                 'vendors' => $matchedVendors->map(fn (array $vendor): array => $this->presentVendor($vendor))->all(),
             ]);
         })->values()->all();
@@ -50,7 +55,7 @@ class PlanPresentationService
         $planVendors = collect($costing)->pluck('vendors')->flatten(1)->unique('id')->values()->all();
 
         $recommendationSource = collect($summary['recommendations'] ?? []);
-        if ($recommendationSource->isEmpty()) {
+        if ($recommendationSource->isEmpty() && $legacy) {
             $recommendationSource = $vendors->values()->take(8)->map(fn (array $vendor): array => [
                 'vendor_id' => $vendor['id'],
                 'name' => $vendor['name'],
@@ -60,7 +65,7 @@ class PlanPresentationService
             ]);
         }
 
-        $recommendations = $recommendationSource->map(function (array $recommendation) use ($vendors, $costing): array {
+        $recommendations = $recommendationSource->map(function (array $recommendation) use ($vendors, $costing, $legacy): array {
             $vendor = $vendors->get((int) ($recommendation['vendor_id'] ?? 0), []);
             $attributes = collect((array) ($vendor['attributes'] ?? []))->map(function ($value, $key): array {
                 return [
@@ -70,20 +75,17 @@ class PlanPresentationService
             })->filter(fn (array $attribute): bool => $attribute['value'] !== '')->take(8)->values();
 
             $estimated = (float) ($recommendation['estimated_cost'] ?? 0);
-            if ($estimated <= 0) {
+            if ($estimated <= 0 && $legacy) {
                 $category = strtolower((string) ($recommendation['category'] ?? ''));
                 $matchingCost = collect($costing)->first(fn (array $item) => $category !== '' && str_contains(strtolower((string) ($item['category'] ?? '')), $category));
                 $estimated = (float) data_get($matchingCost, 'amount', 0);
             }
-            $attributeCount = max(1, $attributes->count());
 
             return array_merge($recommendation, [
                 'name' => (string) ($vendor['name'] ?? $recommendation['name'] ?? 'Matched vendor'),
                 'category' => (string) ($vendor['category'] ?? $recommendation['category'] ?? 'Vendor'),
                 'estimated_cost' => $estimated,
-                'attributes' => $attributes->map(fn (array $attribute): array => $attribute + [
-                    'cost' => round($estimated / $attributeCount, 2),
-                ])->all(),
+                'attributes' => $attributes->all(),
             ]);
         })->values()->all();
 

@@ -9,6 +9,7 @@ use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Services\EventPlanningService;
 use App\Services\PlanPdfService;
 use App\Services\PlanPresentationService;
+use App\Services\VendorCostingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -512,13 +513,21 @@ class AiPlannerController extends Controller
                 return null;
             }
             $configured = $foodCatalog->get(mb_strtolower($title), []);
+            $vendorRate = collect(app(VendorCostingService::class)->catalog([
+                'id' => $vendor->id, 'name' => $vendorName, 'attribute_definitions' => data_get($vendor->vendor_json, 'attributes', []),
+            ], 1))->first(fn (array $rate): bool => $rate['unit'] === 'per_guest' && (
+                mb_strtolower($rate['name']) === mb_strtolower($title)
+                || $rate['attribute_key'] === Str::snake($title)
+                || $rate['attribute_key'] === Str::snake($title).'_price_per_guest'
+            ));
             $image = $configured['image'] ?? ($images[$index] ?? null);
 
             return [
                 'id' => (string) ($configured['id'] ?? Str::slug($title, '_')),
                 'title' => $title,
                 'category' => (string) ($configured['category'] ?? 'Menu Items'),
-                'cost' => max(0, (float) ($configured['cost'] ?? 0)),
+                'cost' => max(0, (float) ($vendorRate['unit_price'] ?? $configured['cost'] ?? 0)),
+                'source' => $vendorRate ? 'vendor_attribute' : 'configured_menu',
                 'image' => $image ? (str_starts_with($image, 'http') ? $image : asset('storage/'.ltrim($image, '/'))) : null,
                 'vendor_id' => $vendor->id,
                 'vendor_name' => $vendorName,

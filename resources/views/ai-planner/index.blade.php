@@ -675,10 +675,10 @@
         <input type="hidden" name="answers[decoration_type]" :value="planner.decorTheme">
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
         <input type="hidden" name="answers[food_type]" :value="planner.cateringMode === 'package' ? (getSelectedPackage()?.name || '') : planner.foodItems.map(item => item.title).join(', ')">
-        <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.foodItems)">
+        <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.cateringMode === 'custom' ? planner.foodItems : [])">
         <input type="hidden" name="answers[selected_caterers]" :value="JSON.stringify(planner.selectedVendorIds)">
-        <input type="hidden" name="answers[selected_food_package]" :value="JSON.stringify(getSelectedPackage())">
-        <input type="hidden" name="answers[selected_food_extras]" :value="JSON.stringify(planner.selectedFoodExtras)">
+        <input type="hidden" name="answers[selected_food_package]" :value="JSON.stringify(planner.cateringMode === 'package' ? getSelectedPackage() : null)">
+        <input type="hidden" name="answers[selected_food_extras]" :value="JSON.stringify(planner.cateringMode === 'package' ? planner.selectedFoodExtras : [])">
         <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
         <input type="hidden" name="answers[event_date]" :value="planner.eventDate">
