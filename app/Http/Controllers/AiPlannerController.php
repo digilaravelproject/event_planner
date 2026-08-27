@@ -103,13 +103,16 @@ class AiPlannerController extends Controller
                 }, $offerings);
             })->values()->all();
 
+        $foodCatalog = collect($this->plannerOptions($questions->get('food_type')))
+            ->keyBy(fn (array $item): string => mb_strtolower($item['title']));
+
         $cateringVendors = DynamicVendor::query()
             ->whereRaw('LOWER(status) = ?', ['active'])
             ->get()
             ->filter(function (DynamicVendor $vendor): bool {
-                return in_array($vendor->category, ['Catering', 'Venue', 'Hotel', 'Lawn', 'Decorator'], true);
+                return mb_strtolower(trim($vendor->category)) === 'catering';
             })
-            ->map(function (DynamicVendor $vendor): array {
+            ->map(function (DynamicVendor $vendor) use ($foodCatalog): array {
                 $brandName = data_get($vendor->vendor_json, 'identity.name') ?: data_get($vendor->vendor_json, 'name') ?: $vendor->name;
 
                 return [
@@ -118,6 +121,7 @@ class AiPlannerController extends Controller
                     'category' => $vendor->category,
                     'food_packages' => data_get($vendor->vendor_json, 'food_packages', []),
                     'food_extras' => data_get($vendor->vendor_json, 'food_extras', []),
+                    'menu_items' => $this->cateringMenuItems($vendor, $foodCatalog),
                 ];
             })->values()->all();
 
@@ -254,8 +258,12 @@ class AiPlannerController extends Controller
             ->with('success', 'Your AI wedding plan is ready.');
     }
 
-    private function plannerOptions(EventRequirementQuestion $question): array
+    private function plannerOptions(?EventRequirementQuestion $question): array
     {
+        if (! $question) {
+            return [];
+        }
+
         if ($question->question_code !== 'food_type') {
             return array_values($question->options ?? []);
         }
@@ -381,7 +389,7 @@ class AiPlannerController extends Controller
     {
         $answers = (array) $request->input('answers', []);
         foreach ($answers as $answerKey => $value) {
-            if (is_string($value) && str_starts_with(trim($value), '[')) {
+            if (is_string($value) && in_array(substr(trim($value), 0, 1), ['[', '{'], true)) {
                 $answers[$answerKey] = json_decode($value, true) ?: [];
             }
         }
@@ -413,12 +421,16 @@ class AiPlannerController extends Controller
             'answers.service_area' => ['nullable', 'array', 'max:50'],
             'answers.service_area.*' => ['string', 'max:255'],
             'answers.event_timeline' => ['nullable', 'string', 'max:255'],
-            'answers.event_date' => ['nullable', 'date'],
+            'answers.event_date' => ['nullable', 'date', 'after_or_equal:today'],
             'answers.food_menu_items' => ['nullable', 'array', 'max:100'],
             'answers.food_menu_items.*.id' => ['required', 'string', 'max:255'],
             'answers.food_menu_items.*.title' => ['required', 'string', 'max:255'],
             'answers.food_menu_items.*.category' => ['required', 'string', 'max:100'],
             'answers.food_menu_items.*.cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'answers.food_menu_items.*.vendor_id' => ['nullable', 'integer'],
+            'answers.food_menu_items.*.vendor_name' => ['nullable', 'string', 'max:255'],
+            'answers.selected_caterers' => ['nullable', 'array', 'max:25'],
+            'answers.selected_caterers.*' => ['integer'],
             'answers.selected_food_package' => ['nullable', 'array'],
             'answers.selected_food_extras' => ['nullable', 'array'],
             'answers.ceremonies' => ['nullable', 'array', 'max:50'],
@@ -439,13 +451,39 @@ class AiPlannerController extends Controller
         $mappedValues = collect($question?->option_vendor_values ?: $question?->vendor_attribute_values ?: [])->values();
         $values = $options->map(fn (string $option, int $index): string => (string) (($mappedValues[$index] ?? null) ?: $option));
         $labels = $values->mapWithKeys(fn (string $value, int $index): array => [$value => $options[$index] ?? $value]);
-        $selectedIds = collect($selectedItems)->pluck('id')->map('strval')->unique()->values();
+        $selected = collect($selectedItems)->map(function (array $item): array {
+            return [
+                'id' => (string) $item['id'],
+                'vendor_id' => isset($item['vendor_id']) ? (int) $item['vendor_id'] : null,
+            ];
+        })->unique(fn (array $item): string => ($item['vendor_id'] ?? 'admin').':'.$item['id'])->values();
+        $selectedIds = $selected->whereNull('vendor_id')->pluck('id');
 
         if (! $question || $selectedIds->diff($values)->isNotEmpty()) {
             throw ValidationException::withMessages(['answers.food_menu_items' => 'Select menu items from the available food question.']);
         }
 
-        return $selectedIds->map(function (string $id) use ($labels, $metadata): array {
+        $vendors = DynamicVendor::query()
+            ->whereIn('id', $selected->pluck('vendor_id')->filter()->unique())
+            ->whereRaw('LOWER(status) = ?', ['active'])
+            ->get()
+            ->filter(fn (DynamicVendor $vendor): bool => mb_strtolower(trim($vendor->category)) === 'catering')
+            ->keyBy('id');
+        $foodCatalog = collect($this->plannerOptions($question))->keyBy(fn (array $item): string => mb_strtolower($item['title']));
+
+        return $selected->map(function (array $selection) use ($foodCatalog, $labels, $metadata, $vendors): array {
+            $id = $selection['id'];
+            if ($selection['vendor_id'] !== null) {
+                $vendor = $vendors->get($selection['vendor_id']);
+                $available = $vendor ? collect($this->cateringMenuItems($vendor, $foodCatalog))->keyBy('id') : collect();
+                $item = $available->get($id);
+                if (! $item) {
+                    throw ValidationException::withMessages(['answers.food_menu_items' => 'Select menu items offered by the chosen caterers.']);
+                }
+
+                return $item;
+            }
+
             $details = (array) ($metadata[$id] ?? []);
 
             return [
@@ -455,5 +493,36 @@ class AiPlannerController extends Controller
                 'cost' => max(0, (float) ($details['cost'] ?? 0)),
             ];
         })->all();
+    }
+
+    private function cateringMenuItems(DynamicVendor $vendor, $foodCatalog): array
+    {
+        $attribute = collect(data_get($vendor->vendor_json, 'attributes', []))
+            ->first(fn (array $item): bool => mb_strtolower(trim((string) ($item['label'] ?? ''))) === 'menu card items');
+        $rawItems = (array) data_get($attribute, 'value', []);
+        if (count($rawItems) === 1 && is_string($rawItems[0])) {
+            $rawItems = preg_split('/\s*,\s*/', $rawItems[0]) ?: [];
+        }
+        $images = array_values((array) data_get($attribute, 'images', []));
+        $vendorName = $vendor->name;
+
+        return collect($rawItems)->map(function ($title, int $index) use ($foodCatalog, $images, $vendor, $vendorName): ?array {
+            $title = trim((string) $title);
+            if ($title === '') {
+                return null;
+            }
+            $configured = $foodCatalog->get(mb_strtolower($title), []);
+            $image = $configured['image'] ?? ($images[$index] ?? null);
+
+            return [
+                'id' => (string) ($configured['id'] ?? Str::slug($title, '_')),
+                'title' => $title,
+                'category' => (string) ($configured['category'] ?? 'Menu Items'),
+                'cost' => max(0, (float) ($configured['cost'] ?? 0)),
+                'image' => $image ? (str_starts_with($image, 'http') ? $image : asset('storage/'.ltrim($image, '/'))) : null,
+                'vendor_id' => $vendor->id,
+                'vendor_name' => $vendorName,
+            ];
+        })->filter()->values()->all();
     }
 }

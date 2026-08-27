@@ -104,8 +104,26 @@
         const value = this.dynamicAnswers[code];
         return Array.isArray(value) ? JSON.stringify(value) : (value ?? '');
     },
+    init() {
+        if (!Array.isArray(this.planner.selectedVendorIds)) this.planner.selectedVendorIds = [];
+        if (!this.planner.selectedVendorIds.length && this.cateringVendors.length) {
+            this.planner.selectedVendorIds = [this.cateringVendors[0].id];
+        }
+        if (!this.planner.selectedVendorId || !this.planner.selectedVendorIds.includes(this.planner.selectedVendorId)) {
+            this.planner.selectedVendorId = this.planner.selectedVendorIds[0] || null;
+        }
+        if (this.planner.eventDate && this.planner.eventDate < this.todayDate) {
+            this.planner.eventDate = '';
+        }
+        if (this.planner.eventDate) {
+            const selectedDate = this.planner.eventDate.split('-').map(Number);
+            this.calendarYear = selectedDate[0];
+            this.calendarMonth = selectedDate[1] - 1;
+        }
+    },
     foodOptions() {
-        return this.optionsFor('food_type', []).map(value => typeof value === 'object' ? value : ({ id: value, title: value, category: 'Menu Items', cost: 0 }));
+        const vendor = this.getSelectedCateringVendor();
+        return vendor?.menu_items || [];
     },
     foodCategories() {
         return [...new Set(this.foodOptions().map(item => item.category || 'Menu Items'))];
@@ -114,12 +132,12 @@
         return this.foodOptions().filter(item => (item.category || 'Menu Items') === category);
     },
     toggleFoodItem(item) {
-        const index = this.planner.foodItems.findIndex(selected => selected.id === item.id);
+        const index = this.planner.foodItems.findIndex(selected => selected.id === item.id && selected.vendor_id === item.vendor_id);
         index >= 0 ? this.planner.foodItems.splice(index, 1) : this.planner.foodItems.push(item);
         this.plannerError = '';
     },
-    isFoodSelected(id) {
-        return this.planner.foodItems.some(item => item.id === id);
+    isFoodSelected(item) {
+        return this.planner.foodItems.some(selected => selected.id === item.id && selected.vendor_id === item.vendor_id);
     },
     formatMenuCost(cost) {
         return Number(cost) > 0 ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(cost)) + ' / person' : 'Cost not configured';
@@ -130,7 +148,27 @@
             const found = this.cateringVendors.find(v => v.id === this.planner.selectedVendorId);
             if (found) return found;
         }
-        return this.cateringVendors[0] || null;
+        return null;
+    },
+    selectCateringVendor(vendor) {
+        if (!this.planner.selectedVendorIds.includes(vendor.id)) {
+            this.planner.selectedVendorIds.push(vendor.id);
+        }
+        this.planner.selectedVendorId = vendor.id;
+        this.plannerError = '';
+    },
+    removeCateringVendor(vendorId) {
+        this.planner.selectedVendorIds = this.planner.selectedVendorIds.filter(id => id !== vendorId);
+        this.planner.foodItems = this.planner.foodItems.filter(item => item.vendor_id !== vendorId);
+        if (this.planner.selectedVendorId === vendorId) {
+            this.planner.selectedVendorId = this.planner.selectedVendorIds[0] || null;
+        }
+    },
+    isCateringVendorSelected(vendorId) {
+        return this.planner.selectedVendorIds.includes(vendorId);
+    },
+    selectedCateringVendors() {
+        return this.cateringVendors.filter(vendor => this.planner.selectedVendorIds.includes(vendor.id));
     },
     getFoodPackages() {
         const vendor = this.getSelectedCateringVendor();
@@ -283,7 +321,8 @@
         decorTheme: @js($savedAnswers['decoration_type'] ?? $plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
         ceremonies: @js($savedArray('ceremonies', ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'])),
         customCeremony: '',
-        selectedVendorId: null,
+        selectedVendorIds: @js($savedArray('selected_caterers')),
+        selectedVendorId: @js(data_get($savedAnswers, 'food_menu_items.0.vendor_id')),
         cateringMode: 'custom',
         selectedFoodPackageId: @js(data_get($savedAnswers, 'selected_food_package.id', 'deluxe_menu')),
         selectedFoodExtras: @js($savedArray('selected_food_extras', ['chinese_counter', 'chat_counter'])),
@@ -295,8 +334,9 @@
         eventDate: @js($savedAnswers['event_date'] ?? ''),
         setting: @js($savedAnswers['venue_setting'] ?? 'Indoor AC Banquet')
     },
-    calendarMonth: 10,
-    calendarYear: 2026,
+    todayDate: @js(now()->toDateString()),
+    calendarMonth: @js((int) now()->format('n') - 1),
+    calendarYear: @js((int) now()->format('Y')),
     monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
     formatEventDate(dateStr) {
         if (!dateStr) return 'Not set';
@@ -319,6 +359,7 @@
         }
     },
     prevMonth() {
+        if (!this.canGoToPreviousMonth()) return;
         if (this.calendarMonth === 0) {
             this.calendarMonth = 11;
             this.calendarYear--;
@@ -327,9 +368,24 @@
         }
     },
     selectCalendarDate(day) {
+        if (this.isPastDate(day)) return;
         const m = String(this.calendarMonth + 1).padStart(2, '0');
         const d = String(day).padStart(2, '0');
         this.planner.eventDate = `${this.calendarYear}-${m}-${d}`;
+    },
+    calendarDate(day) {
+        const month = String(this.calendarMonth + 1).padStart(2, '0');
+        return `${this.calendarYear}-${month}-${String(day).padStart(2, '0')}`;
+    },
+    isPastDate(day) {
+        return this.calendarDate(day) < this.todayDate;
+    },
+    isQuickDatePast(date) {
+        return date < this.todayDate;
+    },
+    canGoToPreviousMonth() {
+        const today = this.todayDate.split('-').map(Number);
+        return this.calendarYear > today[0] || (this.calendarYear === today[0] && this.calendarMonth > today[1] - 1);
     },
     isDateSelected(day) {
         if (!this.planner.eventDate) return false;
@@ -618,8 +674,9 @@
         <input type="hidden" name="answers[ceremonies]" :value="JSON.stringify(planner.ceremonies)">
         <input type="hidden" name="answers[decoration_type]" :value="planner.decorTheme">
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
-        <input type="hidden" name="answers[food_type]" :value="planner.foodItems.map(item => item.title).join(', ')">
+        <input type="hidden" name="answers[food_type]" :value="planner.cateringMode === 'package' ? (getSelectedPackage()?.name || '') : planner.foodItems.map(item => item.title).join(', ')">
         <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.foodItems)">
+        <input type="hidden" name="answers[selected_caterers]" :value="JSON.stringify(planner.selectedVendorIds)">
         <input type="hidden" name="answers[selected_food_package]" :value="JSON.stringify(getSelectedPackage())">
         <input type="hidden" name="answers[selected_food_extras]" :value="JSON.stringify(planner.selectedFoodExtras)">
         <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">

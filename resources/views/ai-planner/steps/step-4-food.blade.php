@@ -17,7 +17,7 @@
                     <i class="fa-solid fa-utensils text-lg"></i>
                 </div>
                 <div>
-                    <span class="text-[10px] uppercase font-bold text-rose-200 tracking-widest block">Selected Venue / Lawn Caterer</span>
+                    <span class="text-[10px] uppercase font-bold text-rose-200 tracking-widest block">Active Caterer</span>
                     <h3 class="font-extrabold text-lg text-white leading-tight flex items-center gap-2" x-text="getSelectedCateringVendor()?.name || 'Select Caterer'">
                     </h3>
                 </div>
@@ -46,30 +46,40 @@
                     class="absolute right-0 mt-2 w-full sm:w-80 bg-white border-2 border-rose-200 rounded-3xl shadow-2xl p-2.5 z-50 max-h-72 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] divide-y divide-rose-100 space-y-1 text-slate-900">
                     
                     <div class="px-3 py-2 text-[10px] font-extrabold text-[#850625] uppercase tracking-widest">
-                        Available Venue & Catering Vendors
+                        Available Catering Vendors
                     </div>
 
                     <template x-for="vendor in cateringVendors" :key="vendor.id">
                         <button type="button" 
                             @click="
-                                planner.selectedVendorId = vendor.id;
+                                selectCateringVendor(vendor);
                                 isVendorDropdownOpen = false;
                             "
                             :class="planner.selectedVendorId === vendor.id ? 'bg-[#850625] text-white font-extrabold shadow-md' : 'text-slate-700 hover:bg-rose-50 hover:text-[#850625]'"
                             class="w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-center justify-between gap-2 text-xs cursor-pointer group">
                             
                             <div class="flex items-center gap-2.5 truncate">
-                                <i class="fa-solid fa-building-circle-check text-[#850625] group-hover:scale-110 transition-transform"></i>
+                                <i class="fa-solid fa-utensils group-hover:scale-110 transition-transform" :class="planner.selectedVendorId === vendor.id ? 'text-white' : 'text-[#850625]'"></i>
                                 <span class="truncate font-semibold" x-text="vendor.name"></span>
                             </div>
 
                             <span :class="planner.selectedVendorId === vendor.id ? 'bg-white/20 text-white' : 'bg-rose-100 text-[#850625]'"
-                                class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0" x-text="vendor.category"></span>
+                                class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0" x-text="isCateringVendorSelected(vendor.id) ? 'Selected' : vendor.category"></span>
                         </button>
                     </template>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div x-show="selectedCateringVendors().length" class="flex flex-wrap gap-2">
+        <template x-for="vendor in selectedCateringVendors()" :key="vendor.id">
+            <span class="inline-flex items-center overflow-hidden rounded-full border text-[11px] font-bold"
+                :class="planner.selectedVendorId === vendor.id ? 'border-[#850625] bg-rose-50 text-[#850625]' : 'border-slate-200 bg-white text-slate-600'">
+                <button type="button" @click="planner.selectedVendorId = vendor.id" class="px-3 py-1.5" x-text="vendor.name"></button>
+                <button type="button" @click="removeCateringVendor(vendor.id)" class="border-l border-current/15 px-2 py-1.5" :aria-label="'Remove ' + vendor.name">×</button>
+            </span>
+        </template>
     </div>
 
     <!-- Mode Selector Tabs: Vendor Packages vs Custom Selection -->
@@ -85,7 +95,7 @@
             :class="planner.cateringMode === 'custom' ? 'bg-[#850625] text-white shadow-md' : 'text-slate-600 hover:text-slate-900'"
             class="w-1/2 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-2 select-none">
             <i class="fa-solid fa-list-check text-xs"></i>
-            <span>Admin Food Options</span>
+            <span>Caterer Menu Items</span>
         </button>
     </div>
 
@@ -182,7 +192,7 @@
     <!-- TAB 2: Admin-managed food items -->
     <div x-show="planner.cateringMode === 'custom'" class="space-y-5">
         <div class="rounded-2xl border border-rose-100 bg-rose-50/60 px-4 py-3 text-xs font-semibold text-slate-700">
-            These food choices, prices, categories, and images are managed from the Food & Catering question in the admin panel.
+            Showing menu items offered by <strong x-text="getSelectedCateringVendor()?.name || 'the selected caterer'"></strong>. Your choices from other selected caterers remain saved.
         </div>
         <template x-for="category in foodCategories()" :key="category">
             <section class="space-y-3">
@@ -191,20 +201,20 @@
                     <span class="text-[10px] font-semibold text-slate-400" x-text="foodItemsFor(category).length + ' items'"></span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-                    <template x-for="food in foodItemsFor(category)" :key="food.id">
-                        <button type="button" @click="toggleFoodItem(food)" :aria-pressed="isFoodSelected(food.id)"
-                            :class="isFoodSelected(food.id) ? 'border-[#850625] bg-rose-50 shadow-md ring-2 ring-[#850625]/15' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-md'"
+                    <template x-for="food in foodItemsFor(category)" :key="food.vendor_id + ':' + food.id">
+                        <button type="button" @click="toggleFoodItem(food)" :aria-pressed="isFoodSelected(food)"
+                            :class="isFoodSelected(food) ? 'border-[#850625] bg-rose-50 shadow-md ring-2 ring-[#850625]/15' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-md'"
                             class="group relative min-h-[112px] overflow-hidden rounded-2xl border-2 p-4 text-left transition-all">
                             <template x-if="food.image">
                                 <span class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                                    :class="isFoodSelected(food.id) ? '!opacity-100' : ''">
+                                    :class="isFoodSelected(food) ? '!opacity-100' : ''">
                                     <img :src="food.image" :alt="food.title" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                     <span class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/75 to-white/20"></span>
                                 </span>
                             </template>
                             <span class="relative z-10 flex items-start justify-between gap-3">
                                 <span class="text-sm font-extrabold text-slate-900" x-text="food.title"></span>
-                                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px]" :class="isFoodSelected(food.id) ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-300 text-transparent'">✓</span>
+                                <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px]" :class="isFoodSelected(food) ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-300 text-transparent'">✓</span>
                             </span>
                             <span class="relative z-10 mt-2 block text-xs font-bold text-[#850625]" x-text="formatMenuCost(food.cost)"></span>
                             <span x-show="food.image" class="relative z-10 mt-2 block text-[10px] font-semibold text-slate-500 opacity-0 transition-opacity group-hover:opacity-100">Image preview</span>
@@ -213,7 +223,8 @@
                 </div>
             </section>
         </template>
-        <div x-show="foodOptions().length === 0" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Food menu items have not been configured yet. Ask the administrator to add menu items and prices.</div>
+        <div x-show="!getSelectedCateringVendor()" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Select a caterer to view its menu items.</div>
+        <div x-show="getSelectedCateringVendor() && foodOptions().length === 0" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">This caterer has no menu-card items configured yet.</div>
     </div>
 
     <!-- SHORT LIVE RANGE CALCULATION SUMMARY CARD -->

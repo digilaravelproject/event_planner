@@ -408,11 +408,13 @@ class EventPlanningService
 
         $menuItems = collect(is_array($menuItems) ? $menuItems : [])->filter(fn ($item): bool => is_array($item) && trim((string) ($item['title'] ?? '')) !== '')->map(function (array $item) use ($guestCount): array {
             $pricePerGuest = max(0, (float) ($item['cost'] ?? 0));
+            $vendorName = trim((string) ($item['vendor_name'] ?? ''));
 
             return [
                 'name' => Str::limit((string) $item['title'], 100),
-                'value' => Str::limit((string) ($item['category'] ?? 'Menu Items').' at Rs. '.number_format($pricePerGuest, 2).' per guest for '.$guestCount.' guests', 200),
+                'value' => Str::limit(($vendorName !== '' ? $vendorName.' · ' : '').(string) ($item['category'] ?? 'Menu Items').' at Rs. '.number_format($pricePerGuest, 2).' per guest for '.$guestCount.' guests', 200),
                 'cost' => round($pricePerGuest * $guestCount, 2),
+                'vendor_id' => isset($item['vendor_id']) ? (int) $item['vendor_id'] : null,
             ];
         })->values();
 
@@ -429,7 +431,12 @@ class EventPlanningService
         ] : $costing->get($cateringIndex);
         $catering['amount'] = $menuTotal;
         $catering['summary'] = 'Your selected food menu for '.number_format($guestCount).' guests.';
-        $catering['attributes'] = $menuItems->all();
+        $catering['vendor_ids'] = $menuItems->pluck('vendor_id')->filter()->unique()->values()->all();
+        $catering['attributes'] = $menuItems->map(function (array $item): array {
+            unset($item['vendor_id']);
+
+            return $item;
+        })->all();
 
         if ($cateringIndex === false) {
             $costing->push($catering);

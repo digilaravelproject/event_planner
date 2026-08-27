@@ -67,6 +67,8 @@ class OpenRouterService
             ->withHeaders([
                 'HTTP-Referer' => config('app.url'),
                 'X-Title' => config('app.name'),
-            ])->timeout(20)->retry(2, 300);
+            ])
+            ->connectTimeout(3)
+            ->timeout(8);
     }
 }

@@ -8,6 +8,7 @@ use App\Models\EventRequirementQuestion;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserEventPlan;
+use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Services\PlanPresentationService;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -45,6 +46,97 @@ class EventPlanningFlowTest extends TestCase
             ->assertSee('plannerSteps:', false)
             ->assertSee('totalSteps:', false)
             ->assertDontSee('currentStep === 5 && this.planner.foodItems', false);
+    }
+
+    public function test_catering_dropdown_and_menu_items_are_vendor_specific_and_multi_selectable(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+        EventRequirementQuestion::where('question_code', 'food_type')->update([
+            'options' => ['Paneer Tikka', 'Veg Biryani', 'Gulab Jamun'],
+            'option_vendor_values' => ['paneer', 'biryani', 'jamun'],
+            'option_metadata' => [
+                'paneer' => ['category' => 'Starters', 'cost' => 125],
+                'biryani' => ['category' => 'Main Course', 'cost' => 180],
+                'jamun' => ['category' => 'Desserts', 'cost' => 50],
+            ],
+        ]);
+        $first = DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+            'identity' => ['name' => 'First Caterer', 'category' => 'Catering'],
+            'attributes' => [['label' => 'Menu Card Items', 'value' => 'Paneer Tikka, Veg Biryani']],
+        ]]);
+        $second = DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+            'identity' => ['name' => 'Second Caterer', 'category' => 'Catering'],
+            'attributes' => [['label' => 'Menu Card Items', 'value' => 'Gulab Jamun']],
+        ]]);
+        DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+            'identity' => ['name' => 'Not A Caterer', 'category' => 'Venue'],
+            'attributes' => [['label' => 'Menu Card Items', 'value' => 'Paneer Tikka']],
+        ]]);
+
+        $response = $this->get(route('ai-planner'))->assertOk();
+        $vendors = collect($response->viewData('cateringVendors'));
+        $this->assertSame(['First Caterer', 'Second Caterer'], $vendors->pluck('name')->all());
+        $this->assertSame(['Paneer Tikka', 'Veg Biryani'], array_column($vendors->first()['menu_items'], 'title'));
+        $this->assertSame(['Gulab Jamun'], array_column($vendors->last()['menu_items'], 'title'));
+        $response->assertSee('selectedVendorIds:', false)
+            ->assertSee('selectedCateringVendors()', false)
+            ->assertSee('Available Catering Vendors');
+
+        $this->post(route('ai-planner.generate'), [
+            'category' => 'wedding',
+            'guest_count' => 100,
+            'answers' => [
+                'wedding_budget' => 10,
+                'food_type' => 'Paneer Tikka, Gulab Jamun',
+                'selected_caterers' => [$first->id, $second->id],
+                'food_menu_items' => [
+                    ['id' => 'paneer', 'title' => 'Paneer Tikka', 'category' => 'Starters', 'cost' => 1, 'vendor_id' => $first->id, 'vendor_name' => 'spoofed'],
+                    ['id' => 'jamun', 'title' => 'Gulab Jamun', 'category' => 'Desserts', 'cost' => 1, 'vendor_id' => $second->id, 'vendor_name' => 'spoofed'],
+                ],
+            ],
+        ])->assertRedirect(route('user.login'))
+            ->assertSessionHas('pending_event_plan.answers.food_menu_items.0.cost', 125.0)
+            ->assertSessionHas('pending_event_plan.answers.food_menu_items.1.cost', 50.0)
+            ->assertSessionHas('pending_event_plan.answers.food_menu_items.1.vendor_name', 'Second Caterer');
+    }
+
+    public function test_guest_package_generation_redirects_to_login_instead_of_restarting_questions(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+
+        $this->post(route('ai-planner.generate'), [
+            'category' => 'wedding',
+            'guest_count' => 150,
+            'answers' => [
+                'wedding_budget' => 20,
+                'food_type' => 'Deluxe Menu',
+                'selected_food_package' => json_encode(['id' => 'deluxe_menu', 'name' => 'Deluxe Menu']),
+            ],
+        ])->assertRedirect(route('user.login'))
+            ->assertSessionHas('pending_event_plan.answers.food_type', 'Deluxe Menu');
+    }
+
+    public function test_planner_disables_and_rejects_past_event_dates(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+
+        $this->get(route('ai-planner'))
+            ->assertOk()
+            ->assertSee('isPastDate(day)', false)
+            ->assertSee(':disabled="isPastDate(day)"', false)
+            ->assertSee('canGoToPreviousMonth()', false);
+
+        $this->from(route('ai-planner'))->post(route('ai-planner.generate'), [
+            'category' => 'wedding',
+            'guest_count' => 150,
+            'answers' => [
+                'wedding_budget' => 20,
+                'food_type' => 'Deluxe Menu',
+                'event_date' => now()->subDay()->toDateString(),
+            ],
+        ])->assertRedirect(route('ai-planner'))
+            ->assertSessionHasErrors('answers.event_date')
+            ->assertSessionMissing('pending_event_plan');
     }
 
     public function test_guest_requirements_resume_after_login_and_create_history_with_suggestions(): void
@@ -255,7 +347,7 @@ class EventPlanningFlowTest extends TestCase
             ->assertSee('Live musicians for your celebration')
             ->assertSee('fa-solid fa-music', false)
             ->assertSee("cateringMode: 'custom'", false)
-            ->assertSee('Admin Food Options')
+            ->assertSee('Caterer Menu Items')
             ->assertSee('answers[${step.code}]', false);
 
         $steps = collect($response->viewData('plannerSteps'));

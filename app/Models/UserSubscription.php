@@ -6,13 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserSubscription extends Model
 {
-    protected $fillable = ['user_id', 'subscription_id', 'billing_cycle', 'amount', 'currency', 'status', 'razorpay_order_id', 'razorpay_payment_id', 'starts_at', 'ends_at', 'paid_at', 'gateway_payload'];
+    protected $fillable = ['user_id', 'subscription_id', 'billing_cycle', 'amount', 'currency', 'status', 'razorpay_order_id', 'razorpay_payment_id', 'starts_at', 'ends_at', 'reminder_sent_at', 'paid_at', 'gateway_payload'];
 
     protected function casts(): array
     {
-        return ['amount' => 'decimal:2', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'paid_at' => 'datetime', 'gateway_payload' => 'array'];
+        return ['amount' => 'decimal:2', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'reminder_sent_at' => 'datetime', 'paid_at' => 'datetime', 'gateway_payload' => 'array'];
     }
 
-    public function user() { return $this->belongsTo(User::class); }
-    public function plan() { return $this->belongsTo(Subscription::class, 'subscription_id'); }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(Subscription::class, 'subscription_id');
+    }
 }
