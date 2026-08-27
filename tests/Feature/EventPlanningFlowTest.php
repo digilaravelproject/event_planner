@@ -329,9 +329,8 @@ class EventPlanningFlowTest extends TestCase
         $response = $this->actingAs($user)->get(route('ai-planner.resume'));
         $plan = UserEventPlan::whereNull('parent_plan_id')->firstOrFail();
         $response->assertRedirect(route('user.plans.show', $plan));
-        $this->assertCount(6, $plan->suggestions);
+        $this->assertCount(0, $plan->suggestions);
         $this->assertSame('5 saved requirements', data_get($plan->summary, 'display_content.selection_eyebrow'));
-        $this->assertSame('Essential option', data_get($plan->suggestions->firstWhere('title', 'Essential Wedding Plan')?->summary, 'comparison.tier'));
         $catering = collect($plan->summary['costing'])->firstWhere('category', 'Catering');
         $this->assertSame(35000.0, (float) $catering['amount']);
         $this->assertSame(['Paneer Tikka', 'Gulab Jamun'], array_column($catering['attributes'], 'name'));
@@ -339,7 +338,7 @@ class EventPlanningFlowTest extends TestCase
         $this->actingAs($user)->get(route('user.plans.index'))
             ->assertOk()->assertSee('AI Wedding Plan');
         $this->actingAs($user)->get(route('user.plans.show', $plan))
-            ->assertOk()->assertSee('Nearby Value Plan')->assertSee('Nearby Premium Plan');
+            ->assertOk()->assertSee('Priced vendor alternatives')->assertSee('No comparable alternatives');
     }
 
     public function test_user_cannot_view_another_users_plan(): void

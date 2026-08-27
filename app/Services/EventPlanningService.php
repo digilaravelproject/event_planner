@@ -325,55 +325,36 @@ class EventPlanningService
         })->values();
     }
 
+    public function refreshSuggestions(UserEventPlan $plan): void
+    {
+        DB::transaction(function () use ($plan) {
+            $locked = UserEventPlan::query()->lockForUpdate()->findOrFail($plan->id);
+            $locked->suggestions()->delete();
+            $this->createSuggestions($locked);
+        });
+    }
+
     private function createSuggestions(UserEventPlan $plan): void
     {
-        foreach ($this->suggestionDefinitions() as $index => [$title, $factor, $tier]) {
-            $summary = $plan->summary;
-            $summary['title'] = $title;
-            $change = (int) round(abs(1 - $factor) * 100);
-            $summary['overview'] = $factor < 1
-                ? $change.'% below the original plan while retaining the saved wedding requirements.'
-                : $change.'% above the original plan with additional budget across the saved service categories.';
-            // Budget scenarios must not alter a vendor's saved quotation.
-            $summary['target_budget'] = round((float) $plan->total_cost * $factor, 2);
-            $summary['overview'] = 'Budget target: Rs. '.number_format($summary['target_budget']).'. Saved vendor rates are unchanged. Discuss scope changes with vendors to reach this target.';
-            $summary['total_cost'] = round(collect($summary['costing'])->sum('amount'), 2);
-            $summary['comparison'] = [
-                'tier' => $tier,
-                'change_label' => $change.'% '.($factor < 1 ? 'lower budget target' : 'higher budget target'),
-                'requirements_label' => count($plan->answers ?? []).' saved selections retained',
-                'costing_label' => 'Saved vendor rates retained',
-                'image' => $index % 2 === 0 ? 'images/planner/value-wedding-plan.webp' : 'images/planner/premium-wedding-plan.webp',
-            ];
-            $summary['display_content'] = $this->displayContent($summary, $plan->answers ?? [], $plan->guest_count, $plan->category);
-
+        $vendors = $this->vendorSnapshot($plan->answers ?? [], $plan->guest_count);
+        foreach (app(PlanSuggestionService::class)->alternatives($plan, $vendors) as $alternative) {
+            $summary = $alternative['summary'];
+            $summary['display_content'] = $this->displayContent($summary, $alternative['answers'], $plan->guest_count, $plan->category);
             UserEventPlan::create([
                 'user_id' => $plan->user_id,
                 'parent_plan_id' => $plan->id,
-                'title' => $title,
+                'title' => $summary['title'],
                 'category' => $plan->category,
                 'guest_count' => $plan->guest_count,
-                'answers' => $plan->answers,
+                'answers' => $alternative['answers'],
                 'requirement_prompt' => $plan->requirement_prompt,
-                'vendor_snapshot' => $plan->vendor_snapshot,
+                'vendor_snapshot' => $alternative['vendor_snapshot'],
                 'summary' => $summary,
                 'total_cost' => $summary['total_cost'],
                 'model' => $plan->model,
                 'status' => 'completed',
             ]);
         }
-    }
-
-    private function suggestionDefinitions(): array
-    {
-        return [
-            ['Essential Wedding Plan', .75, 'Essential option'],
-            ['Smart Value Wedding Plan', .85, 'Smart value option'],
-            ['Nearby Value Plan', .90, 'Value option'],
-            ['Nearby Premium Plan', 1.10, 'Premium option'],
-            ['Signature Wedding Plan', 1.15, 'Signature option'],
-            ['Luxury Wedding Plan', 1.25, 'Luxury option'],
-        ];
     }
 
     private function displayContent(array $summary, array $answers, int $guestCount, string $category): array

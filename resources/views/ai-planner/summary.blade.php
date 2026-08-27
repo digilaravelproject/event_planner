@@ -117,18 +117,28 @@
                 </section>
             @endif
 
-            @if($plan->suggestions->isNotEmpty() || $plan->parent)
                 @php
                     $comparisonPlans = $plan->parent
-                        ? collect([$plan->parent])->concat($plan->parent->suggestions)->reject(fn ($candidate) => $candidate->is($plan))
+                        ? collect($plan->parent->suggestions)->reject(fn ($candidate) => $candidate->is($plan))
                         : collect($plan->suggestions);
                     $comparisonBase = (float) ($plan->parent?->total_cost ?? $plan->total_cost);
+                    $comparisonPlans = $comparisonPlans->filter(fn ($candidate) => data_get($candidate->summary, 'suggestion_version') === 2 && abs((float) $candidate->total_cost - $comparisonBase) >= .01)->unique(fn ($candidate) => (string) $candidate->total_cost);
+                    if ($plan->parent) $comparisonPlans = collect([$plan->parent])->concat($comparisonPlans);
                 @endphp
                 <section class="mb-5 overflow-hidden rounded-3xl border border-amber-200 p-6 sm:p-8" style="background: linear-gradient(135deg, #fffdf7 0%, #fff7ee 50%, #fff1f3 100%); box-shadow: 0 18px 42px rgba(87, 27, 5, .09);">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div><span class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9B0B35]">{{ $content['comparison_eyebrow'] ?? $comparisonPlans->count().' saved alternatives' }}</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">{{ $content['comparison_title'] ?? $presentation['title'] }}</h2><p class="mt-2 text-sm text-slate-600">{{ $content['comparison_description'] ?? $presentation['overview'] }}</p></div>
+                        <div><span class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9B0B35]">Compare actual service costs</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">Priced vendor alternatives</h2><p class="mt-2 text-sm text-slate-600">Each alternative changes a vendor using comparable saved service rates. Guest count and priced items stay the same; availability and equivalent scope still need confirmation. Higher price does not guarantee higher quality.</p></div>
                         <span class="inline-flex w-fit rounded-full bg-amber-100 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-amber-800">{{ $comparisonPlans->count() }} {{ $content['comparison_count_label'] }}</span>
                     </div>
+                    <form method="POST" action="{{ route('user.plans.suggestions.refresh', $plan->parent ?: $plan) }}" class="mt-5" x-data="{ busy: false }" @submit="busy = true">
+                        @csrf
+                        <button type="submit" :disabled="busy" class="rounded-xl bg-[#850625] px-5 py-3 text-sm font-bold text-white disabled:opacity-60" x-text="busy ? 'Checking vendor rates…' : 'Refresh priced alternatives'">Refresh priced alternatives</button>
+                        <p class="mt-2 text-xs text-slate-500">Replaces suggested options only. Your original plan and its prices are retained.</p>
+                        @error('suggestions')<p role="alert" class="mt-2 text-sm text-rose-800">{{ $message }}</p>@enderror
+                    </form>
+                    @if($comparisonPlans->isEmpty())
+                        <p class="mt-5 rounded-2xl border border-amber-200 bg-white p-5 text-sm text-slate-700">No comparable alternatives with different saved prices are available. Refresh to check current vendor records. We will not invent a discount or show duplicate plans. Older plans without itemized rates must be regenerated first.</p>
+                    @endif
                     <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                         @foreach($comparisonPlans as $comparison)
                             @php
@@ -144,7 +154,7 @@
                                     <img src="{{ asset($comparisonImage) }}" alt="{{ $comparison->title }} wedding inspiration" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                                     <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(35,0,9,.02) 15%, rgba(69,1,21,.82) 100%);"></div>
                                     <span class="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-[#850625] shadow">{{ $isOriginal ? 'Original plan' : ($comparisonMeta['tier'] ?? $comparison->title) }}</span>
-                                    <div class="absolute inset-x-5 bottom-4 text-white"><div class="text-3xl font-extrabold">₹{{ number_format($comparisonCost) }}</div><div class="mt-1 text-xs text-white/85">{{ $isOriginal ? $comparison->summary['overview'] : ($comparisonMeta['change_label'] ?? number_format($differencePercent, 0).'% change') }}</div></div>
+                                    <div class="absolute inset-x-5 bottom-4 text-white"><div class="text-3xl font-extrabold">₹{{ number_format($comparisonCost, 2) }}</div><div class="mt-1 text-xs text-white/85">{{ $isOriginal ? $comparison->summary['overview'] : ($comparisonMeta['change_label'] ?? number_format($differencePercent, 0).'% change') }}</div></div>
                                 </div>
                                 <div class="p-5 sm:p-6">
                                     <h3 class="text-xl font-extrabold text-slate-950">{{ $comparison->title }}</h3>
@@ -156,7 +166,6 @@
                         @endforeach
                     </div>
                 </section>
-            @endif
         </main>
     </div>
 </div>

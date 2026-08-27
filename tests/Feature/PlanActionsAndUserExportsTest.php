@@ -54,7 +54,7 @@ class PlanActionsAndUserExportsTest extends TestCase
         $this->assertSame(350, $plan->guest_count);
         $this->assertSame(30, $plan->answers['wedding_budget']);
         $this->assertSame('Updated Wedding Plan', $plan->title);
-        $this->assertCount(6, $plan->suggestions);
+        $this->assertCount(0, $plan->suggestions);
         $this->assertSame(1, UserEventPlan::whereNull('parent_plan_id')->count());
     }
 

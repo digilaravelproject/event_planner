@@ -12,7 +12,9 @@ In the vendor's **Dynamic attributes** tab, add one attribute for each billable 
 - For a dish, use its exact menu-item name and a per-guest rate. This overrides the shared question-menu price. Otherwise the saved question-menu rate remains labelled as a configured menu rate.
 - Food packages and extras use the selected vendor's saved minimum rate, explicitly labelled as a starting rate with its saved range. An extra with the same name as an included package item is not billed again.
 
-The summary and PDF show vendor names, line items, rate × quantity, subtotals and missing quotations. Saved budget alternatives retain vendor rates and show a separate budget target; they do not claim automatic vendor discounts.
+The summary and PDF show vendor names, line items, rate × quantity, subtotals and missing quotations. New suggestions swap one provider for a comparable vendor and use that replacement's saved rates. Service items, units and quantities must match. They do not manufacture percentage discounts or infer better quality from a higher price. Unchanged services retain their original saved prices.
+
+Up to three lower-cost and three higher-cost alternatives are saved, with duplicate totals omitted. Known availability conflicts, incomplete prices and incompatible service items are excluded. If no suitable alternative exists, fewer cards (or an explicit empty state) are shown. The summary's **Refresh priced alternatives** action rebuilds suggestions from current vendor records without changing the original plan. Legacy duplicate budget-target cards are hidden; legacy aggregate-only plans require regeneration before meaningful comparison.
 
 ## Existing plans and deployment
 

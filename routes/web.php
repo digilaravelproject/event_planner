@@ -144,6 +144,7 @@ Route::prefix('user')->group(function () {
             Route::put('/plans/{plan}', [AiPlannerController::class, 'update'])->name('user.plans.update');
             Route::post('/plans/{plan}/share', [AiPlannerController::class, 'share'])->name('user.plans.share');
             Route::post('/plans/{plan}/regenerate', [AiPlannerController::class, 'regenerate'])->name('user.plans.regenerate');
+            Route::post('/plans/{plan}/suggestions', [AiPlannerController::class, 'refreshSuggestions'])->name('user.plans.suggestions.refresh');
             Route::get('/plans/{plan}', [AiPlannerController::class, 'show'])->name('user.plans.show');
             Route::get('/plans/{plan}/download', [AiPlannerController::class, 'download'])->name('user.plans.download');
             Route::get('/planner/resume', [AiPlannerController::class, 'resume'])->name('ai-planner.resume');

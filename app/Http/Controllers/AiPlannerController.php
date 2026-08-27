@@ -297,6 +297,22 @@ class AiPlannerController extends Controller
         return redirect()->route('user.plans.show', $newPlan)->with('success', 'A new plan was generated with your selected vendors and current saved rates. Your original plan is unchanged.');
     }
 
+    public function refreshSuggestions(Request $request, UserEventPlan $plan, EventPlanningService $planning)
+    {
+        abort_unless($plan->user_id === $request->user()->id, 403);
+        $base = $plan->parent ?: $plan;
+        abort_unless($base->user_id === $request->user()->id, 403);
+        try {
+            $planning->refreshSuggestions($base);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()->route('user.plans.show', $base)->withErrors(['suggestions' => 'Unable to refresh alternatives. Your saved plan is unchanged. Please try again.']);
+        }
+
+        return redirect()->route('user.plans.show', $base)->with('success', 'Alternatives checked against saved vendor rates. Only comparable options with different totals are shown.');
+    }
+
     public function download(Request $request, UserEventPlan $plan, PlanPresentationService $presenter, PlanPdfService $pdf)
     {
         abort_unless($plan->user_id === $request->user()->id, 403);
