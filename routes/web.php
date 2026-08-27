@@ -11,23 +11,23 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\UserQueryController as AdminUserQueryController;
 use App\Http\Controllers\Admin\UserPlanController;
+use App\Http\Controllers\Admin\UserQueryController as AdminUserQueryController;
 use App\Http\Controllers\Admin\VendorAnalyticsController;
 use App\Http\Controllers\AiPlannerController;
 use App\Http\Controllers\PublicQueryController;
 use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserNotificationController;
-use App\Http\Controllers\User\UserSubscriptionController;
 use App\Http\Controllers\User\UserQueryController;
+use App\Http\Controllers\User\UserSubscriptionController;
 use App\Http\Controllers\Vendor\VendorAuthController;
 use App\Http\Controllers\Vendor\VendorPanelController;
 use App\Models\EventRequirementQuestion;
 use App\Models\LandingContent;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Mail;
 
 Route::get('/send-mail', function () {
 
@@ -35,7 +35,7 @@ Route::get('/send-mail', function () {
 
     Mail::raw('This is a sample test email from the Event Planner project.', function ($message) use ($to) {
         $message->to($to)
-                ->subject('Test Email - Event Planner');
+            ->subject('Test Email - Event Planner');
     });
 
     return 'Email sent successfully!';
@@ -143,6 +143,7 @@ Route::prefix('user')->group(function () {
             Route::get('/plans/{plan}/edit', [AiPlannerController::class, 'edit'])->name('user.plans.edit');
             Route::put('/plans/{plan}', [AiPlannerController::class, 'update'])->name('user.plans.update');
             Route::post('/plans/{plan}/share', [AiPlannerController::class, 'share'])->name('user.plans.share');
+            Route::post('/plans/{plan}/regenerate', [AiPlannerController::class, 'regenerate'])->name('user.plans.regenerate');
             Route::get('/plans/{plan}', [AiPlannerController::class, 'show'])->name('user.plans.show');
             Route::get('/plans/{plan}/download', [AiPlannerController::class, 'download'])->name('user.plans.download');
             Route::get('/planner/resume', [AiPlannerController::class, 'resume'])->name('ai-planner.resume');

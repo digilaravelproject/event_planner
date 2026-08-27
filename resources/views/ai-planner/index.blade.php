@@ -25,11 +25,11 @@
         })->all();
 @endphp
 <div class="min-h-screen bg-[#FAF7F2] text-slate-800 pt-24 md:pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans-ui relative overflow-x-hidden" x-data="{
-    currentStep: 1,
+    currentStep: {{ $initialStep ?? 1 }},
     totalSteps: {{ count($plannerSteps) }},
     plannerSteps: @js($plannerSteps),
     dynamicAnswers: @js($genericInitialAnswers),
-    maxVisitedStep: 1,
+    maxVisitedStep: {{ $initialStep ?? 1 }},
     isCalculating: false,
     calculationStage: 0,
     calculationTimer: null,
@@ -323,7 +323,7 @@
         customCeremony: '',
         selectedVendorIds: @js($savedArray('selected_caterers')),
         selectedVendorId: @js(data_get($savedAnswers, 'food_menu_items.0.vendor_id')),
-        cateringMode: 'custom',
+        cateringMode: '{{ !empty($savedAnswers['selected_food_package']) ? 'package' : 'custom' }}',
         selectedFoodPackageId: @js(data_get($savedAnswers, 'selected_food_package.id', 'deluxe_menu')),
         selectedFoodExtras: @js($savedArray('selected_food_extras', ['chinese_counter', 'chat_counter'])),
         foodType: '',
@@ -332,6 +332,7 @@
         subarea: 'Juhu Beach',
         timeline: @js($savedAnswers['event_timeline'] ?? $plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
         eventDate: @js($savedAnswers['event_date'] ?? ''),
+        eventTime: @js($savedAnswers['event_time'] ?? ''),
         setting: @js($savedAnswers['venue_setting'] ?? 'Indoor AC Banquet')
     },
     todayDate: @js(now()->toDateString()),
@@ -467,6 +468,7 @@
         }
     },
     generatePlan() {
+        if (this.isCalculating) return;
         if (!this.validateCurrentStep()) return;
         this.isCalculating = true;
         this.calculationStage = 0;
@@ -577,6 +579,12 @@
             </div>
 
             <!-- Action Controls (Back / Continue Buttons) -->
+            @if($errors->any())
+                <div role="alert" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                    <p class="font-bold">Your answers are still here. Please correct these details:</p>
+                    <ul class="mt-2 list-disc pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                </div>
+            @endif
             <p x-show="plannerError" x-text="plannerError" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700"></p>
             <div x-show="currentStep <= totalSteps" class="pt-8 border-t border-slate-100 flex items-center justify-between gap-4 mt-8">
                 <button type="button" 
@@ -665,6 +673,7 @@
 
     <form x-ref="planForm" method="POST" action="{{ $editingPlan ? route('user.plans.update', $editingPlan) : route('ai-planner.generate') }}" class="hidden">
         @csrf
+        <input type="hidden" name="planner_step" :value="currentStep">
         @if($editingPlan) @method('PUT') @endif
         <input type="hidden" name="category" :value="dynamicAnswers.event_category || @js($category)">
         <input type="hidden" name="guest_count" :value="planner.exactGuest">
@@ -677,11 +686,12 @@
         <input type="hidden" name="answers[food_type]" :value="planner.cateringMode === 'package' ? (getSelectedPackage()?.name || '') : planner.foodItems.map(item => item.title).join(', ')">
         <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.cateringMode === 'custom' ? planner.foodItems : [])">
         <input type="hidden" name="answers[selected_caterers]" :value="JSON.stringify(planner.selectedVendorIds)">
-        <input type="hidden" name="answers[selected_food_package]" :value="JSON.stringify(planner.cateringMode === 'package' ? getSelectedPackage() : null)">
+        <input type="hidden" name="answers[selected_food_package]" :value="planner.cateringMode === 'package' ? JSON.stringify(getSelectedPackage()) : ''">
         <input type="hidden" name="answers[selected_food_extras]" :value="JSON.stringify(planner.cateringMode === 'package' ? planner.selectedFoodExtras : [])">
         <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
         <input type="hidden" name="answers[event_date]" :value="planner.eventDate">
+        <input type="hidden" name="answers[event_time]" :value="planner.eventTime">
         <template x-for="step in plannerSteps.filter(item => item.renderer === 'generic')" :key="step.code">
             <input type="hidden" :name="`answers[${step.code}]`" :value="serializedGenericAnswer(step.code)">
         </template>

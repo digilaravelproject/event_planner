@@ -21,3 +21,13 @@ Existing plans are historical snapshots. Their totals are not silently rewritten
 No schema migration is needed for these changes. Deploy the PHP/Blade files and rebuilt `public/build` assets together. Run `npm run build` after frontend changes and `php artisan test --compact` for regression checks.
 
 Vendor record replacement requires verified business/service information and rates. Do not use example data as a real business quotation.
+
+## Availability and replacement plans
+
+Vendor Details now includes a Service availability section. Store dates as `YYYY-MM-DD`, service areas as exact city/area names, local service start/end times, and a reason for temporary unavailability. If Available dates is populated, only those dates are eligible; Unavailable/booked dates always take priority. A blank schedule is **Needs confirmation**, never a confirmed booking. Overnight hours check the event start time only; duration and final booking must be confirmed directly.
+
+The summary checks current vendor records for activity, availability flags, date, area, capacity and start time without rewriting historical prices. Vendors with known conflicts are excluded from new plans. Missing providers show explanations and suitable alternatives. Question location labels use their configured vendor-value mapping. Existing availability/capacity/location attributes are also supported.
+
+Select a replacement in **Vendor availability**, then **Generate new plan with selected vendors**. This requires an active subscription and ownership of the plan; it creates a separate plan, preserves the requirements and rechecks eligibility and current saved prices. Select one replacement per service category in each request. A catering replacement must offer the selected dishes/package and extras. Unconfirmed alternatives are clearly labelled and still need direct vendor confirmation. The original plan is retained.
+
+Guest submissions now normalize the unused food-package `"null"` value, save answers in the session, and redirect to user login/registration. Validation failures display their errors and restore answers and the current question. Login/registration continues through the existing subscription flow before generation.

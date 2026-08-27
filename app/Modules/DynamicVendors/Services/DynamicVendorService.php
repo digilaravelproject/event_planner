@@ -229,6 +229,7 @@ class DynamicVendorService
                 'category' => trim((string) $input['category']),
             ],
             'attributes' => $attributes,
+            'availability' => $input['availability'] ?? data_get($existing, 'availability', []),
             'offerings' => $offerings ?: data_get($existing, 'offerings', []),
             'food_packages' => $foodPackages ?: data_get($existing, 'food_packages', []),
             'food_extras' => $foodExtras ?: data_get($existing, 'food_extras', []),

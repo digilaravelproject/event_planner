@@ -51,16 +51,22 @@ class VendorCostingService
         $used = [];
         $billed = [];
         $costing = [];
+        foreach ($available->where('preferred', true) as $vendor) {
+            if (! collect($summary['costing'] ?? [])->contains(fn ($item) => $this->matches($vendor['category'], $item['category'] ?? ''))) {
+                $summary['costing'][] = ['category' => $vendor['category'], 'vendor_ids' => [$vendor['id']]];
+            }
+        }
         foreach ($summary['costing'] ?? [] as $item) {
             $category = (string) ($item['category'] ?? 'Service');
             $candidates = $available->filter(fn ($vendor) => $this->matches($vendor['category'], $category));
             $requested = collect($item['vendor_ids'] ?? [])->map(fn ($id) => (int) $id);
             $explicit = $available->only($requested->all());
             if ($explicit->isNotEmpty()) {
-                $candidates = $explicit;
+                $services = $explicit->map(fn ($vendor) => $this->serviceKey($vendor['category']));
+                $candidates = $explicit->union($available->filter(fn ($vendor) => ! empty($vendor['preferred']) && $services->contains($this->serviceKey($vendor['category']))));
             }
             // Choose one provider per vendor category; never bill every alternative.
-            $chosen = $candidates->sortByDesc(fn ($vendor) => ($vendor['match_score'] ?? 0) * 10 + ($requested->contains($vendor['id']) ? 1 : 0))
+            $chosen = $candidates->sortByDesc(fn ($vendor) => (! empty($vendor['preferred']) ? 100000 : 0) + ($vendor['match_score'] ?? 0) * 10 + ($requested->contains($vendor['id']) ? 1 : 0))
                 ->groupBy(fn ($vendor) => $this->serviceKey($vendor['category']))->map->first();
             $lines = [];
             foreach ($chosen as $vendor) {
@@ -165,7 +171,7 @@ class VendorCostingService
         }, $services);
     }
 
-    private function serviceKey(string $category): string
+    public function serviceKey(string $category): string
     {
         foreach (['venue' => '/venue|stay|hotel|banquet|resort|hall/i', 'catering' => '/cater|food|menu/i', 'decor' => '/decor|flor|mandap/i', 'photography' => '/photo|video|media/i', 'entertainment' => '/entertain|dj|sound/i', 'transport' => '/transport|travel/i', 'planning' => '/plan|coordinat/i'] as $key => $pattern) {
             if (preg_match($pattern, $category)) {

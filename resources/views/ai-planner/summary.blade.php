@@ -67,6 +67,8 @@
                 </div>
             </section>
 
+            <!-- @include('ai-planner.partials.vendor-availability') -->
+
             <section class="space-y-4">
                 <div><span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#850625]">{{ $content['costing_eyebrow'] ?? count($presentation['costing']).' costed services' }}</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">{{ $content['costing_title'] ?? $presentation['title'] }}</h2><p class="mt-1 text-sm text-slate-500">{{ $content['costing_description'] ?? $presentation['overview'] }}</p></div>
                 @foreach($presentation['costing'] as $item)

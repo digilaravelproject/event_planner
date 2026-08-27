@@ -6,7 +6,7 @@
             <span>Step {{ str_pad((string) ($stepNumbers['event_timeline'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Timeline & Event Date</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('event_timeline')?->question ?? 'When is the big day planned?' }}</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Helps vendors verify seasonal availability, lock early-bird pricing, and reserve mandap slots.</p>
+        <p class="text-slate-600 text-sm sm:text-base">Check the date and start time against saved vendor schedules. Confirm final availability before booking.</p>
     </div>
 
     <!-- 1. Custom Interactive Reference Event Date Picker Card -->
@@ -15,7 +15,7 @@
             <div class="space-y-1">
                 <span class="text-[10px] uppercase font-bold text-rose-200 tracking-widest block">Exact / Reference Date (Optional)</span>
                 <h3 class="font-extrabold text-lg text-white font-serif-luxury">Do you have a specific wedding date in mind?</h3>
-                <p class="text-xs text-rose-200">Selecting a reference date checks live mandap slot availability & seasonal auspicious dates.</p>
+                <p class="text-xs text-rose-200">An exact date helps identify conflicts in vendor schedules. Dates without saved availability need confirmation.</p>
             </div>
 
             <!-- Custom Luxury Date Trigger Button -->
@@ -125,6 +125,10 @@
         </div>
 
         <!-- Selected Date Preview Pill -->
+        <label class="block text-sm font-bold text-slate-800">Event start time (optional, local time)
+            <input type="time" x-model="planner.eventTime" class="mt-2 block rounded-xl border border-slate-300 bg-white p-3">
+            <span class="mt-1 block text-xs font-normal text-slate-500">Used to check vendor service hours. Confirm the full event duration with your vendor.</span>
+        </label>
         <template x-if="planner.eventDate">
             <div class="pt-3 border-t border-white/15 flex items-center justify-between text-xs">
                 <span class="flex items-center gap-2 text-emerald-300 font-bold">
@@ -208,7 +212,7 @@
                     <span class="text-xs font-bold text-emerald-300 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-400/30" x-text="'📅 ' + formatEventDate(planner.eventDate)"></span>
                 </template>
             </div>
-            <p class="text-xs text-rose-100">All 7 steps completed. Click the button below to generate your personalized AI plan.</p>
+            <p class="text-xs text-rose-100">Complete the remaining questions, then generate your personalized AI plan. Your choices will be saved before login.</p>
         </div>
 
         <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-amber-300 shrink-0 text-xl shadow-inner">

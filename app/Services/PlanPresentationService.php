@@ -91,6 +91,7 @@ class PlanPresentationService
 
         $answers = (array) ($plan->answers ?? []);
         $displayAnswers = $answers;
+        unset($displayAnswers['preferred_vendor_ids']);
         if (! empty($displayAnswers['food_menu_items'])) {
             unset($displayAnswers['food_type']);
         }

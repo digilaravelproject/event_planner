@@ -112,12 +112,13 @@ class EventPlanningService
     private function vendorSnapshot(array $answers, int $guestCount): array
     {
         $criteria = $this->mappedVendorCriteria($answers);
+        $availability = app(VendorAvailabilityService::class);
 
         return DynamicVendor::query()
             ->whereRaw('LOWER(status) = ?', ['active'])
             ->latest('id')
             ->get()
-            ->map(function (DynamicVendor $vendor) use ($criteria): array {
+            ->map(function (DynamicVendor $vendor) use ($criteria, $answers, $guestCount, $availability): array {
                 $attributes = collect((array) data_get($vendor->vendor_json, 'attributes', []))
                     ->filter(fn ($attribute): bool => is_array($attribute) && trim((string) ($attribute['key'] ?? '')) !== '')
                     ->mapWithKeys(fn (array $attribute): array => [
@@ -133,6 +134,8 @@ class EventPlanningService
                     'id' => $vendor->id,
                     'name' => $vendor->name,
                     'category' => $vendor->category,
+                    'availability' => $availability->assess($vendor, $answers, $guestCount),
+                    'preferred' => in_array($vendor->id, $answers['preferred_vendor_ids'] ?? [], true),
                     'attributes' => $attributes,
                     'attribute_definitions' => data_get($vendor->vendor_json, 'attributes', []),
                     'offerings' => data_get($vendor->vendor_json, 'offerings', []),
@@ -143,23 +146,8 @@ class EventPlanningService
                     'match_score' => count($matches),
                 ];
             })
-            ->filter(function (array $vendor) use ($guestCount, $criteria): bool {
-                $attributes = $vendor['attributes'];
-                if (($attributes['currently_available'] ?? true) === false) {
-                    return false;
-                }
-                if (is_numeric($attributes['guest_capacity'] ?? null) && (int) $attributes['guest_capacity'] < $guestCount) {
-                    return false;
-                }
-                foreach ($criteria as $key => $values) {
-                    if (in_array($key, ['service_area', 'city'], true) && isset($attributes[$key]) && ! $this->attributeMatches($attributes[$key], $values)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            })
-            ->sortByDesc('match_score')
+            ->filter(fn (array $vendor): bool => $vendor['availability']['eligible'])
+            ->sortByDesc(fn ($vendor) => ($vendor['preferred'] ? 10000 : 0) + $vendor['match_score'])
             ->take(200)
             ->values()
             ->all();
@@ -427,7 +415,13 @@ class EventPlanningService
             $menuItems = json_decode($menuItems, true) ?: [];
         }
 
-        $menuItems = collect(is_array($menuItems) ? $menuItems : [])->filter(fn ($item): bool => is_array($item) && trim((string) ($item['title'] ?? '')) !== '')->map(function (array $item) use ($guestCount): array {
+        $menuItems = collect(is_array($menuItems) ? $menuItems : [])->filter(fn ($item): bool => is_array($item) && trim((string) ($item['title'] ?? '')) !== '')->map(function (array $item) use ($guestCount, $vendors): array {
+            if (! empty($item['vendor_id']) && ! collect($vendors)->contains('id', (int) $item['vendor_id'])) {
+                return ['name' => $item['title'], 'vendor_id' => (int) $item['vendor_id'],
+                    'vendor_name' => $item['vendor_name'] ?? 'Selected caterer', 'cost' => 0,
+                    'value' => 'This caterer cannot meet the current requirements. Select a replacement in Vendor availability.',
+                    'pricing_status' => 'quote_required'];
+            }
             $pricePerGuest = max(0, (float) ($item['cost'] ?? 0));
             $vendorName = trim((string) ($item['vendor_name'] ?? ''));
 
