@@ -209,7 +209,8 @@ Route::get('/', function () {
             $label = preg_match('/guest/i', $label) ? $label : $label.' Guests';
 
             return [(string) $number => $label];
-        })->filter(fn ($label, $value) => (int) $value > 0);
+        })->filter(fn ($label, $value) => (int) $value > 0)
+        ->sortKeys(SORT_NUMERIC);
     $categoryQuestion = Schema::hasTable('event_requirement_questions')
         ? EventRequirementQuestion::enabled()->where('question_code', 'event_category')->first()
         : null;

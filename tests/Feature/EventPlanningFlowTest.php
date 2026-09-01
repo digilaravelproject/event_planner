@@ -437,8 +437,8 @@ class EventPlanningFlowTest extends TestCase
             'options' => ['Wedding Celebration', 'Birthday Party'],
         ]);
         EventRequirementQuestion::where('question_code', 'guest_capacity')->update([
-            'options' => ['500', '800', '1200', '1600'],
-            'vendor_attribute_values' => ['50', '150', '300', '600'],
+            'options' => ['500', '800', '1200', '1600', '100'],
+            'vendor_attribute_values' => ['50', '150', '300', '600', '25'],
         ]);
         EventRequirementQuestion::where('question_code', 'food_type')->update([
             'options' => ['Butter Chicken', 'Masala Dosa'],
@@ -469,7 +469,8 @@ class EventPlanningFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Birthday Party')
             ->assertSee('500 Guests')
-            ->assertSee('1600 Guests');
+            ->assertSee('1600 Guests')
+            ->assertSeeInOrder(['100 Guests', '500 Guests', '800 Guests', '1200 Guests', '1600 Guests']);
 
         $response = $this->get(route('ai-planner', ['type' => 'Birthday Party', 'guests' => 1200]))
             ->assertOk()
@@ -488,7 +489,7 @@ class EventPlanningFlowTest extends TestCase
         $this->assertSame(9, $steps->count());
         $this->assertSame('generic', $steps->firstWhere('code', 'music_style')['renderer']);
         $this->assertSame('Live musicians for your celebration', $steps->firstWhere('code', 'music_style')['option_details'][0]['subtitle']);
-        $this->assertSame(['500', '800', '1200', '1600'], data_get($plannerOptions, 'guest_capacity.options'));
+        $this->assertSame(['500', '800', '1200', '1600', '100'], data_get($plannerOptions, 'guest_capacity.options'));
         $this->assertSame('Butter Chicken', data_get($plannerOptions, 'food_type.options.0.title'));
         $this->assertSame('food_1', data_get($plannerOptions, 'food_type.options.0.id'));
         $this->assertSame(asset('storage/question-options/butter-chicken.jpg'), data_get($plannerOptions, 'food_type.options.0.image'));
