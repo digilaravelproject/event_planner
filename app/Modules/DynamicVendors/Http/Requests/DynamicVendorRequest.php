@@ -20,37 +20,12 @@ abstract class DynamicVendorRequest extends FormRequest
         return $this->user('admin') !== null || $this->user('vendor') !== null;
     }
 
-    protected function prepareForValidation(): void
-    {
-        if (! is_array($this->input('availability'))) {
-            return;
-        }
-        $schedule = $this->input('availability');
-        foreach (['available_dates', 'unavailable_dates', 'service_areas'] as $key) {
-            if (array_key_exists($key, $schedule) && ! is_array($schedule[$key])) {
-                $schedule[$key] = array_values(array_filter(array_map('trim', preg_split('/[,\r\n]+/', (string) $schedule[$key]) ?: [])));
-            }
-        }
-        $this->merge(['availability' => $schedule]);
-    }
-
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:255'],
             'status' => ['required', Rule::in(['active', 'inactive', 'draft', 'archived'])],
-            'availability' => ['sometimes', 'array:is_available,available_dates,unavailable_dates,service_areas,start_time,end_time,reason'],
-            'availability.is_available' => ['nullable', 'boolean'],
-            'availability.available_dates' => ['nullable', 'array', 'max:730'],
-            'availability.available_dates.*' => ['date_format:Y-m-d'],
-            'availability.unavailable_dates' => ['nullable', 'array', 'max:730'],
-            'availability.unavailable_dates.*' => ['date_format:Y-m-d'],
-            'availability.service_areas' => ['nullable', 'array', 'max:100'],
-            'availability.service_areas.*' => ['string', 'max:255'],
-            'availability.start_time' => ['nullable', 'date_format:H:i', 'required_with:availability.end_time'],
-            'availability.end_time' => ['nullable', 'date_format:H:i', 'required_with:availability.start_time'],
-            'availability.reason' => ['nullable', 'string', 'max:500'],
             'attributes' => ['nullable', 'array'],
             'attributes.*.id' => ['nullable', 'uuid'],
             'attributes.*.label' => ['required', 'string', 'max:255'],

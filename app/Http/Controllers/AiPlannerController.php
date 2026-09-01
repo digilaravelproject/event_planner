@@ -9,7 +9,6 @@ use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Services\EventPlanningService;
 use App\Services\PlanPdfService;
 use App\Services\PlanPresentationService;
-use App\Services\VendorAvailabilityService;
 use App\Services\VendorCostingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -229,72 +228,7 @@ class AiPlannerController extends Controller
         $plan->load(['suggestions', 'parent.suggestions']);
         $presentation = $presenter->present($plan);
 
-        $availability = app(VendorAvailabilityService::class)->report($plan);
-
-        return view('ai-planner.summary', compact('plan', 'presentation', 'availability'));
-    }
-
-    public function regenerate(Request $request, UserEventPlan $plan, EventPlanningService $planning, VendorAvailabilityService $availability)
-    {
-        abort_unless($plan->user_id === $request->user()->id, 403);
-        $input = $request->validate([
-            'replacements' => ['required', 'array', 'max:25'],
-            'replacements.*' => ['nullable', 'integer', 'distinct'],
-        ]);
-        $replacements = array_filter($input['replacements']);
-        if ($replacements === []) {
-            throw ValidationException::withMessages(['replacements' => 'Choose at least one replacement vendor.']);
-        }
-        $slots = $availability->report($plan);
-        $answers = (array) $plan->answers;
-        validator($answers, ['event_date' => ['nullable', 'date', 'after_or_equal:today']])->validate();
-        $preferred = collect($plan->summary['costing'] ?? [])->flatMap(fn ($item) => $item['vendor_ids'] ?? [])->map(fn ($id) => (int) $id);
-        $catalog = collect($this->plannerOptions(EventRequirementQuestion::enabled()->where('question_code', 'food_type')->first()))->keyBy(fn ($item) => mb_strtolower($item['title']));
-        $replacedServices = [];
-        foreach ($replacements as $key => $id) {
-            $slot = $slots[$key] ?? null;
-            if (! $slot || ! collect($slot['alternatives'])->contains('id', (int) $id)) {
-                throw ValidationException::withMessages(['replacements' => 'A selected vendor can no longer meet these requirements. Please review the updated availability below.']);
-            }
-            $vendor = DynamicVendor::findOrFail($id);
-            $service = app(VendorCostingService::class)->serviceKey($vendor->category);
-            if (in_array($service, $replacedServices, true)) {
-                throw ValidationException::withMessages(['replacements' => 'Choose one replacement per service category, then generate your plan.']);
-            }
-            $replacedServices[] = $service;
-            // A replacement is authoritative for its service, including over an AI recommendation.
-            $preferred = $preferred->reject(fn ($oldId) => $oldId === $slot['vendor_id'] || app(VendorCostingService::class)->serviceKey($slots['vendor_'.$oldId]['category'] ?? '') === $service)->push((int) $id);
-            if ($service === 'catering') {
-                $answers['selected_caterers'] = collect($answers['selected_caterers'] ?? [])->reject(fn ($oldId) => (int) $oldId === $slot['vendor_id'])->push((int) $id)->unique()->values()->all();
-                $menu = collect($this->cateringMenuItems($vendor, $catalog))->keyBy(fn ($item) => mb_strtolower($item['title']));
-                $answers['food_menu_items'] = collect($answers['food_menu_items'] ?? [])->map(function ($item) use ($slot, $menu) {
-                    if ($slot['vendor_id'] === null || (int) ($item['vendor_id'] ?? 0) === $slot['vendor_id']) {
-                        return $menu->get(mb_strtolower($item['title'])) ?? $item;
-                    }
-
-                    return $item;
-                })->unique(fn ($item) => ($item['vendor_id'] ?? 'admin').':'.$item['id'])->values()->all();
-            }
-        }
-        $answers['preferred_vendor_ids'] = $preferred->unique()->values()->all();
-        // Reprice retained menu selections too; do not carry historical prices into a new plan.
-        $answers['food_menu_items'] = collect($answers['food_menu_items'] ?? [])->map(function ($item) use ($availability, $answers, $plan) {
-            $vendor = isset($item['vendor_id']) ? DynamicVendor::find($item['vendor_id']) : null;
-            if (isset($item['vendor_id']) && (! $vendor || ! $availability->assess($vendor, $answers, $plan->guest_count)['eligible'])) {
-                return $item;
-            }
-
-            return $this->validatedFoodMenuItems([$item])[0];
-        })->all();
-        try {
-            $newPlan = $planning->create($request->user(), ['category' => $plan->category, 'guest_count' => $plan->guest_count, 'answers' => $answers]);
-        } catch (\Throwable $exception) {
-            report($exception);
-
-            return back()->withInput()->withErrors(['replacements' => 'We could not save the new plan. Your original plan is unchanged. Please try again.']);
-        }
-
-        return redirect()->route('user.plans.show', $newPlan)->with('success', 'A new plan was generated with your selected vendors and current saved rates. Your original plan is unchanged.');
+        return view('ai-planner.summary', compact('plan', 'presentation'));
     }
 
     public function refreshSuggestions(Request $request, UserEventPlan $plan, EventPlanningService $planning)

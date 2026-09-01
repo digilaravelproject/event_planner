@@ -87,7 +87,7 @@
             </div>
 
             @if($attributeCatalog === [])
-                <p class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">Add attributes and values to Dynamic Vendors before creating a vendor mapping.</p>
+                <p class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">Add attributes and values to Manage Vendors before creating a vendor mapping.</p>
             @endif
         </section>
 

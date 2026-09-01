@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\LandingContentController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Vendor\VendorAuthController;
 use App\Http\Controllers\Vendor\VendorPanelController;
 use App\Models\EventRequirementQuestion;
 use App\Models\LandingContent;
+use App\Support\AdminMenu;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -41,8 +43,13 @@ Route::get('/send-mail', function () {
     return 'Email sent successfully!';
 });
 
-// Redirect /admin to /admin/dashboard
-Route::redirect('/admin', '/admin/dashboard');
+Route::get('/admin', function () {
+    $admin = auth('admin')->user();
+
+    return $admin
+        ? redirect(AdminMenu::firstRouteFor($admin))
+        : redirect()->route('admin.login');
+});
 
 Route::prefix('admin')->group(function () {
     // Guest Admin Routes
@@ -52,35 +59,39 @@ Route::prefix('admin')->group(function () {
     });
 
     // Authenticated Admin Routes
-    Route::middleware('auth:admin')->group(function () {
+    Route::middleware(['auth:admin', 'admin.active'])->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->middleware('admin.permission:dashboard')->name('admin.dashboard');
+
+        Route::post('/staff/{staff}/toggle', [StaffController::class, 'toggle'])->middleware('admin.permission:staff')->name('admin.staff.toggle');
+        Route::resource('/staff', StaffController::class)->except('show')->middleware('admin.permission:staff')->names('admin.staff');
 
         // Subscription Manager
-        Route::resource('/subscriptions', SubscriptionController::class)->except(['create', 'show', 'edit'])->names('admin.subscriptions');
-        Route::get('/transactions/export/pdf', [TransactionController::class, 'exportPdf'])->name('admin.transactions.export.pdf');
-        Route::get('/transactions/export/excel', [TransactionController::class, 'exportExcel'])->name('admin.transactions.export.excel');
-        Route::get('/transactions', [TransactionController::class, 'index'])->name('admin.transactions.index');
-        Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('admin.transactions.show');
+        Route::resource('/subscriptions', SubscriptionController::class)->except(['create', 'show', 'edit'])->middleware('admin.permission:subscriptions')->names('admin.subscriptions');
+        Route::get('/transactions/export/pdf', [TransactionController::class, 'exportPdf'])->middleware('admin.permission:transactions')->name('admin.transactions.export.pdf');
+        Route::get('/transactions/export/excel', [TransactionController::class, 'exportExcel'])->middleware('admin.permission:transactions')->name('admin.transactions.export.excel');
+        Route::get('/transactions', [TransactionController::class, 'index'])->middleware('admin.permission:transactions')->name('admin.transactions.index');
+        Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->middleware('admin.permission:transactions')->name('admin.transactions.show');
 
         // Profile Settings
         Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
 
         // OpenRouter Settings
-        Route::get('/ai-settings', [AiSettingController::class, 'index'])->name('admin.ai.manage');
-        Route::post('/ai-settings', [AiSettingController::class, 'store'])->name('admin.ai.manage.save');
+        Route::get('/ai-settings', [AiSettingController::class, 'index'])->middleware('admin.permission:ai_settings')->name('admin.ai.manage');
+        Route::post('/ai-settings', [AiSettingController::class, 'store'])->middleware('admin.permission:ai_settings')->name('admin.ai.manage.save');
 
         // Additive planning and communication modules
-        Route::get('/vendor-analytics', [VendorAnalyticsController::class, 'index'])->name('admin.vendor-analytics.index');
+        Route::get('/vendor-analytics', [VendorAnalyticsController::class, 'index'])->middleware('admin.permission:vendor_analytics')->name('admin.vendor-analytics.index');
         Route::resource('/event-requirement-questions', EventRequirementQuestionController::class)
             ->parameters(['event-requirement-questions' => 'event_question'])
+            ->middleware('admin.permission:event_questions')
             ->names('admin.event-questions');
-        Route::post('/notifications/{notification}/send', [NotificationController::class, 'send'])->name('admin.notifications.send');
-        Route::resource('/notifications', NotificationController::class)->names('admin.notifications');
-        Route::resource('/pages', PageController::class)->names('admin.pages');
-        Route::prefix('/landing-content/{type}')->whereIn('type', array_keys(LandingContent::TYPES))->group(function () {
+        Route::post('/notifications/{notification}/send', [NotificationController::class, 'send'])->middleware('admin.permission:notifications')->name('admin.notifications.send');
+        Route::resource('/notifications', NotificationController::class)->middleware('admin.permission:notifications')->names('admin.notifications');
+        Route::resource('/pages', PageController::class)->middleware('admin.permission:pages')->names('admin.pages');
+        Route::prefix('/landing-content/{type}')->whereIn('type', array_keys(LandingContent::TYPES))->middleware('admin.permission:pages')->group(function () {
             Route::get('/', [LandingContentController::class, 'index'])->name('admin.landing-content.index');
             Route::get('/create', [LandingContentController::class, 'create'])->name('admin.landing-content.create');
             Route::post('/', [LandingContentController::class, 'store'])->name('admin.landing-content.store');
@@ -89,15 +100,15 @@ Route::prefix('admin')->group(function () {
             Route::delete('/{landingContent}', [LandingContentController::class, 'destroy'])->name('admin.landing-content.destroy');
         });
         // User Management CRUD
-        Route::get('/users/export/pdf', [UserController::class, 'exportPdf'])->name('admin.users.export.pdf');
-        Route::get('/users/export/excel', [UserController::class, 'exportExcel'])->name('admin.users.export.excel');
-        Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->name('admin.users.toggle-status');
-        Route::get('/users/{user}/plans', [UserPlanController::class, 'index'])->name('admin.users.plans.index');
-        Route::get('/user-plans/{plan}', [UserPlanController::class, 'show'])->name('admin.users.plans.show');
-        Route::get('/user-plans/{plan}/download', [UserPlanController::class, 'download'])->name('admin.users.plans.download');
-        Route::resource('/users', UserController::class)->except(['create', 'show', 'store'])->names('admin.users');
-        Route::post('/user-queries/{query}/reply', [AdminUserQueryController::class, 'reply'])->name('admin.user-queries.reply');
-        Route::resource('/user-queries', AdminUserQueryController::class)->only(['index', 'update', 'destroy'])->parameters(['user-queries' => 'query'])->names('admin.user-queries');
+        Route::get('/users/export/pdf', [UserController::class, 'exportPdf'])->middleware('admin.permission:users')->name('admin.users.export.pdf');
+        Route::get('/users/export/excel', [UserController::class, 'exportExcel'])->middleware('admin.permission:users')->name('admin.users.export.excel');
+        Route::post('/users/{id}/toggle-status', [UserController::class, 'toggleStatus'])->middleware('admin.permission:users')->name('admin.users.toggle-status');
+        Route::get('/users/{user}/plans', [UserPlanController::class, 'index'])->middleware('admin.permission:users')->name('admin.users.plans.index');
+        Route::get('/user-plans/{plan}', [UserPlanController::class, 'show'])->middleware('admin.permission:users')->name('admin.users.plans.show');
+        Route::get('/user-plans/{plan}/download', [UserPlanController::class, 'download'])->middleware('admin.permission:users')->name('admin.users.plans.download');
+        Route::resource('/users', UserController::class)->except(['create', 'show', 'store'])->middleware('admin.permission:users')->names('admin.users');
+        Route::post('/user-queries/{query}/reply', [AdminUserQueryController::class, 'reply'])->middleware('admin.permission:user_queries')->name('admin.user-queries.reply');
+        Route::resource('/user-queries', AdminUserQueryController::class)->only(['index', 'update', 'destroy'])->parameters(['user-queries' => 'query'])->middleware('admin.permission:user_queries')->names('admin.user-queries');
     });
 });
 
@@ -143,7 +154,6 @@ Route::prefix('user')->group(function () {
             Route::get('/plans/{plan}/edit', [AiPlannerController::class, 'edit'])->name('user.plans.edit');
             Route::put('/plans/{plan}', [AiPlannerController::class, 'update'])->name('user.plans.update');
             Route::post('/plans/{plan}/share', [AiPlannerController::class, 'share'])->name('user.plans.share');
-            Route::post('/plans/{plan}/regenerate', [AiPlannerController::class, 'regenerate'])->name('user.plans.regenerate');
             Route::post('/plans/{plan}/suggestions', [AiPlannerController::class, 'refreshSuggestions'])->name('user.plans.suggestions.refresh');
             Route::get('/plans/{plan}', [AiPlannerController::class, 'show'])->name('user.plans.show');
             Route::get('/plans/{plan}/download', [AiPlannerController::class, 'download'])->name('user.plans.download');

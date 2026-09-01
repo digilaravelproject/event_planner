@@ -17,23 +17,15 @@ class DynamicVendorManagementTest extends TestCase
 
     private Admin $admin;
 
-    public function test_availability_schedule_is_validated_saved_and_preserved(): void
+    public function test_legacy_availability_input_is_ignored_and_form_is_removed(): void
     {
         $payload = $this->payload();
         $payload['availability'] = ['is_available' => '0', 'reason' => 'Annual maintenance', 'available_dates' => '2027-01-01, 2027-01-03',
             'unavailable_dates' => "2027-01-02\n2027-01-04", 'service_areas' => 'Pune, Mumbai', 'start_time' => '18:00', 'end_time' => '02:00'];
         $this->actingAs($this->admin, 'admin')->post(route('admin.dynamic-vendors.store'), $payload)->assertSessionHasNoErrors()->assertRedirect();
         $vendor = DynamicVendor::firstOrFail();
-        $this->assertSame(['2027-01-01', '2027-01-03'], data_get($vendor->vendor_json, 'availability.available_dates'));
-        $this->get(route('admin.dynamic-vendors.edit', $vendor))->assertOk()->assertSee('Service availability')->assertSee('Annual maintenance');
-        unset($payload['availability']);
-        $this->put(route('admin.dynamic-vendors.update', $vendor), $payload)->assertSessionHasNoErrors();
-        $this->assertSame(['Pune', 'Mumbai'], data_get($vendor->fresh()->vendor_json, 'availability.service_areas'));
-        $payload['availability'] = ['available_dates' => '', 'unavailable_dates' => '', 'service_areas' => ''];
-        $this->put(route('admin.dynamic-vendors.update', $vendor), $payload)->assertSessionHasNoErrors();
-        $this->assertSame([], data_get($vendor->fresh()->vendor_json, 'availability.available_dates'));
-        $payload['availability'] = ['available_dates' => '2027-02-31', 'start_time' => '18:00'];
-        $this->post(route('admin.dynamic-vendors.store'), $payload)->assertSessionHasErrors(['availability.available_dates.0', 'availability.end_time']);
+        $this->assertArrayNotHasKey('availability', $vendor->vendor_json);
+        $this->get(route('admin.dynamic-vendors.edit', $vendor))->assertOk()->assertDontSee('Service availability')->assertDontSee('Annual maintenance');
     }
 
     public function test_vendor_service_pricing_metadata_is_saved_and_validated(): void

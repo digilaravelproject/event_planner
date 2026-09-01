@@ -90,7 +90,7 @@ class PlanPdfService
         }
         $ensure(85);
         $paragraph('BEFORE YOU BOOK', 13, 'F2', '0.52 0.02 0.14');
-        foreach (array_unique(array_merge($presentation['notes'] ?? [], ['Saved rates are indicative, not live quotations. Confirm availability, scope, taxes and final prices with each vendor. Unpriced services are excluded from the total.'])) as $note) {
+        foreach (array_unique(array_merge($presentation['notes'] ?? [], ['Saved rates are indicative, not live quotations. Confirm scope, taxes and final prices with each vendor. Unpriced services are excluded from the total.'])) as $note) {
             $paragraph($note, 9);
         }
         $pages[] = $commands.$this->footer($page);

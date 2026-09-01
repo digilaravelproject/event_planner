@@ -27,8 +27,7 @@ class PlanSuggestionTest extends TestCase
     private function snapshot(DynamicVendor $vendor): array
     {
         return ['id' => $vendor->id, 'name' => $vendor->name, 'category' => $vendor->category,
-            'attribute_definitions' => $vendor->vendor_json['attributes'], 'food_packages' => $vendor->vendor_json['food_packages'] ?? [],
-            'availability' => ['status' => 'unconfirmed', 'eligible' => true]];
+            'attribute_definitions' => $vendor->vendor_json['attributes'], 'food_packages' => $vendor->vendor_json['food_packages'] ?? []];
     }
 
     private function plan(DynamicVendor $vendor): UserEventPlan
@@ -68,7 +67,7 @@ class PlanSuggestionTest extends TestCase
         $this->actingAs($plan->user)->get(route('user.plans.show', $plan))->assertOk()->assertSee('₹7,000')->assertSee('₹14,000')->assertDontSee('lower budget target');
     }
 
-    public function test_unavailable_missing_scope_and_changed_quantity_are_not_cheaper_suggestions(): void
+    public function test_legacy_schedules_are_ignored_while_incompatible_scope_is_excluded(): void
     {
         $original = $this->vendor('Original', 10000);
         $plan = $this->plan($original);
@@ -78,8 +77,8 @@ class PlanSuggestionTest extends TestCase
         $this->vendor('Different service', 0, ['attributes' => [['key' => 'entrance', 'label' => 'Entrance', 'type' => 'currency', 'value' => 500]]]);
         $this->vendor('Hourly instead', 0, ['attributes' => [['key' => 'mandap', 'label' => 'Mandap', 'pricing' => ['rate' => 20, 'unit' => 'per_hour', 'quantity' => 2]]]]);
         app(EventPlanningService::class)->refreshSuggestions($plan);
-        $this->assertCount(0, $plan->fresh()->suggestions);
-        $this->actingAs($plan->user)->get(route('user.plans.show', $plan))->assertOk()->assertSee('No comparable alternatives');
+        $this->assertEquals([1000, 2000], $plan->fresh()->suggestions->pluck('total_cost')->map('floatval')->all());
+        $this->actingAs($plan->user)->get(route('user.plans.show', $plan))->assertOk()->assertSee('₹1,000')->assertSee('₹2,000');
     }
 
     public function test_refresh_replaces_legacy_clones_and_preserves_original_and_enforces_ownership(): void

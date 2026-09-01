@@ -57,7 +57,6 @@
                 <label class="block md:col-span-1"><span class="mb-2 block text-xs font-bold text-slate-700">Category *</span><input name="category" list="category-suggestions" required maxlength="255" value="{{ old('category', data_get($document, 'identity.category')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-[#3950a2] focus:outline-none focus:ring-2 focus:ring-[#3950a2]/10"><datalist id="category-suggestions">@foreach($categorySuggestions as $suggestion)<option value="{{ $suggestion }}">@endforeach</datalist></label>
                 <label class="block"><span class="mb-2 block text-xs font-bold text-slate-700">Status *</span><select name="status" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">@foreach(['draft', 'active', 'inactive', 'archived'] as $status)<option value="{{ $status }}" @selected(old('status', $vendor?->status ?? 'draft') === $status)>{{ ucfirst($status) }}</option>@endforeach</select></label>
             </div>
-            @include('dynamic-vendors::partials.availability')
         </section>
 
         <section data-tab-panel="attributes" class="admin-card tab-panel hidden p-6">

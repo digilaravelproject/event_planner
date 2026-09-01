@@ -104,7 +104,7 @@
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
                         <label for="password" class="text-xs font-semibold text-slate-700">Password</label>
-                        <a href="#" class="text-xs text-[#850625] font-semibold hover:underline">Forgot password?</a>
+                        <?php /*<a href="#" class="text-xs text-[#850625] font-semibold hover:underline">Forgot password?</a> */?>  
                     </div>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
@@ -125,7 +125,7 @@
                         <input type="checkbox" name="remember" class="mr-2 accent-[#850625] rounded border-slate-200">
                         Remember me on this device
                     </label>
-                    <a href="#" class="text-[#850625] font-semibold hover:underline">Login with OTP</a>
+                    <?php /*<a href="#" class="text-[#850625] font-semibold hover:underline">Login with OTP</a> */?>
                 </div>
 
                 <!-- Submit Button -->

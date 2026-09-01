@@ -109,7 +109,7 @@
     <aside id="admin-sidebar" class="fixed inset-y-0 left-4 my-4 flex w-64 flex-col overflow-hidden rounded-3xl border border-white/80 bg-white/95" style="z-index: 60;">
         <!-- Sidebar Brand / Logo -->
         <div class="flex h-20 items-center justify-between px-6 border-b border-slate-100 shrink-0">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
+            <a href="{{ \App\Support\AdminMenu::firstRouteFor(Auth::guard('admin')->user()) }}" class="flex items-center gap-3">
                 <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00c689] text-white shadow-sm">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
@@ -133,6 +133,8 @@
                 $currentRoute = Route::currentRouteName();
             @endphp
 
+            @php($adminUser = Auth::guard('admin')->user())
+            @if($adminUser->canAccess('dashboard'))
             <!-- Admin Dashboard -->
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.dashboard') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
@@ -142,7 +144,9 @@
                 </span>
                 Dashboard
             </a>
+            @endif
 
+            @if($adminUser->canAccess('users'))
             <!-- Manage Users -->
             <a href="{{ route('admin.users.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
@@ -152,13 +156,17 @@
                 </span>
                 Manage Users
             </a>
+            @endif
 
+            @if($adminUser->canAccess('user_queries'))
             <!-- Independent Dynamic Vendor Management -->
             <a href="{{ route('admin.user-queries.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.user-queries') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-400">UQ</span>
                 User Queries
             </a>
+            @endif
 
+            @if($adminUser->canAccess('vendors'))
             <!-- Independent Dynamic Vendor Management -->
             <a href="{{ route('admin.dynamic-vendors.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.dynamic-vendors') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.dynamic-vendors') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
@@ -166,9 +174,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m9-9H3m15.75-6.75-13.5 13.5" />
                     </svg>
                 </span>
-                Dynamic Vendors
+                Manage Vendors
             </a>
+            @endif
 
+            @if($adminUser->canAccess('subscriptions'))
             <!-- Subscription Manager -->
             <a href="{{ route('admin.subscriptions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.subscriptions') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
@@ -178,24 +188,30 @@
                 </span>
                 Subscription Manager
             </a>
+            @endif
 
+            @if($adminUser->canAccess('transactions'))
             <a href="{{ route('admin.transactions.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.transactions') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ str_starts_with($currentRoute, 'admin.transactions') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">TX</span>
                 Transactions
             </a>
+            @endif
 
             <!-- Manage AI -->
             @foreach([
-                ['admin.vendor-analytics.index', 'admin.vendor-analytics', 'Vendor Analytics', 'VA'],
-                ['admin.event-questions.index', 'admin.event-questions', 'Event Requirement Questions', 'EQ'],
-                ['admin.notifications.index', 'admin.notifications', 'Notification Management', 'NM'],
-            ] as [$menuRoute, $routePrefix, $menuLabel, $menuIcon])
+                ['vendor_analytics', 'admin.vendor-analytics.index', 'admin.vendor-analytics', 'Vendor Analytics', 'VA'],
+                ['event_questions', 'admin.event-questions.index', 'admin.event-questions', 'Event Requirement Questions', 'EQ'],
+                ['notifications', 'admin.notifications.index', 'admin.notifications', 'Notification Management', 'NM'],
+            ] as [$permission, $menuRoute, $routePrefix, $menuLabel, $menuIcon])
+                @if($adminUser->canAccess($permission))
                 <a href="{{ route($menuRoute) }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, $routePrefix) ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                     <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ str_starts_with($currentRoute, $routePrefix) ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">{{ $menuIcon }}</span>
                     <span>{{ $menuLabel }}</span>
                 </a>
+                @endif
             @endforeach
 
+            @if($adminUser->canAccess('pages'))
             @php($pagesOpen = str_starts_with($currentRoute, 'admin.pages') || str_starts_with($currentRoute, 'admin.landing-content'))
             <details class="group" @if($pagesOpen) open @endif>
                 <summary class="flex cursor-pointer list-none items-center gap-x-3.5 rounded-r-xl border-l-4 px-4 py-3 text-xs font-bold tracking-tight transition-all {{ $pagesOpen ? 'border-[#3950a2] bg-slate-50 text-[#3950a2]' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
@@ -215,7 +231,9 @@
                     @endforeach
                 </div>
             </details>
+            @endif
 
+            @if($adminUser->canAccess('ai_settings'))
             <a href="{{ route('admin.ai.manage') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.ai.manage') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
                 <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.ai.manage') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -224,6 +242,14 @@
                 </span>
                 AI Configuration
             </a>
+            @endif
+
+            @if($adminUser->isSuperAdmin())
+            <a href="{{ route('admin.staff.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.staff') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ str_starts_with($currentRoute, 'admin.staff') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">ST</span>
+                Staff
+            </a>
+            @endif
         </nav>
 
         <!-- Sidebar User Badge Card (Argon style) -->

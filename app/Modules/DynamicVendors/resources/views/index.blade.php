@@ -11,7 +11,7 @@
             </span>
             <div>
             <p class="text-xs font-extrabold uppercase tracking-[.22em] text-emerald-300">Vendor workspace</p>
-            <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Dynamic Vendors</h1>
+            <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Manage Vendors</h1>
             <p class="mt-1 text-sm text-blue-100">Manage flexible vendor records from one clear workspace.</p>
             </div>
         </div>
@@ -105,7 +105,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-5 py-14 text-center text-sm text-slate-500">No dynamic vendors match these filters.</td></tr>
+                        <tr><td colspan="6" class="px-5 py-14 text-center text-sm text-slate-500">No Manage Vendors match these filters.</td></tr>
                     @endforelse
                 </tbody>
             </table>

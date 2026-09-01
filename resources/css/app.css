@@ -171,6 +171,60 @@
             radial-gradient(circle at 82% 5%, rgb(0 198 137 / 0.10), transparent 28%);
     }
 
+    .staff-form-page::before {
+        display: none;
+    }
+
+    .staff-status-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        border: 0;
+        background: transparent;
+        padding: 0.25rem 0;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .staff-status-track {
+        position: relative;
+        display: inline-block;
+        flex: 0 0 2.75rem;
+        width: 2.75rem;
+        height: 1.5rem;
+        border-radius: 9999px;
+        background: #cbd5e1;
+        transition: background-color 160ms ease;
+    }
+
+    .staff-status-thumb {
+        position: absolute;
+        top: 0.1875rem;
+        left: 0.1875rem;
+        width: 1.125rem;
+        height: 1.125rem;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 3px rgb(15 23 42 / 0.3);
+        transition: transform 160ms ease;
+    }
+
+    .staff-status-toggle.is-active {
+        color: #047857;
+    }
+
+    .staff-status-toggle.is-active .staff-status-track {
+        background: #10b981;
+    }
+
+    .staff-status-toggle.is-active .staff-status-thumb {
+        transform: translateX(1.25rem);
+    }
+
+    .staff-status-toggle.is-inactive {
+        color: #64748b;
+    }
+
     .admin-hero {
         position: relative;
         overflow: hidden;

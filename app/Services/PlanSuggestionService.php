@@ -30,7 +30,6 @@ class PlanSuggestionService
             if (! $old || $oldLines->contains(fn ($line) => ($line['pricing_status'] ?? '') !== 'priced')) {
                 continue;
             }
-            // A suggestion cannot retain a vendor with a known date/area/capacity conflict.
             if ($used->reject(fn ($id) => $id == $oldId)->diff($current->keys())->isNotEmpty()) {
                 continue;
             }
@@ -59,7 +58,7 @@ class PlanSuggestionService
                     $item['amount'] = round(collect($item['attributes'])->sum('cost'), 2);
                     $item['vendor_ids'] = collect($item['attributes'])->pluck('vendor_id')->filter()->unique()->values()->all();
                     if (in_array($vendor['id'], $item['vendor_ids'], true)) {
-                        $item['summary'] = 'Comparable services from '.$vendor['name'].'. Confirm scope and availability before booking.';
+                        $item['summary'] = 'Comparable services from '.$vendor['name'].'. Confirm scope before booking.';
                     }
                 }
                 unset($item);
@@ -79,7 +78,7 @@ class PlanSuggestionService
                     'requirements_label' => 'Guest count and service items retained',
                     'costing_label' => 'Actual replacement rates',
                     'replaced_vendor_id' => (int) $oldId, 'replacement_vendor_id' => $vendor['id'],
-                    'difference' => $delta, 'availability_status' => $vendor['availability']['status'] ?? 'unconfirmed',
+                    'difference' => $delta,
                     'image' => $delta < 0 ? 'images/planner/value-wedding-plan.webp' : 'images/planner/premium-wedding-plan.webp',
                 ];
                 $answers = $plan->answers;
@@ -140,7 +139,7 @@ class PlanSuggestionService
         // Require menu support, not merely a coincidentally named rate.
         if ($this->costing->serviceKey($vendor['category']) === 'catering') {
             $record = DynamicVendor::find($vendor['id']);
-            if (! $record || ! app(VendorAvailabilityService::class)->supportsMenu($record, $plan->answers, (int) $oldLines[0]['vendor_id'])) {
+            if (! $record || ! app(VendorCompatibilityService::class)->supportsMenu($record, $plan->answers, (int) $oldLines[0]['vendor_id'])) {
                 return null;
             }
         }

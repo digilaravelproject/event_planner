@@ -91,7 +91,7 @@ class VendorCostingService
             $amount = round((float) collect($lines)->sum('cost'), 2);
             $costing[] = [
                 'category' => $category, 'amount' => $amount, 'percentage' => 0,
-                'summary' => $lines === [] ? 'No matching vendor with confirmed pricing. Request a quote.' : 'Saved vendor rates. Confirm scope, taxes and availability before booking.',
+                'summary' => $lines === [] ? 'No matching vendor with confirmed pricing. Request a quote.' : 'Saved vendor rates. Confirm scope and taxes before booking.',
                 'vendor_ids' => collect($lines)->pluck('vendor_id')->unique()->values()->all(), 'attributes' => $lines,
                 'pricing_status' => $lines === [] || collect($lines)->contains('pricing_status', 'quote_required') ? 'quote_required' : 'priced',
             ];
@@ -111,7 +111,7 @@ class VendorCostingService
         ])->values()->all();
         $summary['notes'] = array_values(array_unique(array_merge($summary['notes'] ?? [], [
             'Only priced services are included in the total. Items marked Quote required are excluded.',
-            'Rates are a saved database snapshot, not live quotations. Taxes and availability require vendor confirmation.',
+            'Rates are a saved database snapshot, not live quotations. Confirm taxes and final pricing with the vendor.',
         ])));
 
         return $summary;

@@ -55,7 +55,7 @@ class EventPlanningFlowTest extends TestCase
         $this->assertEquals(24550, $presentation['costing'][0]['vendor_groups'][0]['amount']);
     }
 
-    public function test_fallback_uses_saved_prices_and_excludes_insufficient_capacity(): void
+    public function test_fallback_uses_saved_prices_and_keeps_all_active_vendors_available(): void
     {
         $user = User::factory()->create();
         foreach ([['Small Hall', 50, 1000], ['Suitable Hall', 500, 123456]] as [$name, $capacity, $price]) {
@@ -69,7 +69,7 @@ class EventPlanningFlowTest extends TestCase
         $this->assertEquals(123456, $plan->total_cost);
         $this->assertSame('Suitable Hall', $plan->summary['costing'][0]['attributes'][0]['vendor_name']);
         $this->assertSame('quote_required', $plan->summary['costing'][1]['pricing_status']);
-        $this->assertCount(1, $plan->vendor_snapshot);
+        $this->assertCount(2, $plan->vendor_snapshot);
     }
 
     public function test_unknown_quantities_are_not_invented_and_duplicate_categories_are_not_billed_twice(): void

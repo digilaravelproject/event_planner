@@ -6,7 +6,7 @@
             <span>Step {{ str_pad((string) ($stepNumbers['event_timeline'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Timeline & Event Date</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('event_timeline')?->question ?? 'When is the big day planned?' }}</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Check the date and start time against saved vendor schedules. Confirm final availability before booking.</p>
+        <p class="text-slate-600 text-sm sm:text-base">Choose the event date and start time for your personalized plan.</p>
     </div>
 
     <!-- 1. Custom Interactive Reference Event Date Picker Card -->
@@ -15,7 +15,7 @@
             <div class="space-y-1">
                 <span class="text-[10px] uppercase font-bold text-rose-200 tracking-widest block">Exact / Reference Date (Optional)</span>
                 <h3 class="font-extrabold text-lg text-white font-serif-luxury">Do you have a specific wedding date in mind?</h3>
-                <p class="text-xs text-rose-200">An exact date helps identify conflicts in vendor schedules. Dates without saved availability need confirmation.</p>
+                <p class="text-xs text-rose-200">An exact date helps organize the event timeline and recommendations.</p>
             </div>
 
             <!-- Custom Luxury Date Trigger Button -->

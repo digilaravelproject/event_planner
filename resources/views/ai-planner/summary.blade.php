@@ -67,7 +67,6 @@
                 </div>
             </section>
 
-            <!-- @include('ai-planner.partials.vendor-availability') -->
 
             <section class="space-y-4">
                 <div><span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#850625]">{{ $content['costing_eyebrow'] ?? count($presentation['costing']).' costed services' }}</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">{{ $content['costing_title'] ?? $presentation['title'] }}</h2><p class="mt-1 text-sm text-slate-500">{{ $content['costing_description'] ?? $presentation['overview'] }}</p></div>
@@ -127,7 +126,7 @@
                 @endphp
                 <section class="mb-5 overflow-hidden rounded-3xl border border-amber-200 p-6 sm:p-8" style="background: linear-gradient(135deg, #fffdf7 0%, #fff7ee 50%, #fff1f3 100%); box-shadow: 0 18px 42px rgba(87, 27, 5, .09);">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div><span class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9B0B35]">Compare actual service costs</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">Priced vendor alternatives</h2><p class="mt-2 text-sm text-slate-600">Each alternative changes a vendor using comparable saved service rates. Guest count and priced items stay the same; availability and equivalent scope still need confirmation. Higher price does not guarantee higher quality.</p></div>
+                        <div><span class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9B0B35]">Compare actual service costs</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">Priced vendor alternatives</h2><p class="mt-2 text-sm text-slate-600">Each alternative changes a vendor using comparable saved service rates. Guest count and priced items stay the same; confirm equivalent scope directly. Higher price does not guarantee higher quality.</p></div>
                         <span class="inline-flex w-fit rounded-full bg-amber-100 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-amber-800">{{ $comparisonPlans->count() }} {{ $content['comparison_count_label'] }}</span>
                     </div>
                     <form method="POST" action="{{ route('user.plans.suggestions.refresh', $plan->parent ?: $plan) }}" class="mt-5" x-data="{ busy: false }" @submit="busy = true">
