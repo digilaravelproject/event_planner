@@ -3,7 +3,7 @@
 use App\Modules\DynamicVendors\Http\Controllers\DynamicVendorController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web', 'auth:admin'])
+Route::middleware(['web', 'auth:admin', 'admin.active', 'admin.permission:vendors'])
     ->prefix('admin/dynamic-vendors')
     ->name('admin.dynamic-vendors.')
     ->group(function (): void {

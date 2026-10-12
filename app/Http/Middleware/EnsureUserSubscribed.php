@@ -22,7 +22,7 @@ class EnsureUserSubscribed
         $user = Auth::guard('web')->user();
 
         // Check if user has an active subscription
-        if (!$user->subscription_id || ($user->subscription_ends_at && $user->subscription_ends_at->isPast())) {
+        if (! $user->hasActiveSubscription()) {
             return redirect()->route('user.subscription')
                 ->with('error', 'You must have an active subscription to access the event planner wizard.');
         }

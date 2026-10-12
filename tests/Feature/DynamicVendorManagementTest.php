@@ -17,6 +17,31 @@ class DynamicVendorManagementTest extends TestCase
 
     private Admin $admin;
 
+    public function test_legacy_availability_input_is_ignored_and_form_is_removed(): void
+    {
+        $payload = $this->payload();
+        $payload['availability'] = ['is_available' => '0', 'reason' => 'Annual maintenance', 'available_dates' => '2027-01-01, 2027-01-03',
+            'unavailable_dates' => "2027-01-02\n2027-01-04", 'service_areas' => 'Pune, Mumbai', 'start_time' => '18:00', 'end_time' => '02:00'];
+        $this->actingAs($this->admin, 'admin')->post(route('admin.dynamic-vendors.store'), $payload)->assertSessionHasNoErrors()->assertRedirect();
+        $vendor = DynamicVendor::firstOrFail();
+        $this->assertArrayNotHasKey('availability', $vendor->vendor_json);
+        $this->get(route('admin.dynamic-vendors.edit', $vendor))->assertOk()->assertDontSee('Service availability')->assertDontSee('Annual maintenance');
+    }
+
+    public function test_vendor_service_pricing_metadata_is_saved_and_validated(): void
+    {
+        $payload = $this->payload();
+        $payload['attributes'][0]['pricing_rate'] = 450.5;
+        $payload['attributes'][0]['pricing_unit'] = 'per_guest';
+        $this->actingAs($this->admin, 'admin')->post(route('admin.dynamic-vendors.store'), $payload)->assertRedirect();
+        $vendor = DynamicVendor::firstOrFail();
+        $this->assertSame(450.5, data_get($vendor->vendor_json, 'attributes.0.pricing.rate'));
+        $this->assertSame('per_guest', data_get($vendor->vendor_json, 'attributes.0.pricing.unit'));
+        $this->get(route('admin.dynamic-vendors.edit', $vendor))->assertOk()->assertSee('450.5')->assertSee('Planning cost');
+        $payload['attributes'][0]['pricing_rate'] = -1;
+        $this->post(route('admin.dynamic-vendors.store'), $payload)->assertSessionHasErrors('attributes.0.pricing_rate');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

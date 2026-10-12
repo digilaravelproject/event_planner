@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Feedback;
 use App\Models\User;
 use App\Models\UserEventPlan;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
@@ -33,8 +32,6 @@ class AdminDashboardController extends Controller
         $plansThisMonth = (clone $rootPlans)->where('created_at', '>=', $monthStart)->count();
         $averagePlanValue = (float) ((clone $rootPlans)->where('status', 'completed')->avg('total_cost') ?? 0);
         $activeVendors = DynamicVendor::whereRaw('LOWER(status) = ?', ['active'])->count();
-        $pendingFeedback = Feedback::where('status', 'pending')->count();
-        $averageRating = (float) (Feedback::avg('rating') ?? 0);
 
         $monthKeys = collect(range(5, 0))->map(fn (int $monthsAgo) => $now->copy()->subMonths($monthsAgo)->format('Y-m'));
         $planRows = UserEventPlan::whereNull('parent_plan_id')->where('created_at', '>=', $now->copy()->subMonths(5)->startOfMonth())->get(['created_at', 'total_cost']);
@@ -47,7 +44,7 @@ class AdminDashboardController extends Controller
         $vendorCategories = DynamicVendor::query()->whereRaw('LOWER(status) = ?', ['active'])->get()->pluck('category')->filter()->countBy()->sortDesc()->take(5);
 
         return view('admin.dashboard', [
-            'metrics' => compact('totalUsers', 'usersThisMonth', 'userGrowth', 'totalRevenue', 'activeSubscribers', 'totalPlans', 'plansThisMonth', 'averagePlanValue', 'activeVendors', 'pendingFeedback', 'averageRating'),
+            'metrics' => compact('totalUsers', 'usersThisMonth', 'userGrowth', 'totalRevenue', 'activeSubscribers', 'totalPlans', 'plansThisMonth', 'averagePlanValue', 'activeVendors'),
             'revenueData' => $revenueData,
             'vendorCategories' => $vendorCategories,
             'recentPlans' => UserEventPlan::with('user')->whereNull('parent_plan_id')->latest()->take(6)->get(),

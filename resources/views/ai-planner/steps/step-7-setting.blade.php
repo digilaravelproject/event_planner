@@ -1,9 +1,9 @@
 <!-- Step 5: Venue Ambience & Dynamic Decor Styling (With High-Resolution Visual Previews) -->
-<div x-show="currentStep === 5" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+<div x-show="currentStep === {{ $stepNumbers['decoration_type'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
     <div class="space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
-            <span>Step 05 / 07 • Venue Ambience & Decor Visualizer</span>
+            <span>Step {{ str_pad((string) ($stepNumbers['decoration_type'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Venue Ambience & Decor Visualizer</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('decoration_type')?->question ?? 'Select your Venue Vibe & Mandap Decor' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Visual previews & decor themes tailored for <span class="font-bold text-[#850625]" x-text="planner.culture"></span> tradition.</p>
@@ -13,18 +13,18 @@
     <div class="space-y-3">
         <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">1. What venue setting environment do you prefer?</span>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <template x-for="(settingOption, index) in optionsFor('venue_setting', [
+            <template x-for="(settingOption, index) in optionsFor('decoration_type', [
                 'Sea-Facing Beachfront',
                 'Lawn & Poolside',
                 'Grand AC Ballroom',
                 'Heritage Resort'
             ])">
-                <div @click="planner.setting = settingOption"
+                <div @click="planner.setting = settingOption; planner.decorTheme = settingOption"
                     :class="planner.setting === settingOption ? 'border-[#850625] shadow-xl ring-2 ring-[#850625]/30 scale-[1.02]' : 'border-slate-200 hover:border-rose-300 hover:shadow-md'"
                     class="bg-white rounded-3xl border-2 overflow-hidden transition-all cursor-pointer group flex flex-col justify-between">
                     
                     <div class="relative h-32 w-full overflow-hidden bg-slate-900">
-                        <img :src="imageFor('venue_setting', index, [
+                        <img :src="imageFor('decoration_type', index, [
                             'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
                             'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80',
                             'https://images.unsplash.com/photo-1544078751-58fee2d8a03b?auto=format&fit=crop&w=600&q=80',

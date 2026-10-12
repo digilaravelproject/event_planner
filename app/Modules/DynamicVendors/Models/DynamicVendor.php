@@ -3,6 +3,7 @@
 namespace App\Modules\DynamicVendors\Models;
 
 use App\Models\Admin;
+use App\Models\VendorAccount;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,7 +12,7 @@ class DynamicVendor extends Model
 {
     protected $table = 'vendors_dynamic';
 
-    protected $fillable = ['vendor_json', 'status', 'created_by', 'updated_by'];
+    protected $fillable = ['vendor_json', 'status', 'vendor_account_id', 'created_by', 'updated_by'];
 
     protected function casts(): array
     {
@@ -31,6 +32,11 @@ class DynamicVendor extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(Admin::class, 'updated_by');
+    }
+
+    public function vendorAccount(): BelongsTo
+    {
+        return $this->belongsTo(VendorAccount::class);
     }
 
     public function getNameAttribute(): string

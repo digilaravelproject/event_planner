@@ -5,6 +5,7 @@
 @section('content')
 @php
     $content = $presentation['content'];
+    $editablePlan = $plan->parent ?: $plan;
 @endphp
 <div class="min-h-screen pt-24 md:pt-28 pb-16 px-4 sm:px-6 lg:px-8" style="background: radial-gradient(circle at 85% 10%, rgba(226,184,47,.12), transparent 26rem), radial-gradient(circle at 8% 35%, rgba(158,20,59,.09), transparent 28rem), #fbf7f2;">
     <div class="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -32,6 +33,13 @@
                 </div>
 
                 <a href="{{ route('user.plans.download', $plan) }}" class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-5 py-3 text-xs font-extrabold text-slate-950 shadow-lg hover:bg-amber-300"><i class="fa-solid fa-file-arrow-down"></i> {{ $content['download_label'] }}</a>
+                <form action="{{ route('user.plans.share', $plan) }}" method="POST" class="mt-3 rounded-2xl border border-white/15 bg-white/10 p-3">
+                    @csrf
+                    <label for="share-plan-email" class="text-[10px] font-bold uppercase tracking-wider text-rose-100">Share plan by email</label>
+                    <input id="share-plan-email" type="email" name="email" value="{{ old('email', auth()->user()->email) }}" required placeholder="name@example.com" class="mt-2 w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                    @error('email')<div class="mt-1 text-[10px] font-semibold text-amber-200">{{ $message }}</div>@enderror
+                    <button type="submit" class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-white/25 px-4 py-2.5 text-xs font-extrabold text-white hover:bg-white/10"><i class="fa-solid fa-paper-plane"></i> Share plan on mail</button>
+                </form>
                 <a href="{{ route('ai-planner', ['type' => 'wedding', 'guests' => $plan->guest_count]) }}" class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-xs font-extrabold text-[#850625] hover:bg-rose-50"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ $content['new_plan_label'] }}</a>
                 <a href="{{ route('user.dashboard') }}" class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-5 py-3 text-xs font-bold text-white hover:bg-white/10"><i class="fa-solid fa-table-columns"></i> {{ $content['dashboard_label'] }}</a>
             </div>
@@ -51,13 +59,14 @@
             </section>
 
             <section class="rounded-3xl border border-rose-100 bg-white p-6 sm:p-8 shadow-lg">
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#850625]">{{ $content['selection_eyebrow'] }}</span><h2 class="mt-1 text-3xl font-extrabold font-serif-luxury text-slate-950">{{ $content['selection_title'] }}</h2></div><a href="{{ route('ai-planner', ['type' => 'wedding', 'guests' => $plan->guest_count]) }}" class="inline-flex w-fit items-center gap-2 rounded-full bg-[#850625] px-5 py-3 text-xs font-extrabold text-white"><i class="fa-solid fa-plus"></i> {{ $content['new_plan_label'] }}</a></div>
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#850625]">{{ $content['selection_eyebrow'] }}</span><h2 class="mt-1 text-3xl font-extrabold font-serif-luxury text-slate-950">{{ $content['selection_title'] }}</h2></div><div class="flex flex-wrap gap-2">@if(auth()->user()->hasPaidSubscription())<a href="{{ route('user.plans.edit', $editablePlan) }}" class="inline-flex w-fit items-center gap-2 rounded-full border border-[#850625] bg-white px-5 py-3 text-xs font-extrabold text-[#850625] hover:bg-rose-50"><i class="fa-solid fa-pen-to-square"></i> Edit plan</a>@else<button type="button" disabled title="Upgrade to a paid subscription to edit this plan." class="inline-flex w-fit cursor-not-allowed items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-3 text-xs font-extrabold text-slate-400"><i class="fa-solid fa-pen-to-square"></i> Edit plan</button>@endif<a href="{{ route('ai-planner', ['type' => 'wedding', 'guests' => $plan->guest_count]) }}" class="inline-flex w-fit items-center gap-2 rounded-full bg-[#850625] px-5 py-3 text-xs font-extrabold text-white"><i class="fa-solid fa-plus"></i> {{ $content['new_plan_label'] }}</a></div></div>
                 <div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
                     @foreach($presentation['answer_details'] as $answer)
                         <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4"><div class="text-xs font-extrabold text-slate-800">{{ $answer['question'] }}</div><div class="mt-2 text-sm leading-relaxed text-slate-600">{{ $answer['answer'] }}</div></div>
                     @endforeach
                 </div>
             </section>
+
 
             <section class="space-y-4">
                 <div><span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#850625]">{{ $content['costing_eyebrow'] ?? count($presentation['costing']).' costed services' }}</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">{{ $content['costing_title'] ?? $presentation['title'] }}</h2><p class="mt-1 text-sm text-slate-500">{{ $content['costing_description'] ?? $presentation['overview'] }}</p></div>
@@ -67,27 +76,68 @@
                             <div><div class="text-[10px] font-bold uppercase tracking-wider text-[#850625]">{{ number_format((float) ($item['percentage'] ?? 0), 0) }}% of plan</div><h3 class="mt-1 text-2xl font-bold font-serif-luxury text-slate-950">{{ $item['category'] }}</h3><p class="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">{{ $item['summary'] ?? '' }}</p></div>
                             <div class="shrink-0 rounded-2xl bg-rose-50 px-5 py-3 text-right"><div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">{{ $content['category_total_label'] }}</div><div class="text-2xl font-extrabold text-[#850625]">₹{{ number_format((float) $item['amount']) }}</div></div>
                         </div>
-                        <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-                            @foreach($item['attributes'] as $attribute)
-                                <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4"><div class="text-xs font-bold text-slate-800">{{ $attribute['name'] }}</div><div class="mt-1 text-[10px] text-slate-500">{{ $attribute['value'] }}</div><div class="mt-3 text-base font-extrabold text-[#850625]">₹{{ number_format((float) $attribute['cost']) }}</div></div>
-                            @endforeach
-                        </div>
+                        @if(($item['pricing_status'] ?? '') === 'quote_required')<p class="mt-4 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">Quote required: unpriced services are excluded from the total.</p>@endif
+                        @if($item['cost_warning'])<p class="mt-4 text-xs text-amber-800">{{ $item['cost_warning'] }}</p>@endif
+                        @forelse($item['vendor_groups'] as $group)
+                            <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+                                <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-3"><h4 class="text-sm font-bold text-slate-900"><i class="fa-solid fa-store mr-2 text-[#850625]" aria-hidden="true"></i>{{ $group['name'] }}</h4><span class="text-xs font-bold text-[#850625]">Priced subtotal ₹{{ number_format($group['amount'], 2) }}</span></div>
+                                <div class="divide-y divide-slate-100">
+                                    @foreach($group['attributes'] as $attribute)
+                                        <div class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between">
+                                            <div class="min-w-0"><div class="text-sm font-bold text-slate-800">{{ $attribute['name'] }}</div><p class="mt-1 text-xs leading-relaxed text-slate-500">{{ $attribute['value'] }}</p>
+                                                @if(isset($attribute['unit_price']))<p class="mt-2 text-xs font-semibold text-slate-700">₹{{ number_format($attribute['unit_price'], 2) }} / {{ str_replace(['per_', '_'], ['', ' '], $attribute['unit'] ?? 'service') }} × {{ $attribute['quantity'] ?? 'quantity to confirm' }}</p>@endif
+                                                <p class="mt-1 text-[10px] text-slate-500">{{ ($attribute['source'] ?? '') === 'vendor_attribute' ? 'Saved vendor rate' : (($attribute['source'] ?? '') === 'configured_menu' ? 'Configured menu rate' : 'Saved estimate') }}</p>
+                                            </div>
+                                            <strong class="shrink-0 text-base text-[#850625]">{{ ($attribute['pricing_status'] ?? '') === 'quote_required' ? 'Quote required' : '₹'.number_format((float) $attribute['cost'], 2) }}</strong>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @empty
+                            <p class="mt-5 text-sm text-slate-500">No priced vendor services saved for this category.</p>
+                        @endforelse
                     </article>
                 @endforeach
             </section>
 
-            @if($plan->suggestions->isNotEmpty() || $plan->parent)
+            @if(!empty($presentation['plan_vendors']))
+                <section class="rounded-3xl border border-rose-100 bg-white p-6 sm:p-8 shadow-lg">
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#850625]">Saved vendor matches</span>
+                    <h2 class="mt-1 text-3xl font-extrabold font-serif-luxury text-slate-950">Vendors matched to this plan</h2>
+                    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        @foreach($presentation['plan_vendors'] as $vendor)
+                            <article class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-100 text-[#850625]"><i class="fa-solid fa-store"></i></div>
+                                <h3 class="mt-3 text-sm font-extrabold text-slate-900">{{ $vendor['name'] }}</h3>
+                                <p class="mt-1 text-xs text-slate-500">{{ $vendor['category'] }}</p>
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
                 @php
                     $comparisonPlans = $plan->parent
-                        ? collect([$plan->parent])->concat($plan->parent->suggestions)->reject(fn ($candidate) => $candidate->is($plan))
+                        ? collect($plan->parent->suggestions)->reject(fn ($candidate) => $candidate->is($plan))
                         : collect($plan->suggestions);
                     $comparisonBase = (float) ($plan->parent?->total_cost ?? $plan->total_cost);
+                    $comparisonPlans = $comparisonPlans->filter(fn ($candidate) => data_get($candidate->summary, 'suggestion_version') === 2 && abs((float) $candidate->total_cost - $comparisonBase) >= .01)->unique(fn ($candidate) => (string) $candidate->total_cost);
+                    if ($plan->parent) $comparisonPlans = collect([$plan->parent])->concat($comparisonPlans);
                 @endphp
                 <section class="mb-5 overflow-hidden rounded-3xl border border-amber-200 p-6 sm:p-8" style="background: linear-gradient(135deg, #fffdf7 0%, #fff7ee 50%, #fff1f3 100%); box-shadow: 0 18px 42px rgba(87, 27, 5, .09);">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div><span class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9B0B35]">{{ $content['comparison_eyebrow'] ?? $comparisonPlans->count().' saved alternatives' }}</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">{{ $content['comparison_title'] ?? $presentation['title'] }}</h2><p class="mt-2 text-sm text-slate-600">{{ $content['comparison_description'] ?? $presentation['overview'] }}</p></div>
+                        <div><span class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#9B0B35]">Compare actual service costs</span><h2 class="mt-1 text-3xl sm:text-4xl font-extrabold font-serif-luxury text-slate-950">Priced vendor alternatives</h2><p class="mt-2 text-sm text-slate-600">Each alternative changes a vendor using comparable saved service rates. Guest count and priced items stay the same; confirm equivalent scope directly. Higher price does not guarantee higher quality.</p></div>
                         <span class="inline-flex w-fit rounded-full bg-amber-100 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-amber-800">{{ $comparisonPlans->count() }} {{ $content['comparison_count_label'] }}</span>
                     </div>
+                    <form method="POST" action="{{ route('user.plans.suggestions.refresh', $plan->parent ?: $plan) }}" class="mt-5" x-data="{ busy: false }" @submit="busy = true">
+                        @csrf
+                        <button type="submit" :disabled="busy" class="rounded-xl bg-[#850625] px-5 py-3 text-sm font-bold text-white disabled:opacity-60" x-text="busy ? 'Checking vendor rates…' : 'Refresh priced alternatives'">Refresh priced alternatives</button>
+                        <p class="mt-2 text-xs text-slate-500">Replaces suggested options only. Your original plan and its prices are retained.</p>
+                        @error('suggestions')<p role="alert" class="mt-2 text-sm text-rose-800">{{ $message }}</p>@enderror
+                    </form>
+                    @if($comparisonPlans->isEmpty())
+                        <p class="mt-5 rounded-2xl border border-amber-200 bg-white p-5 text-sm text-slate-700">No comparable alternatives with different saved prices are available. Refresh to check current vendor records. We will not invent a discount or show duplicate plans. Older plans without itemized rates must be regenerated first.</p>
+                    @endif
                     <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
                         @foreach($comparisonPlans as $comparison)
                             @php
@@ -103,7 +153,7 @@
                                     <img src="{{ asset($comparisonImage) }}" alt="{{ $comparison->title }} wedding inspiration" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                                     <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(35,0,9,.02) 15%, rgba(69,1,21,.82) 100%);"></div>
                                     <span class="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-[#850625] shadow">{{ $isOriginal ? 'Original plan' : ($comparisonMeta['tier'] ?? $comparison->title) }}</span>
-                                    <div class="absolute inset-x-5 bottom-4 text-white"><div class="text-3xl font-extrabold">₹{{ number_format($comparisonCost) }}</div><div class="mt-1 text-xs text-white/85">{{ $isOriginal ? $comparison->summary['overview'] : ($comparisonMeta['change_label'] ?? number_format($differencePercent, 0).'% change') }}</div></div>
+                                    <div class="absolute inset-x-5 bottom-4 text-white"><div class="text-3xl font-extrabold">₹{{ number_format($comparisonCost, 2) }}</div><div class="mt-1 text-xs text-white/85">{{ $isOriginal ? $comparison->summary['overview'] : ($comparisonMeta['change_label'] ?? number_format($differencePercent, 0).'% change') }}</div></div>
                                 </div>
                                 <div class="p-5 sm:p-6">
                                     <h3 class="text-xl font-extrabold text-slate-950">{{ $comparison->title }}</h3>
@@ -115,7 +165,6 @@
                         @endforeach
                     </div>
                 </section>
-            @endif
         </main>
     </div>
 </div>

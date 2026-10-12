@@ -117,7 +117,9 @@ class VendorAttributeCatalogService
             ]);
         }
         $data['vendor_attribute_images'] = $selectedImages;
-        $data['options'] = array_map(fn (string $value): string => $values[$value]['label'], $selected);
+        if (empty($data['options'])) {
+            $data['options'] = array_map(fn (string $value): string => $values[$value]['label'], $selected);
+        }
         $metadata = (array) ($data['option_metadata'] ?? []);
         $data['option_metadata'] = collect($selected)->mapWithKeys(function (string $value) use ($metadata, $values): array {
             $details = (array) ($metadata[$value] ?? []);

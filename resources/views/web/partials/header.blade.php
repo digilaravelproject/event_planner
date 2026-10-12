@@ -26,23 +26,23 @@
 
     <!-- Desktop Navigation Links with Floating Pill Hover Animation -->
     <nav class="hidden lg:flex items-center space-x-1 bg-white/70 backdrop-blur-md p-1.5 rounded-full border border-rose-200/50 shadow-xs">
-        <a href="#categories" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#categories" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>Categories</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="#how-it-works" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#how-it-works" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>How It Works</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="#problem-vs-solution" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#problem-vs-solution" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>Why Shaadi Sense</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="#estimator" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#estimator" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>AI Estimator</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="#testimonials" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
+        <a href="{{ route('home') }}#testimonials" class="text-slate-700 hover:text-[#850625] font-bold text-xs md:text-sm px-4 py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group">
             <span>Reviews</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
@@ -63,7 +63,7 @@
                 </button>
             </form>
         @else
-            <a href="{{ route('user.login') }}" class="text-slate-700 hover:text-[#850625] text-xs font-bold px-4 py-2.5 rounded-full hover:bg-rose-50 transition-all duration-200">
+            <a href="{{ route('user.login') }}" data-login-choice aria-haspopup="dialog" aria-controls="login-choice" class="text-slate-700 hover:text-[#850625] text-xs font-bold px-4 py-2.5 rounded-full hover:bg-rose-50 transition-all duration-200">
                 Sign In
             </a>
             <a href="{{ route('user.register') }}" class="relative group overflow-hidden px-5 py-2.5 rounded-full text-white bg-gradient-to-r from-[#850625] to-[#a81036] hover:from-[#6b041e] hover:to-[#850625] text-xs font-bold shadow-md shadow-[#850625]/25 hover:shadow-lg transition-all duration-300 hover:scale-[1.03] flex items-center gap-2">
@@ -77,7 +77,7 @@
     </div>
 
     <!-- Mobile Menu Hamburger Button -->
-    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden text-slate-900 hover:text-[#850625] p-2 focus:outline-none transition-transform duration-200" :class="{ 'rotate-90': mobileMenuOpen }">
+    <button @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Toggle navigation" :aria-expanded="mobileMenuOpen" class="lg:hidden text-slate-900 hover:text-[#850625] p-2 focus:outline-none transition-transform duration-200" :class="{ 'rotate-90': mobileMenuOpen }">
         <i class="fa-solid" :class="mobileMenuOpen ? 'fa-xmark text-2xl text-[#850625]' : 'fa-bars-staggered text-2xl'"></i>
     </button>
 
@@ -93,35 +93,40 @@
         class="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-2xl shadow-2xl border-t border-rose-100/80 p-6 flex flex-col space-y-3 lg:hidden z-50 rounded-b-3xl"
         style="display: none;"
     >
-        <a @click="mobileMenuOpen = false" href="#categories" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#categories" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>Categories</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
-        <a @click="mobileMenuOpen = false" href="#how-it-works" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#how-it-works" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>How It Works</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
-        <a @click="mobileMenuOpen = false" href="#problem-vs-solution" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#problem-vs-solution" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>Why Shaadi Sense</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
-        <a @click="mobileMenuOpen = false" href="#estimator" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#estimator" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>AI Estimator</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
-        <a @click="mobileMenuOpen = false" href="#testimonials" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
+        <a @click="mobileMenuOpen = false" href="{{ route('home') }}#testimonials" class="text-slate-800 hover:text-[#850625] font-bold py-2.5 px-4 rounded-xl hover:bg-rose-50/70 transition-all text-sm flex items-center justify-between">
             <span>Reviews</span>
             <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
         </a>
         
         <div class="pt-4 border-t border-rose-100/80 flex flex-col space-y-2.5">
+            @auth('vendor')
+                <a @click="mobileMenuOpen = false" href="{{ route('vendor.dashboard') }}" class="w-full rounded-full border border-[#850625] px-4 py-2.5 text-center text-xs font-bold text-[#850625]">Vendor Dashboard</a>
+            @else
+                <div class="grid grid-cols-2 gap-2"><a href="{{ route('vendor.login') }}" class="rounded-full border border-[#850625]/30 px-3 py-2.5 text-center text-xs font-bold text-[#850625]">Vendor Login</a><a href="{{ route('vendor.register') }}" class="rounded-full bg-slate-900 px-3 py-2.5 text-center text-xs font-bold text-white">Join as Vendor</a></div>
+            @endauth
             @auth('web')
                 <a @click="mobileMenuOpen = false" href="{{ route('user.dashboard') }}" class="w-full text-center px-5 py-3 rounded-full text-white bg-[#850625] text-xs font-bold shadow-md flex items-center justify-center gap-2">
                     <i class="fa-solid fa-gauge"></i>
                     <span>Dashboard</span>
                 </a>
             @else
-                <a @click="mobileMenuOpen = false" href="{{ route('user.login') }}" class="w-full text-center text-slate-800 border border-slate-200 hover:border-[#850625] px-4 py-2.5 rounded-full text-xs font-bold transition-all">
+                <a @click="mobileMenuOpen = false" href="{{ route('user.login') }}" data-login-choice aria-haspopup="dialog" aria-controls="login-choice" class="w-full text-center text-slate-800 border border-slate-200 hover:border-[#850625] px-4 py-2.5 rounded-full text-xs font-bold transition-all">
                     Sign In
                 </a>
                 <a @click="mobileMenuOpen = false" href="{{ route('user.register') }}" class="w-full text-center px-5 py-3 rounded-full text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2">
@@ -132,3 +137,6 @@
         </div>
     </div>
 </header>
+@guest('web')
+    @include('web.partials.login-choice')
+@endguest

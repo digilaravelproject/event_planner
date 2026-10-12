@@ -1,9 +1,9 @@
 <!-- Step 1: Budget Selection -->
-<div x-show="currentStep === 1" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+<div x-show="currentStep === {{ $stepNumbers['wedding_budget'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
     <div class="space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-calculator text-[10px]"></i>
-            <span>Step 01 / 07 • Financial Comfort</span>
+            <span>Step {{ str_pad((string) ($stepNumbers['wedding_budget'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Financial Comfort</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('wedding_budget')?->question ?? 'What is your total estimated wedding budget?' }}</h2>
         <p class="text-slate-600 text-sm sm:text-base">Drag the slider, select a preset, or type your exact budget manually in Lakhs.</p>

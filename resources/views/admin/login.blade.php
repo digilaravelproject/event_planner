@@ -58,7 +58,7 @@
                 <!-- Email Input -->
                 <div>
                     <label for="email" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
-                    <input type="email" name="email" id="email" value="{{ old('email', 'admin@eventplanner.com') }}" required autofocus
+                    <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition duration-150"
                         placeholder="admin@eventplanner.com">
                     @error('email')
@@ -69,7 +69,7 @@
                 <!-- Password Input -->
                 <div>
                     <label for="password" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
-                    <input type="password" name="password" id="password" value="admin123" required
+                    <input type="password" name="password" id="password" required
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition duration-150"
                         placeholder="••••••••">
                     @error('password')
@@ -92,12 +92,6 @@
                 </button>
             </form>
 
-            <!-- Demo details banner -->
-            <div class="mt-6 border-t border-slate-100 pt-5 text-center">
-                <p class="text-[11px] text-slate-400 font-semibold">
-                    Demo Credentials: <span class="text-slate-600 font-bold">admin@eventplanner.com</span> / <span class="text-slate-600 font-bold">admin123</span>
-                </p>
-            </div>
         </div>
     </div>
 </body>

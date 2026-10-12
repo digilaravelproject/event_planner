@@ -14,6 +14,15 @@
         <label class="attribute-value {{ $isUpload ? 'hidden' : '' }} block md:col-span-5"><span class="mb-1.5 block text-xs font-bold text-slate-700">Attribute value</span><textarea name="attributes[{{ $index }}][value]" rows="1" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm">{{ $attribute['value'] ?? '' }}</textarea></label>
         <label class="attribute-upload {{ $isUpload ? '' : 'hidden' }} block md:col-span-5"><span class="mb-1.5 block text-xs font-bold text-slate-700">Upload</span><input type="file" name="attribute_uploads[{{ $index }}]" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"><span class="mt-1 block truncate text-[11px] text-slate-400">{{ $isUpload && ($attribute['value'] ?? null) ? 'Current: '.$attribute['value'] : '' }}</span></label>
     </div>
+    <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50/40 p-3">
+        <p class="text-xs font-extrabold text-slate-700">Planning cost (optional)</p>
+        <p class="mt-1 text-[11px] text-slate-500">Add a separate attribute for each billable service. Currency values can be used directly. Do not repeat services already included in a package.</p>
+        <div class="mt-3 grid gap-3 sm:grid-cols-3">
+            <label class="text-xs font-bold">Rate (INR)<input type="number" min="0" max="99999999.99" step="0.01" name="attributes[{{ $index }}][pricing_rate]" value="{{ $attribute['pricing_rate'] ?? data_get($attribute, 'pricing.rate', '') }}" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Use currency value"></label>
+            <label class="text-xs font-bold">Charged per<select name="attributes[{{ $index }}][pricing_unit]" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2">@foreach(['fixed' => 'Fixed service', 'per_guest' => 'Guest', 'per_unit' => 'Unit', 'per_hour' => 'Hour', 'per_day' => 'Day'] as $unit => $unitLabel)<option value="{{ $unit }}" @selected(($attribute['pricing_unit'] ?? data_get($attribute, 'pricing.unit', 'fixed')) === $unit)>{{ $unitLabel }}</option>@endforeach</select></label>
+            <label class="text-xs font-bold">Quantity<input type="number" min="0.01" max="100000" step="0.01" name="attributes[{{ $index }}][pricing_quantity]" value="{{ $attribute['pricing_quantity'] ?? data_get($attribute, 'pricing.quantity', '') }}" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Automatic for guests / fixed"></label>
+        </div>
+    </div>
     <div class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/40 p-3">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div><p class="text-xs font-extrabold text-slate-700">Attribute images</p><p class="text-[11px] text-slate-500">Attach one or more images to this attribute.</p></div>

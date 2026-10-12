@@ -19,15 +19,23 @@
     <!-- Vite Styles & Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Force Scroll to Top on Refresh / Hard Refresh -->
+    <!-- Preserve section navigation across the shared entrance animation. -->
     <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
-        window.scrollTo(0, 0);
-        window.addEventListener('beforeunload', function() {
-            window.scrollTo(0, 0);
-        });
+        window.scrollToRequestedAnchor = function () {
+            window.requestAnimationFrame(function () {
+                const id = window.location.hash.slice(1);
+                const target = id ? document.getElementById(decodeURIComponent(id)) : null;
+                if (target) {
+                    target.scrollIntoView({ behavior: 'auto', block: 'start' });
+                } else if (!id) {
+                    window.scrollTo({ top: 0, behavior: 'auto' });
+                }
+            });
+        };
+        window.addEventListener('hashchange', window.scrollToRequestedAnchor);
     </script>
 
     <!-- Three.js CDN for WebGL Shader Canvas -->
@@ -81,18 +89,12 @@
     </style>
     @stack('styles')
 
-    <!-- Immediate Scroll Restoration Reset -->
-    <script>
-        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-        if (window.location.hash) history.replaceState(null, null, window.location.pathname);
-        window.scrollTo(0, 0);
-    </script>
 </head>
 <body 
     class="bg-[#FFFDF9] text-slate-800 min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-[#850625]/20 selection:text-[#850625]" 
     x-data="{ isLoaded: false, pageReady: false, scrolled: false }" 
     @scroll.window="scrolled = (window.pageYOffset > 40) ? true : false" 
-    x-init="window.scrollTo(0, 0); setTimeout(() => isLoaded = true, 100); setTimeout(() => { pageReady = true; window.scrollTo(0, 0); }, 1200)"
+    x-init="setTimeout(() => isLoaded = true, 100); setTimeout(() => { pageReady = true; window.scrollToRequestedAnchor(); }, 1200)"
 >
     <!-- Top Luxury Scroll Progress Indicator Line -->
     <div id="scroll-progress-bar" class="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-[#850625] via-[#D4AF37] to-[#850625] z-[100] transition-all duration-75 w-0 pointer-events-none"></div>

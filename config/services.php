@@ -39,4 +39,10 @@ return [
         'url' => env('OPENROUTER_URL', 'https://openrouter.ai/api/v1'),
     ],
 
+    'razorpay' => [
+        'key_id' => env('RAZORPAY_KEY_ID'),
+        'key_secret' => env('RAZORPAY_KEY_SECRET'),
+        'url' => env('RAZORPAY_URL', 'https://api.razorpay.com/v1'),
+    ],
+
 ];

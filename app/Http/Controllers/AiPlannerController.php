@@ -2,28 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SharedPlanMail;
 use App\Models\EventRequirementQuestion;
 use App\Models\UserEventPlan;
+use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Services\EventPlanningService;
 use App\Services\PlanPdfService;
 use App\Services\PlanPresentationService;
+use App\Services\VendorCostingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AiPlannerController extends Controller
 {
     public function index(Request $request)
     {
-        $questions = EventRequirementQuestion::enabled()->get()->keyBy('question_code');
-        $guestCount = max(10, min(5000, (int) $request->integer('guests', 150)));
+        /** @var UserEventPlan|null $editingPlan */
+        $editingPlan = $request->attributes->get('editingPlan');
+        $orderedQuestions = EventRequirementQuestion::enabled()->get();
+        $questions = $orderedQuestions->keyBy('question_code');
+        $pending = (array) $request->session()->get('pending_event_plan', []);
+        $guestCount = max(10, min(5000, (int) old('guest_count', $editingPlan?->guest_count ?? $pending['guest_count'] ?? $request->integer('guests', 150))));
+        $plannerSteps = $this->plannerSteps($orderedQuestions);
+        $stepNumbers = $plannerSteps->pluck('number', 'code')->all();
 
-        $vendorPackages = \App\Modules\DynamicVendors\Models\DynamicVendor::query()
+        $vendorPackages = DynamicVendor::query()
             ->whereRaw('LOWER(status) = ?', ['active'])
             ->latest('id')
             ->get()
-            ->flatMap(function (\App\Modules\DynamicVendors\Models\DynamicVendor $vendor): array {
+            ->flatMap(function (DynamicVendor $vendor): array {
                 $offerings = data_get($vendor->vendor_json, 'offerings', []);
-                if (empty($offerings) && !empty(data_get($vendor->vendor_json, 'offering'))) {
+                if (empty($offerings) && ! empty(data_get($vendor->vendor_json, 'offering'))) {
                     $offerings = [data_get($vendor->vendor_json, 'offering')];
                 }
 
@@ -93,13 +105,16 @@ class AiPlannerController extends Controller
                 }, $offerings);
             })->values()->all();
 
-        $cateringVendors = \App\Modules\DynamicVendors\Models\DynamicVendor::query()
+        $foodCatalog = collect($this->plannerOptions($questions->get('food_type')))
+            ->keyBy(fn (array $item): string => mb_strtolower($item['title']));
+
+        $cateringVendors = DynamicVendor::query()
             ->whereRaw('LOWER(status) = ?', ['active'])
             ->get()
-            ->filter(function (\App\Modules\DynamicVendors\Models\DynamicVendor $vendor): bool {
-                return in_array($vendor->category, ['Catering', 'Venue', 'Hotel', 'Lawn', 'Decorator'], true);
+            ->filter(function (DynamicVendor $vendor): bool {
+                return mb_strtolower(trim($vendor->category)) === 'catering';
             })
-            ->map(function (\App\Modules\DynamicVendors\Models\DynamicVendor $vendor): array {
+            ->map(function (DynamicVendor $vendor) use ($foodCatalog): array {
                 $brandName = data_get($vendor->vendor_json, 'identity.name') ?: data_get($vendor->vendor_json, 'name') ?: $vendor->name;
 
                 return [
@@ -108,63 +123,43 @@ class AiPlannerController extends Controller
                     'category' => $vendor->category,
                     'food_packages' => data_get($vendor->vendor_json, 'food_packages', []),
                     'food_extras' => data_get($vendor->vendor_json, 'food_extras', []),
+                    'menu_items' => $this->cateringMenuItems($vendor, $foodCatalog),
                 ];
             })->values()->all();
 
         return view('ai-planner.index', [
             'questions' => $questions,
+            'plannerSteps' => $plannerSteps->values()->all(),
+            'stepNumbers' => $stepNumbers,
             'vendorPackages' => $vendorPackages,
             'cateringVendors' => $cateringVendors,
             'plannerOptions' => $questions->map(fn (EventRequirementQuestion $question): array => [
                 'question' => $question->question,
                 'options' => $this->plannerOptions($question),
-                'images' => collect($question->vendor_attribute_images ?? [])->map(
-                    fn (string $path): string => str_starts_with($path, 'http') ? $path : asset('storage/'.ltrim($path, '/'))
-                )->values()->all(),
+                'images' => $this->questionImages($question),
                 'required' => $question->is_required,
             ])->all(),
             'initialGuestCount' => $guestCount,
-            'category' => 'wedding',
+            'category' => old('category', $editingPlan?->category ?: $pending['category'] ?? $this->selectedCategory($questions->get('event_category'), (string) $request->query('type', ''))),
+            'editingPlan' => $editingPlan,
+            'initialAnswers' => (array) old('answers', $editingPlan?->answers ?? $pending['answers'] ?? []),
+            'initialStep' => max(1, min(count($plannerSteps), (int) old('planner_step', 1))),
         ]);
+    }
+
+    public function edit(Request $request, UserEventPlan $plan)
+    {
+        abort_unless($request->user()->hasPaidSubscription(), 403, 'A paid subscription is required to edit plans.');
+        $plan = $plan->parent ?: $plan;
+        abort_unless($plan->user_id === $request->user()->id, 403);
+        $request->attributes->set('editingPlan', $plan);
+
+        return $this->index($request);
     }
 
     public function generate(Request $request, EventPlanningService $planning)
     {
-        $answers = (array) $request->input('answers', []);
-        foreach (['food_menu_items', 'ceremonies', 'selected_food_package', 'selected_food_extras'] as $answerKey) {
-            $value = $answers[$answerKey] ?? null;
-            if (is_string($value) && str_starts_with(trim($value), '[')) {
-                $answers[$answerKey] = json_decode($value, true) ?: [];
-            }
-        }
-        $request->merge(['answers' => $answers]);
-
-        $validated = $request->validate([
-            'category' => ['required', 'in:wedding'],
-            'guest_count' => ['required', 'integer', 'min:10', 'max:5000'],
-            'answers' => ['required', 'array'],
-            'answers.wedding_budget' => ['required', 'numeric', 'min:1', 'max:500'],
-            'answers.guest_capacity' => ['nullable', 'integer', 'min:10', 'max:5000'],
-            'answers.wedding_tradition' => ['nullable', 'string', 'max:255'],
-            'answers.decoration_type' => ['nullable', 'string', 'max:255'],
-            'answers.venue_setting' => ['nullable', 'string', 'max:255'],
-            'answers.food_type' => ['nullable', 'string', 'max:2000'],
-            'answers.service_area' => ['nullable', 'string', 'max:255'],
-            'answers.event_timeline' => ['nullable', 'string', 'max:255'],
-            'answers.event_date' => ['nullable', 'date'],
-            'answers.food_menu_items' => ['nullable', 'array', 'max:100'],
-            'answers.food_menu_items.*.id' => ['required', 'string', 'max:255'],
-            'answers.food_menu_items.*.title' => ['required', 'string', 'max:255'],
-            'answers.food_menu_items.*.category' => ['required', 'string', 'max:100'],
-            'answers.food_menu_items.*.cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'answers.selected_food_package' => ['nullable', 'array'],
-            'answers.selected_food_extras' => ['nullable', 'array'],
-            'answers.ceremonies' => ['nullable', 'array', 'max:50'],
-            'answers.ceremonies.*' => ['string', 'max:255'],
-        ]);
-        if (! empty($validated['answers']['food_menu_items'])) {
-            $validated['answers']['food_menu_items'] = $this->validatedFoodMenuItems($validated['answers']['food_menu_items']);
-        }
+        $validated = $this->validatedRequirements($request);
 
         $request->session()->put('pending_event_plan', $validated);
 
@@ -174,6 +169,37 @@ class AiPlannerController extends Controller
         }
 
         return $this->finishPending($request, $planning);
+    }
+
+    public function update(Request $request, UserEventPlan $plan, EventPlanningService $planning)
+    {
+        abort_unless($request->user()->hasPaidSubscription(), 403, 'A paid subscription is required to update plans.');
+        $plan = $plan->parent ?: $plan;
+        abort_unless($plan->user_id === $request->user()->id, 403);
+        $validated = $this->validatedRequirements($request);
+
+        try {
+            $plan = $planning->update($plan, $validated);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return back()->withInput()->withErrors(['planner' => 'We could not update your plan. Please try again.']);
+        }
+
+        return redirect()->route('user.plans.show', $plan)->with('success', 'Your plan was updated successfully.');
+    }
+
+    public function share(Request $request, UserEventPlan $plan, PlanPresentationService $presenter, PlanPdfService $pdf)
+    {
+        abort_unless($plan->user_id === $request->user()->id, 403);
+        $validated = $request->validate(['email' => ['required', 'email:rfc', 'max:255']]);
+        $plan->load('user');
+        Mail::to($validated['email'])->send(new SharedPlanMail(
+            $plan,
+            $pdf->render($plan, $presenter->present($plan))
+        ));
+
+        return back()->with('success', 'The plan PDF was emailed to '.$validated['email'].'.');
     }
 
     public function resume(Request $request, EventPlanningService $planning)
@@ -203,6 +229,22 @@ class AiPlannerController extends Controller
         $presentation = $presenter->present($plan);
 
         return view('ai-planner.summary', compact('plan', 'presentation'));
+    }
+
+    public function refreshSuggestions(Request $request, UserEventPlan $plan, EventPlanningService $planning)
+    {
+        abort_unless($plan->user_id === $request->user()->id, 403);
+        $base = $plan->parent ?: $plan;
+        abort_unless($base->user_id === $request->user()->id, 403);
+        try {
+            $planning->refreshSuggestions($base);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()->route('user.plans.show', $base)->withErrors(['suggestions' => 'Unable to refresh alternatives. Your saved plan is unchanged. Please try again.']);
+        }
+
+        return redirect()->route('user.plans.show', $base)->with('success', 'Alternatives checked against saved vendor rates. Only comparable options with different totals are shown.');
     }
 
     public function download(Request $request, UserEventPlan $plan, PlanPresentationService $presenter, PlanPdfService $pdf)
@@ -235,42 +277,239 @@ class AiPlannerController extends Controller
             ->with('success', 'Your AI wedding plan is ready.');
     }
 
-    private function plannerOptions(EventRequirementQuestion $question): array
+    private function plannerOptions(?EventRequirementQuestion $question): array
     {
+        if (! $question) {
+            return [];
+        }
+
         if ($question->question_code !== 'food_type') {
             return array_values($question->options ?? []);
         }
 
         $metadata = (array) ($question->option_metadata ?? []);
+        $options = array_values($question->options ?: $question->vendor_attribute_values ?: []);
+        $vendorValues = array_values($question->option_vendor_values ?: $question->vendor_attribute_values ?: $options);
+        $images = $this->questionImages($question);
 
-        $values = $question->vendor_attribute_values ?: $question->options ?: [];
-
-        return collect($values)->map(function ($value, int $index) use ($question, $metadata): array {
-            $value = (string) $value;
-            $details = (array) ($metadata[$value] ?? []);
+        return collect($options)->map(function ($option, int $index) use ($images, $metadata, $vendorValues): array {
+            $title = (string) $option;
+            $value = (string) ($vendorValues[$index] ?? $title);
+            $details = (array) ($metadata[$value] ?? $metadata[$title] ?? []);
 
             return [
                 'id' => $value,
-                'title' => (string) ($details['label'] ?? $value),
+                'title' => $title,
                 'category' => (string) ($details['category'] ?? 'Menu Items'),
                 'cost' => max(0, (float) ($details['cost'] ?? 0)),
+                'image' => $images[$index] ?? null,
             ];
         })->values()->all();
+    }
+
+    private function plannerSteps($questions)
+    {
+        $renderers = [
+            'wedding_budget' => 'budget',
+            'guest_capacity' => 'guest',
+            'service_area' => 'location',
+            'wedding_tradition' => 'tradition',
+            'decoration_type' => 'setting',
+            'food_type' => 'food',
+            'event_timeline' => 'timeline',
+        ];
+        $labels = [
+            'event_category' => 'Event Category',
+            'wedding_budget' => 'Budget Allocation',
+            'guest_capacity' => 'Guest Capacity',
+            'service_area' => 'Location & Vibe',
+            'wedding_tradition' => 'Wedding Tradition',
+            'decoration_type' => 'Decor & Venue Style',
+            'food_type' => 'Food & Catering',
+            'event_timeline' => 'Dates & Timeline',
+        ];
+
+        return $questions->values()->map(function (EventRequirementQuestion $question, int $index) use ($renderers, $labels): array {
+            return [
+                'number' => $index + 1,
+                'code' => $question->question_code,
+                'name' => $labels[$question->question_code] ?? Str::limit($question->question, 32),
+                'question' => $question->question,
+                'type' => $question->question_type,
+                'placeholder' => $question->placeholder,
+                'required' => $question->is_required,
+                'renderer' => $renderers[$question->question_code] ?? 'generic',
+                'options' => array_values($question->options ?? []),
+                'images' => $this->questionImages($question),
+                'option_details' => $this->questionOptionDetails($question),
+            ];
+        });
+    }
+
+    private function questionOptionDetails(EventRequirementQuestion $question): array
+    {
+        $options = array_values($question->options ?? []);
+        $mappedValues = array_values($question->option_vendor_values ?: $question->vendor_attribute_values ?: []);
+        $metadata = (array) ($question->option_metadata ?? []);
+        $images = $this->questionImages($question);
+        $defaultIcons = [
+            'fa-solid fa-star',
+            'fa-solid fa-heart',
+            'fa-solid fa-crown',
+            'fa-solid fa-leaf',
+            'fa-solid fa-gem',
+            'fa-solid fa-champagne-glasses',
+            'fa-solid fa-music',
+            'fa-solid fa-building',
+        ];
+
+        return collect($options)->map(function ($option, int $index) use ($defaultIcons, $images, $mappedValues, $metadata): array {
+            $title = (string) $option;
+            $metadataKey = (string) (($mappedValues[$index] ?? null) ?: $title);
+            $details = (array) ($metadata[$metadataKey] ?? $metadata[$title] ?? []);
+
+            return [
+                'value' => $title,
+                'title' => $title,
+                'subtitle' => trim((string) ($details['subtitle'] ?? '')) ?: 'A personalized choice tailored to your event.',
+                'icon' => trim((string) ($details['icon'] ?? '')) ?: $defaultIcons[$index % count($defaultIcons)],
+                'image' => $images[$index] ?? null,
+            ];
+        })->values()->all();
+    }
+
+    private function questionImages(EventRequirementQuestion $question): array
+    {
+        $optionImages = array_values($question->option_images ?? []);
+        $vendorImages = array_values($question->vendor_attribute_images ?? []);
+        $count = max(count($question->options ?? []), count($optionImages), count($vendorImages));
+        if ($count === 0) {
+            return [];
+        }
+
+        return collect(range(0, $count - 1))->map(function (int $index) use ($optionImages, $vendorImages): ?string {
+            $path = ($optionImages[$index] ?? null) ?: ($vendorImages[$index] ?? null);
+
+            return $path ? (str_starts_with($path, 'http') ? $path : asset('storage/'.ltrim($path, '/'))) : null;
+        })->values()->all();
+    }
+
+    private function selectedCategory(?EventRequirementQuestion $question, string $requested): string
+    {
+        $options = collect($question?->options ?? [])->map('strval')->filter()->values();
+        if ($requested !== '' && ($requested === 'wedding' || $options->contains($requested))) {
+            return $requested;
+        }
+
+        return (string) ($options->first() ?? 'wedding');
+    }
+
+    private function validatedRequirements(Request $request): array
+    {
+        $answers = (array) $request->input('answers', []);
+        unset($answers['preferred_vendor_ids']);
+        foreach ($answers as $answerKey => $value) {
+            if ($answerKey === 'selected_food_package' && $value === 'null') {
+                $answers[$answerKey] = null;
+
+                continue;
+            }
+            if (is_string($value) && in_array(substr(trim($value), 0, 1), ['[', '{'], true)) {
+                $answers[$answerKey] = json_decode($value, true) ?: [];
+            }
+        }
+        $answers['event_category'] ??= (string) $request->input('category', 'wedding');
+        $request->merge(['answers' => $answers]);
+
+        $questions = EventRequirementQuestion::enabled()->get();
+        $categoryOptions = collect($questions->firstWhere('question_code', 'event_category')?->options ?? [])->map('strval')->filter()->values();
+        $answerRules = [];
+        foreach ($questions as $question) {
+            $base = $question->is_required ? ['required'] : ['nullable'];
+            $answerRules['answers.'.$question->question_code] = match ($question->question_type) {
+                'number' => [...$base, 'numeric'],
+                'checkbox', 'multi_select' => [...$base, 'array', 'max:100'],
+                default => [...$base, 'string', 'max:2000'],
+            };
+        }
+
+        $validated = $request->validate(array_merge($answerRules, [
+            'category' => ['required', 'string', 'max:255', Rule::in($categoryOptions->prepend('wedding')->unique()->all())],
+            'guest_count' => ['required', 'integer', 'min:10', 'max:5000'],
+            'answers' => ['required', 'array'],
+            'answers.wedding_budget' => ['required', 'numeric', 'min:1', 'max:500'],
+            'answers.guest_capacity' => ['nullable', 'integer', 'min:10', 'max:5000'],
+            'answers.wedding_tradition' => ['nullable', 'string', 'max:255'],
+            'answers.decoration_type' => ['nullable', 'string', 'max:255'],
+            'answers.venue_setting' => ['nullable', 'string', 'max:255'],
+            'answers.food_type' => ['nullable', 'string', 'max:2000'],
+            'answers.service_area' => ['nullable', 'array', 'max:50'],
+            'answers.service_area.*' => ['string', 'max:255'],
+            'answers.event_timeline' => ['nullable', 'string', 'max:255'],
+            'answers.event_date' => ['nullable', 'date', 'after_or_equal:today'],
+            'answers.event_time' => ['nullable', 'date_format:H:i'],
+            'answers.food_menu_items' => ['nullable', 'array', 'max:100'],
+            'answers.food_menu_items.*.id' => ['required', 'string', 'max:255'],
+            'answers.food_menu_items.*.title' => ['required', 'string', 'max:255'],
+            'answers.food_menu_items.*.category' => ['required', 'string', 'max:100'],
+            'answers.food_menu_items.*.cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'answers.food_menu_items.*.vendor_id' => ['nullable', 'integer'],
+            'answers.food_menu_items.*.vendor_name' => ['nullable', 'string', 'max:255'],
+            'answers.selected_caterers' => ['nullable', 'array', 'max:25'],
+            'answers.selected_caterers.*' => ['integer'],
+            'answers.selected_food_package' => ['nullable', 'array'],
+            'answers.selected_food_extras' => ['nullable', 'array'],
+            'answers.ceremonies' => ['nullable', 'array', 'max:50'],
+            'answers.ceremonies.*' => ['string', 'max:255'],
+        ]));
+        if (! empty($validated['answers']['food_menu_items'])) {
+            $validated['answers']['food_menu_items'] = $this->validatedFoodMenuItems($validated['answers']['food_menu_items']);
+        }
+
+        return $validated;
     }
 
     private function validatedFoodMenuItems(array $selectedItems): array
     {
         $question = EventRequirementQuestion::enabled()->where('question_code', 'food_type')->first();
         $metadata = (array) ($question?->option_metadata ?? []);
-        $values = collect($question?->vendor_attribute_values ?? [])->map('strval')->values();
-        $labels = $values->mapWithKeys(fn (string $value): array => [$value => (string) data_get($metadata, $value.'.label', $value)]);
-        $selectedIds = collect($selectedItems)->pluck('id')->map('strval')->unique()->values();
+        $options = collect($question?->options ?? [])->map('strval')->values();
+        $mappedValues = collect($question?->option_vendor_values ?: $question?->vendor_attribute_values ?: [])->values();
+        $values = $options->map(fn (string $option, int $index): string => (string) (($mappedValues[$index] ?? null) ?: $option));
+        $labels = $values->mapWithKeys(fn (string $value, int $index): array => [$value => $options[$index] ?? $value]);
+        $selected = collect($selectedItems)->map(function (array $item): array {
+            return [
+                'id' => (string) $item['id'],
+                'vendor_id' => isset($item['vendor_id']) ? (int) $item['vendor_id'] : null,
+            ];
+        })->unique(fn (array $item): string => ($item['vendor_id'] ?? 'admin').':'.$item['id'])->values();
+        $selectedIds = $selected->whereNull('vendor_id')->pluck('id');
 
         if (! $question || $selectedIds->diff($values)->isNotEmpty()) {
             throw ValidationException::withMessages(['answers.food_menu_items' => 'Select menu items from the available food question.']);
         }
 
-        return $selectedIds->map(function (string $id) use ($labels, $metadata): array {
+        $vendors = DynamicVendor::query()
+            ->whereIn('id', $selected->pluck('vendor_id')->filter()->unique())
+            ->whereRaw('LOWER(status) = ?', ['active'])
+            ->get()
+            ->filter(fn (DynamicVendor $vendor): bool => mb_strtolower(trim($vendor->category)) === 'catering')
+            ->keyBy('id');
+        $foodCatalog = collect($this->plannerOptions($question))->keyBy(fn (array $item): string => mb_strtolower($item['title']));
+
+        return $selected->map(function (array $selection) use ($foodCatalog, $labels, $metadata, $vendors): array {
+            $id = $selection['id'];
+            if ($selection['vendor_id'] !== null) {
+                $vendor = $vendors->get($selection['vendor_id']);
+                $available = $vendor ? collect($this->cateringMenuItems($vendor, $foodCatalog))->keyBy('id') : collect();
+                $item = $available->get($id);
+                if (! $item) {
+                    throw ValidationException::withMessages(['answers.food_menu_items' => 'Select menu items offered by the chosen caterers.']);
+                }
+
+                return $item;
+            }
+
             $details = (array) ($metadata[$id] ?? []);
 
             return [
@@ -280,5 +519,44 @@ class AiPlannerController extends Controller
                 'cost' => max(0, (float) ($details['cost'] ?? 0)),
             ];
         })->all();
+    }
+
+    private function cateringMenuItems(DynamicVendor $vendor, $foodCatalog): array
+    {
+        $attribute = collect(data_get($vendor->vendor_json, 'attributes', []))
+            ->first(fn (array $item): bool => mb_strtolower(trim((string) ($item['label'] ?? ''))) === 'menu card items');
+        $rawItems = (array) data_get($attribute, 'value', []);
+        if (count($rawItems) === 1 && is_string($rawItems[0])) {
+            $rawItems = preg_split('/\s*,\s*/', $rawItems[0]) ?: [];
+        }
+        $images = array_values((array) data_get($attribute, 'images', []));
+        $vendorName = $vendor->name;
+
+        return collect($rawItems)->map(function ($title, int $index) use ($foodCatalog, $images, $vendor, $vendorName): ?array {
+            $title = trim((string) $title);
+            if ($title === '') {
+                return null;
+            }
+            $configured = $foodCatalog->get(mb_strtolower($title), []);
+            $vendorRate = collect(app(VendorCostingService::class)->catalog([
+                'id' => $vendor->id, 'name' => $vendorName, 'attribute_definitions' => data_get($vendor->vendor_json, 'attributes', []),
+            ], 1))->first(fn (array $rate): bool => $rate['unit'] === 'per_guest' && (
+                mb_strtolower($rate['name']) === mb_strtolower($title)
+                || $rate['attribute_key'] === Str::snake($title)
+                || $rate['attribute_key'] === Str::snake($title).'_price_per_guest'
+            ));
+            $image = $configured['image'] ?? ($images[$index] ?? null);
+
+            return [
+                'id' => (string) ($configured['id'] ?? Str::slug($title, '_')),
+                'title' => $title,
+                'category' => (string) ($configured['category'] ?? 'Menu Items'),
+                'cost' => max(0, (float) ($vendorRate['unit_price'] ?? $configured['cost'] ?? 0)),
+                'source' => $vendorRate ? 'vendor_attribute' : 'configured_menu',
+                'image' => $image ? (str_starts_with($image, 'http') ? $image : asset('storage/'.ltrim($image, '/'))) : null,
+                'vendor_id' => $vendor->id,
+                'vendor_name' => $vendorName,
+            ];
+        })->filter()->values()->all();
     }
 }

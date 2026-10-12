@@ -5,7 +5,7 @@
     @include('admin.partials.alerts')
     <div class="admin-hero flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div class="relative z-10">
-            <a href="{{ route('admin.dynamic-vendors.index') }}" class="text-xs font-bold text-blue-100 transition hover:text-white">← Dynamic Vendors</a>
+            <a href="{{ route('admin.dynamic-vendors.index') }}" class="text-xs font-bold text-blue-100 transition hover:text-white">← Manage Vendors</a>
             <div class="mt-2 flex flex-wrap items-center gap-3"><h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{{ $vendor->name }}</h1><x-dynamic-vendors::status-badge :status="$vendor->status" /></div>
             <p class="mt-1 text-sm text-blue-100">{{ $vendor->category }} · Updated {{ $vendor->updated_at->diffForHumans() }}</p>
         </div>

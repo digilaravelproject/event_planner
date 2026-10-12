@@ -1,4 +1,4 @@
-<footer class="w-full relative bg-gradient-to-br from-[#FFFDF9] via-white to-[#FAF7F2] py-12 md:py-16 px-4 sm:px-8 md:px-12 lg:px-16 border-t border-rose-200/80 shadow-2xl shadow-rose-950/[0.05] overflow-hidden">
+<footer id="site-footer" class="w-full relative bg-gradient-to-br from-[#FFFDF9] via-white to-[#FAF7F2] py-12 md:py-16 px-4 sm:px-8 md:px-12 lg:px-16 border-t border-rose-200/80 shadow-2xl shadow-rose-950/[0.05] overflow-hidden scroll-mt-24">
     <!-- Full-bleed Ambient Corner Glows/Shades (Ref Image 1 style with Light Colors) -->
     <div class="absolute -top-24 -left-24 w-[500px] h-[500px] bg-gradient-to-br from-rose-200/50 via-amber-100/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -right-24 w-[500px] h-[500px] bg-gradient-to-tl from-rose-200/60 via-rose-100/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -7,20 +7,23 @@
     <div class="max-w-[1600px] mx-auto relative z-10 space-y-12">
         <!-- TOP CTA / NEWSLETTER SECTION (Ref Image 2 Top Section) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border-b border-rose-100/80 pb-12">
-            <!-- Left: Headline & Email Form (Col 4) -->
-            <div class="lg:col-span-4 space-y-4">
+            <!-- Left: Any query form -->
+            <div id="query-form" class="lg:col-span-4 space-y-4 scroll-mt-28">
                 <h2 class="text-slate-900 text-2xl md:text-3xl lg:text-4xl font-extrabold font-serif-luxury leading-tight">
-                    Stay ahead with <span class="text-[#850625]">Shaadi Sense.</span>
+                    Have <span class="text-[#850625]">any query?</span>
                 </h2>
                 <p class="text-slate-600 text-xs md:text-sm max-w-sm leading-relaxed font-medium">
-                    Join thousands of couples and planners who trust Shaadi Sense for smart, transparent, and stress-free wedding planning.
+                    Share your details and question. Our team will reply to your email and user panel.
                 </p>
-
-                <!-- Email Input & Button -->
-                <form action="#" method="POST" onsubmit="event.preventDefault();" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2 max-w-md">
-                    <input type="email" placeholder="Enter your email" required class="flex-1 bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs md:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] shadow-xs transition-all">
+                @if(session('query_success'))<div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs font-bold text-emerald-700">{{ session('query_success') }}</div>@endif
+                <form action="{{ route('queries.store') }}" method="POST" class="grid grid-cols-2 gap-2.5 pt-2 max-w-md">@csrf
+                    <input name="name" value="{{ old('name', auth()->user()?->name) }}" placeholder="Your name" required class="bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">
+                    <input name="email" type="email" value="{{ old('email', auth()->user()?->email) }}" placeholder="Email address" required class="bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">
+                    <input name="phone" value="{{ old('phone', auth()->user()?->mobile_number) }}" placeholder="Phone number" class="bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">
+                    <input name="subject" value="{{ old('subject') }}" placeholder="Subject" required class="bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">
+                    <textarea name="message" rows="3" placeholder="Write your query" required class="col-span-2 bg-white border border-rose-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#850625]">{{ old('message') }}</textarea>
                     <button type="submit" class="bg-[#850625] hover:bg-[#6b041e] text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all flex items-center justify-center gap-2 shrink-0">
-                        <span>Subscribe</span>
+                        <span>Submit Query</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </form>
@@ -99,10 +102,10 @@
 
                 <!-- Social Media Icons -->
                 <div class="flex items-center space-x-2.5 pt-1">
-                    <a href="#" class="w-8.5 h-8.5 rounded-lg bg-rose-50 hover:bg-[#850625] text-slate-600 hover:text-white border border-rose-100 flex items-center justify-center transition-all text-xs shadow-xs"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="w-8.5 h-8.5 rounded-lg bg-rose-50 hover:bg-[#850625] text-slate-600 hover:text-white border border-rose-100 flex items-center justify-center transition-all text-xs shadow-xs"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="w-8.5 h-8.5 rounded-lg bg-rose-50 hover:bg-[#850625] text-slate-600 hover:text-white border border-rose-100 flex items-center justify-center transition-all text-xs shadow-xs"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#" class="w-8.5 h-8.5 rounded-lg bg-rose-50 hover:bg-[#850625] text-slate-600 hover:text-white border border-rose-100 flex items-center justify-center transition-all text-xs shadow-xs"><i class="fab fa-youtube"></i></a>
+                    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="w-8.5 h-8.5 rounded-lg bg-rose-50 hover:bg-[#850625] text-slate-600 hover:text-white border border-rose-100 flex items-center justify-center transition-all text-xs shadow-xs"><i class="fab fa-instagram"></i></a>
+                    <a href="https://x.com/" target="_blank" rel="noopener noreferrer" aria-label="X" class="w-8.5 h-8.5 rounded-lg bg-rose-50 hover:bg-[#850625] text-slate-600 hover:text-white border border-rose-100 flex items-center justify-center transition-all text-xs shadow-xs"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="w-8.5 h-8.5 rounded-lg bg-rose-50 hover:bg-[#850625] text-slate-600 hover:text-white border border-rose-100 flex items-center justify-center transition-all text-xs shadow-xs"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube" class="w-8.5 h-8.5 rounded-lg bg-rose-50 hover:bg-[#850625] text-slate-600 hover:text-white border border-rose-100 flex items-center justify-center transition-all text-xs shadow-xs"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
 
@@ -110,11 +113,11 @@
             <div class="md:col-span-3 space-y-3">
                 <h4 class="text-slate-900 font-bold text-xs uppercase tracking-wider">Solutions</h4>
                 <ul class="space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                    <li><a href="#categories" class="hover:text-[#850625] transition-colors">Event Categories</a></li>
-                    <li><a href="#estimator" class="hover:text-[#850625] transition-colors">Smart Cost Estimator</a></li>
-                    <li><a href="#how-it-works" class="hover:text-[#850625] transition-colors">AI Vendor Matchmaker</a></li>
-                    <li><a href="#why-choose-us" class="hover:text-[#850625] transition-colors">Budget Allocation</a></li>
-                    <li><a href="#testimonials" class="hover:text-[#850625] transition-colors">Client Reviews</a></li>
+                    <li><a href="{{ route('home') }}#categories" class="hover:text-[#850625] transition-colors">Event Categories</a></li>
+                    <li><a href="{{ route('home') }}#estimator" class="hover:text-[#850625] transition-colors">Smart Cost Estimator</a></li>
+                    <li><a href="{{ route('home') }}#how-it-works" class="hover:text-[#850625] transition-colors">AI Vendor Matchmaker</a></li>
+                    <li><a href="{{ route('home') }}#why-choose-us" class="hover:text-[#850625] transition-colors">Budget Allocation</a></li>
+                    <li><a href="{{ route('home') }}#testimonials" class="hover:text-[#850625] transition-colors">Client Reviews</a></li>
                 </ul>
             </div>
 
@@ -122,11 +125,11 @@
             <div class="md:col-span-3 space-y-3">
                 <h4 class="text-slate-900 font-bold text-xs uppercase tracking-wider">Resources</h4>
                 <ul class="space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                    <li><a href="#" class="hover:text-[#850625] transition-colors">Wedding Planning Guide</a></li>
-                    <li><a href="#" class="hover:text-[#850625] transition-colors">Vendor Pricing Index</a></li>
-                    <li><a href="#" class="hover:text-[#850625] transition-colors">Blog & Inspiration</a></li>
-                    <li><a href="#" class="hover:text-[#850625] transition-colors">Budget Calculators</a></li>
-                    <li><a href="#" class="hover:text-[#850625] transition-colors">Community Forum</a></li>
+                    <li><a href="{{ route('home') }}#how-it-works" class="hover:text-[#850625] transition-colors">Wedding Planning Guide</a></li>
+                    <li><a href="{{ route('home') }}#estimator" class="hover:text-[#850625] transition-colors">Vendor Pricing Index</a></li>
+                    <li><a href="{{ route('home') }}#shaadi-experience-zone" class="hover:text-[#850625] transition-colors">Blog & Inspiration</a></li>
+                    <li><a href="{{ route('home') }}#estimator" class="hover:text-[#850625] transition-colors">Budget Calculators</a></li>
+                    <li><a href="{{ route('home') }}#testimonials" class="hover:text-[#850625] transition-colors">Community Forum</a></li>
                 </ul>
             </div>
 
@@ -134,9 +137,9 @@
             <div class="md:col-span-2 space-y-3">
                 <h4 class="text-slate-900 font-bold text-xs uppercase tracking-wider">Company</h4>
                 <ul class="space-y-2 text-xs md:text-sm text-slate-600 font-medium">
-                    <li><a href="#why-choose-us" class="hover:text-[#850625] transition-colors">About Us</a></li>
-                    <li><a href="#how-it-works" class="hover:text-[#850625] transition-colors">How It Works</a></li>
-                    <li><a href="#" class="hover:text-[#850625] transition-colors">Contact Support</a></li>
+                    <li><a href="{{ route('home') }}#why-choose-us" class="hover:text-[#850625] transition-colors">About Us</a></li>
+                    <li><a href="{{ route('home') }}#how-it-works" class="hover:text-[#850625] transition-colors">How It Works</a></li>
+                    <li><a href="mailto:support@shaadisense.com" class="hover:text-[#850625] transition-colors">Contact Support</a></li>
                     <li><a href="{{ route('admin.login') }}" class="hover:text-[#850625] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-lock text-[10px] text-[#850625]"></i> Admin Login</a></li>
                 </ul>
             </div>
@@ -146,10 +149,10 @@
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium pt-2">
             <p>&copy; {{ date('Y') }} Shaadi Sense Inc. All rights reserved.</p>
             <div class="flex flex-wrap items-center gap-6">
-                <a href="#" class="hover:text-slate-900 transition-colors">Terms of Service</a>
-                <a href="#" class="hover:text-slate-900 transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-slate-900 transition-colors">Cookie Settings</a>
-                <a href="#" class="hover:text-slate-900 transition-colors">Accessibility</a>
+                <a href="{{ route('home') }}#site-footer" class="hover:text-slate-900 transition-colors">Terms of Service</a>
+                <a href="{{ route('home') }}#site-footer" class="hover:text-slate-900 transition-colors">Privacy Policy</a>
+                <a href="{{ route('home') }}#site-footer" class="hover:text-slate-900 transition-colors">Cookie Settings</a>
+                <a href="{{ route('home') }}#site-footer" class="hover:text-slate-900 transition-colors">Accessibility</a>
             </div>
         </div>
     </div>

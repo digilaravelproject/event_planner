@@ -42,8 +42,10 @@
             <nav class="space-y-1">
                 @php
                     $route = Route::currentRouteName();
+                    $hasActiveSubscription = Auth::user()->hasActiveSubscription();
                 @endphp
 
+                @if($hasActiveSubscription)
                 <a href="{{ route('user.dashboard') }}"
                     class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
                     {{ $route === 'user.dashboard' ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
@@ -57,6 +59,7 @@
                     <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h2m-5 13h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z"/></svg>
                     My Event Plans
                 </a>
+                @endif
                 
                 <a href="{{ route('user.subscription') }}" 
                     class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
@@ -66,6 +69,14 @@
                     </svg>
                     Subscription
                 </a>
+
+                @if($hasActiveSubscription)
+                <a href="{{ route('user.queries.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150 {{ str_starts_with((string) $route, 'user.queries.') ? 'bg-[#850625] text-white shadow-md shadow-[#850625]/10' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50' }}">
+                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M3.75 12a8.25 8.25 0 0 1 16.5 0c0 4.556-3.694 8.25-8.25 8.25a8.28 8.28 0 0 1-3.812-.926L3.75 20.25l.926-4.438A8.28 8.28 0 0 1 3.75 12Z"/></svg>
+                    Queries
+                </a>
+                @endif
 
                 <a href="{{ route('user.profile') }}" 
                     class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold transition duration-150
@@ -110,7 +121,7 @@
     <div class="flex-1 flex flex-col min-w-0">
         <!-- Top bar -->
         <header class="bg-white border-b border-slate-200/50 px-8 py-4 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-4">@include('user.partials.notification-bell')</div>
+            <div class="flex items-center gap-4">@if(Auth::user()->hasActiveSubscription()) @include('user.partials.notification-bell') @endif</div>
         </header>
 
         <!-- Dynamic Content -->

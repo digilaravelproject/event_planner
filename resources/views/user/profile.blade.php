@@ -63,13 +63,13 @@
                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Active Plan</span>
                         <span class="text-xl font-extrabold text-[#850625] tracking-tight uppercase">{{ $planName }}</span>
                     </div>
-                    <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold tracking-wide px-3 py-1 rounded-full uppercase shrink-0">
-                        Paid & Active
+                    <span class="text-[10px] font-bold tracking-wide px-3 py-1 rounded-full uppercase shrink-0 {{ $subscriptionFlag === 'subscribed' ? 'bg-emerald-50 text-emerald-600' : ($subscriptionFlag === 'expired' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-600') }}">
+                        {{ $subscriptionFlag }}
                     </span>
                 </div>
 
                 <div class="text-[11px] text-slate-500 font-light space-y-1 pt-3 border-t border-slate-100">
-                    <div>Next billing date: <strong>{{ $user->subscription_ends_at ? $user->subscription_ends_at->format('M d, Y') : now()->addMonth()->format('M d, Y') }}</strong></div>
+                    <div>{{ $subscriptionFlag === 'expired' ? 'Expired on' : 'Valid until' }}: <strong>{{ $user->subscription_ends_at ? $user->subscription_ends_at->format('M d, Y') : 'No active validity' }}</strong></div>
                     <div>Billing frequency: <strong>{{ $priceLabel }}</strong></div>
                 </div>
             </div>

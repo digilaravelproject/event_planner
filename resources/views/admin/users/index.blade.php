@@ -9,6 +9,10 @@
             <p class="text-sm text-slate-500 mt-1 font-semibold">Manage user accounts, view active subscriptions, and moderate login statuses.</p>
             @include('admin.partials.alerts')
         </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('admin.users.export.pdf') }}" class="inline-flex items-center gap-2 rounded-lg bg-[#850625] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#6f041f]"><i class="fa-solid fa-file-pdf"></i> Download PDF</a>
+            <a href="{{ route('admin.users.export.excel') }}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"><i class="fa-solid fa-file-excel"></i> Download Excel</a>
+        </div>
     </div>
 
     <!-- Users Table -->
@@ -20,7 +24,8 @@
                         <th class="px-6 py-4.5">User Details</th>
                         <th class="px-6 py-4.5">Mobile Number</th>
                         <th class="px-6 py-4.5">Subscription Plan</th>
-                        <th class="px-6 py-4.5">Ends At</th>
+                        <th class="px-6 py-4.5">Subscription Details</th>
+                        <th class="px-6 py-4.5">Subscription Flag</th>
                         <th class="px-6 py-4.5 text-center">Status</th>
                         <th class="px-6 py-4.5 text-right">Actions</th>
                     </tr>
@@ -59,13 +64,20 @@
                                 @endif
                             </td>
 
-                            <!-- Subscription Expiry -->
+                            <!-- Subscription details -->
                             <td class="px-6 py-4 text-xs font-bold text-slate-500">
                                 @if($user->subscription_ends_at)
-                                    {{ $user->subscription_ends_at->format('M d, Y H:i') }}
+                                    <div>{{ $user->hasActiveSubscription() ? 'Active' : 'Expired' }} · ends {{ $user->subscription_ends_at->format('M d, Y H:i') }}</div>
+                                    @if($latest = $user->subscriptionHistory->first())<div class="mt-1 font-normal text-slate-400">{{ ucfirst($latest->billing_cycle) }} · ₹{{ number_format($latest->amount, 2) }} · {{ $latest->razorpay_payment_id ?: 'Free plan' }}</div>@endif
                                 @else
                                     N/A
                                 @endif
+                            </td>
+
+                            <!-- Subscription flag -->
+                            <td class="px-6 py-4">
+                                @php $subscriptionFlag = $user->subscriptionFlag(); @endphp
+                                <span class="inline-flex rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide {{ $subscriptionFlag === 'subscribed' ? 'bg-emerald-50 text-emerald-700' : ($subscriptionFlag === 'expired' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600') }}">{{ $subscriptionFlag }}</span>
                             </td>
 
                             <!-- Status Toggle -->
@@ -133,7 +145,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-10 text-center text-slate-400 font-semibold">No users registered yet.</td>
+                            <td colspan="7" class="px-6 py-10 text-center text-slate-400 font-semibold">No users registered yet.</td>
                         </tr>
                     @endforelse
                 </tbody>

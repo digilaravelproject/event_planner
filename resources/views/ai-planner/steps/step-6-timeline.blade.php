@@ -1,12 +1,12 @@
 <!-- Step 7: Dates, Reference Event Date & Timeline Selection -->
-<div x-show="currentStep === 7" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
+<div x-show="currentStep === {{ $stepNumbers['event_timeline'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
     <div class="space-y-2">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-calendar-star text-[10px]"></i>
-            <span>Step 07 / 07 • Timeline & Event Date</span>
+            <span>Step {{ str_pad((string) ($stepNumbers['event_timeline'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Timeline & Event Date</span>
         </div>
         <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('event_timeline')?->question ?? 'When is the big day planned?' }}</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Helps vendors verify seasonal availability, lock early-bird pricing, and reserve mandap slots.</p>
+        <p class="text-slate-600 text-sm sm:text-base">Choose the event date and start time for your personalized plan.</p>
     </div>
 
     <!-- 1. Custom Interactive Reference Event Date Picker Card -->
@@ -15,7 +15,7 @@
             <div class="space-y-1">
                 <span class="text-[10px] uppercase font-bold text-rose-200 tracking-widest block">Exact / Reference Date (Optional)</span>
                 <h3 class="font-extrabold text-lg text-white font-serif-luxury">Do you have a specific wedding date in mind?</h3>
-                <p class="text-xs text-rose-200">Selecting a reference date checks live mandap slot availability & seasonal auspicious dates.</p>
+                <p class="text-xs text-rose-200">An exact date helps organize the event timeline and recommendations.</p>
             </div>
 
             <!-- Custom Luxury Date Trigger Button -->
@@ -44,7 +44,9 @@
                     
                     <!-- Month Navigation Header -->
                     <div class="flex items-center justify-between border-b border-rose-100 pb-2.5">
-                        <button type="button" @click="prevMonth()" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-[#850625] text-[#850625] hover:text-white flex items-center justify-center transition-all cursor-pointer">
+                        <button type="button" @click="prevMonth()" :disabled="!canGoToPreviousMonth()"
+                            :class="canGoToPreviousMonth() ? 'bg-rose-50 text-[#850625] hover:bg-[#850625] hover:text-white cursor-pointer' : 'cursor-not-allowed bg-slate-100 text-slate-300'"
+                            class="w-8 h-8 rounded-xl flex items-center justify-center transition-all">
                             <i class="fa-solid fa-chevron-left text-xs"></i>
                         </button>
                         
@@ -70,13 +72,15 @@
                         <!-- Days of Month -->
                         <template x-for="day in getDaysInMonth(calendarYear, calendarMonth)" :key="'day-' + day">
                             <button type="button" 
-                                @click="selectCalendarDate(day); isDatePickerOpen = false;"
+                                @click="if (!isPastDate(day)) { selectCalendarDate(day); isDatePickerOpen = false; }"
+                                :disabled="isPastDate(day)"
                                 :class="
+                                    isPastDate(day) ? 'cursor-not-allowed bg-slate-50 text-slate-300 line-through' :
                                     isDateSelected(day) ? 'bg-[#850625] text-white font-extrabold shadow-md ring-2 ring-rose-300' :
                                     isAuspiciousDate(day) ? 'bg-amber-100 text-amber-900 font-extrabold border border-amber-300 hover:bg-amber-200' :
                                     'text-slate-700 hover:bg-rose-50 hover:text-[#850625] font-semibold'
                                 "
-                                class="h-8 rounded-xl transition-all flex items-center justify-center relative cursor-pointer group text-xs">
+                                class="h-8 rounded-xl transition-all flex items-center justify-center relative group text-xs">
                                 <span x-text="day"></span>
                                 <template x-if="isAuspiciousDate(day)">
                                     <span class="absolute -top-0.5 -right-0.5 text-[8px]">✨</span>
@@ -103,21 +107,28 @@
         <!-- Quick Muhurat Pills Bar -->
         <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-white/10">
             <span class="text-[10px] uppercase font-bold text-rose-300">Quick Muhurats:</span>
-            <button type="button" @click="planner.eventDate = '2026-11-25'; planner.timeline = '3 - 6 Months';"
-                class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold text-rose-100 border border-white/15 transition-all flex items-center gap-1 cursor-pointer">
+            <button type="button" @click="if (!isQuickDatePast('2026-11-25')) { planner.eventDate = '2026-11-25'; planner.timeline = '3 - 6 Months'; }"
+                :disabled="isQuickDatePast('2026-11-25')" :class="isQuickDatePast('2026-11-25') ? 'cursor-not-allowed opacity-40 line-through' : 'cursor-pointer hover:bg-white/20'"
+                class="px-3 py-1 rounded-full bg-white/10 text-[10px] font-bold text-rose-100 border border-white/15 transition-all flex items-center gap-1">
                 ✨ 25 Nov 2026 (Tulsi Vivah)
             </button>
-            <button type="button" @click="planner.eventDate = '2026-12-18'; planner.timeline = '3 - 6 Months';"
-                class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold text-rose-100 border border-white/15 transition-all flex items-center gap-1 cursor-pointer">
+            <button type="button" @click="if (!isQuickDatePast('2026-12-18')) { planner.eventDate = '2026-12-18'; planner.timeline = '3 - 6 Months'; }"
+                :disabled="isQuickDatePast('2026-12-18')" :class="isQuickDatePast('2026-12-18') ? 'cursor-not-allowed opacity-40 line-through' : 'cursor-pointer hover:bg-white/20'"
+                class="px-3 py-1 rounded-full bg-white/10 text-[10px] font-bold text-rose-100 border border-white/15 transition-all flex items-center gap-1">
                 ❄️ 18 Dec 2026 (Winter Peak)
             </button>
-            <button type="button" @click="planner.eventDate = '2027-01-20'; planner.timeline = '3 - 6 Months';"
-                class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-[10px] font-bold text-rose-100 border border-white/15 transition-all flex items-center gap-1 cursor-pointer">
+            <button type="button" @click="if (!isQuickDatePast('2027-01-20')) { planner.eventDate = '2027-01-20'; planner.timeline = '3 - 6 Months'; }"
+                :disabled="isQuickDatePast('2027-01-20')" :class="isQuickDatePast('2027-01-20') ? 'cursor-not-allowed opacity-40 line-through' : 'cursor-pointer hover:bg-white/20'"
+                class="px-3 py-1 rounded-full bg-white/10 text-[10px] font-bold text-rose-100 border border-white/15 transition-all flex items-center gap-1">
                 🌸 20 Jan 2027 (Spring Special)
             </button>
         </div>
 
         <!-- Selected Date Preview Pill -->
+        <label class="block text-sm font-bold text-slate-800">Event start time (optional, local time)
+            <input type="time" x-model="planner.eventTime" class="mt-2 block rounded-xl border border-slate-300 bg-white p-3">
+            <span class="mt-1 block text-xs font-normal text-slate-500">Used to check vendor service hours. Confirm the full event duration with your vendor.</span>
+        </label>
         <template x-if="planner.eventDate">
             <div class="pt-3 border-t border-white/15 flex items-center justify-between text-xs">
                 <span class="flex items-center gap-2 text-emerald-300 font-bold">
@@ -134,19 +145,33 @@
         <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider block">Or Choose Your Approximate Planning Window</span>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <template x-for="time in [
-                { id: 'Next 30 Days', title: 'Next 30 Days', tag: 'Fast-Track Setup', badge: 'Urgent Booking', icon: 'fa-solid fa-bolt', desc: 'Express priority vendor allocation & instant mandap slot confirmation.' },
-                { id: 'Next 3 Months', title: 'Next 1 – 3 Months', tag: 'Optimal Prep Window', badge: 'Recommended', icon: 'fa-solid fa-calendar-week', desc: 'Ideal timeframe for menu tastings, designer fittings & invitation printing.' },
-                { id: '3 - 6 Months', title: '3 – 6 Months', tag: 'Peak Wedding Season', badge: 'Most Popular', icon: 'fa-solid fa-heart', desc: 'Full custom decor styling, VVIP catering counters & prime weekend slots.' },
-                { id: '6+ Months', title: '6+ Months Ahead', tag: 'Early Bird Savings', badge: 'Best Price Lock', icon: 'fa-solid fa-gem', desc: 'Lock in current rates, early bird discounts & priority palace venue bookings.' }
-            ]" :key="time.id">
+            <template x-for="time in optionsFor('event_timeline', []).map((value, index) => {
+                const title = String(typeof value === 'object' ? (value.title || value.name || value.id) : value);
+                return {
+                    id: String(typeof value === 'object' ? (value.id || title) : value),
+                    title,
+                    tag: 'Admin-managed planning window',
+                    badge: planner.timeline === String(typeof value === 'object' ? (value.id || title) : value) ? 'Selected' : 'Available',
+                    icon: ['fa-solid fa-bolt', 'fa-solid fa-calendar-week', 'fa-solid fa-heart', 'fa-solid fa-gem'][index % 4],
+                    desc: 'This timeline option is configured in the event requirement question.',
+                    image: imageFor('event_timeline', index, null)
+                };
+            })" :key="time.id">
                 
                 <div @click="planner.timeline = time.id"
                     :class="planner.timeline === time.id ? 'border-[#850625] bg-rose-50/30 shadow-2xl ring-2 ring-[#850625]/25 scale-[1.02]' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-lg'"
-                    class="p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 relative group select-none">
+                    class="p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 relative group select-none overflow-hidden min-h-[210px]">
+
+                    <template x-if="time.image">
+                        <div class="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                            :class="planner.timeline === time.id ? '!opacity-100' : ''">
+                            <img :src="time.image" :alt="time.title" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-white via-white/70 to-white/5"></div>
+                        </div>
+                    </template>
 
                     <!-- Selected Indicator -->
-                    <div class="flex items-center justify-between">
+                    <div class="relative z-10 flex items-center justify-between">
                         <div class="w-10 h-10 rounded-2xl flex items-center justify-center transition-colors"
                             :class="planner.timeline === time.id ? 'bg-[#850625] text-white shadow-md' : 'bg-rose-50 text-[#850625] group-hover:bg-[#850625] group-hover:text-white'">
                             <i :class="time.icon" class="text-base"></i>
@@ -158,19 +183,22 @@
                         </span>
                     </div>
 
-                    <div class="space-y-1">
+                    <div class="relative z-10 space-y-1">
                         <h4 class="font-extrabold text-slate-900 text-base leading-snug" x-text="time.title"></h4>
                         <span class="text-[11px] font-bold text-[#850625] block" x-text="time.tag"></span>
                         <p class="text-xs text-slate-500 leading-relaxed pt-1" x-text="time.desc"></p>
                     </div>
 
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold"
+                    <div class="relative z-10 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold"
                         :class="planner.timeline === time.id ? 'text-[#850625]' : 'text-slate-400 group-hover:text-[#850625]'">
                         <span x-text="planner.timeline === time.id ? 'Active Selection' : 'Select Window'"></span>
                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </div>
                 </div>
             </template>
+        </div>
+        <div x-show="optionsFor('event_timeline', []).length === 0" class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+            Timeline options have not been configured by the administrator.
         </div>
     </div>
 
@@ -184,7 +212,7 @@
                     <span class="text-xs font-bold text-emerald-300 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-400/30" x-text="'📅 ' + formatEventDate(planner.eventDate)"></span>
                 </template>
             </div>
-            <p class="text-xs text-rose-100">All 7 steps completed. Click the button below to generate your personalized AI plan.</p>
+            <p class="text-xs text-rose-100">Complete the remaining questions, then generate your personalized AI plan. Your choices will be saved before login.</p>
         </div>
 
         <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-amber-300 shrink-0 text-xl shadow-inner">
