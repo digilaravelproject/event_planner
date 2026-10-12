@@ -24,7 +24,9 @@
             return [$step['code'] => $value];
         })->all();
 @endphp
-<div class="min-h-screen bg-[#FAF7F2] text-slate-800 pt-24 md:pt-28 pb-12 px-4 sm:px-6 lg:px-8 font-sans-ui relative overflow-x-hidden" x-data="{
+<div class="min-h-0 sm:min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF7F2] to-[#F5ECE3] text-slate-800 pt-18 sm:pt-22 md:pt-24 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8 font-sans-ui relative flex flex-col justify-start overflow-x-hidden" 
+    @keydown.window.enter="handleEnterKey($event)"
+    x-data="{
     currentStep: {{ $initialStep ?? 1 }},
     totalSteps: {{ count($plannerSteps) }},
     plannerSteps: @js($plannerSteps),
@@ -467,6 +469,12 @@
             this.scrollToPlanner();
         }
     },
+    handleEnterKey(e) {
+        if (this.isCalculating || this.isModalOpen) return;
+        if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'textarea') return;
+        e.preventDefault();
+        this.nextStep();
+    },
     generatePlan() {
         if (this.isCalculating) return;
         if (!this.validateCurrentStep()) return;
@@ -496,8 +504,9 @@
         </svg>
     </div>
 
-    <div class="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start relative z-10">
+    <div class="max-w-5xl xl:max-w-6xl mx-auto w-full relative z-10 my-0">
 
+        {{-- 
         <!-- Sidebar Navigation (Psychological Visual Progress & Steps list) -->
         <div class="lg:sticky lg:top-28 lg:col-span-4 xl:col-span-3 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto bg-gradient-to-b from-[#850625] to-[#63041b] text-white rounded-3xl p-5 sm:p-6 shadow-xl relative overflow-x-hidden space-y-6 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,.35)_transparent]">
             <!-- Background Ambient Glow -->
@@ -561,13 +570,30 @@
                 </div>
             </div>
         </div>
+        --}}
 
         <!-- Main Interactive Questionnaire & Steps Area -->
-        <div class="lg:col-span-8 xl:col-span-9 bg-white/90 backdrop-blur-xl rounded-3xl p-5 sm:p-7 shadow-lg border border-rose-100/80 min-h-[480px] flex flex-col justify-between relative overflow-hidden scroll-mt-28">
+        <div class="w-full bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-[28px] p-4 sm:p-6 lg:p-7 shadow-[0_20px_50px_-15px_rgba(133,6,37,0.1)] border border-[#850625]/15 min-h-0 flex flex-col justify-between relative overflow-hidden scroll-mt-16 sm:scroll-mt-24">
 
+            <!-- Slim Header Progress Tracker -->
+            <div class="mb-2.5 sm:mb-3.5 space-y-1 border-b border-rose-100/70 pb-2 sm:pb-2.5">
+                <div class="flex items-center justify-between text-xs font-bold font-cinzel">
+                    <span class="text-[#850625] tracking-widest uppercase flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-[#D4AF37]"></i>
+                        <span>Shaadi Sense AI Planner</span>
+                    </span>
+                    <span class="text-slate-500 font-sans-ui text-[11px] sm:text-xs font-medium">
+                        Step <span class="font-bold text-[#850625]" x-text="currentStep"></span> of <span class="font-bold text-slate-800" x-text="totalSteps"></span>
+                        <span class="text-slate-400 font-normal ml-0.5 sm:ml-1">(<span x-text="Math.round(Math.min(currentStep, totalSteps) / totalSteps * 100) + '%'"></span>)</span>
+                    </span>
+                </div>
+                <div class="w-full h-1.5 bg-rose-100/60 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-[#850625] via-[#A8163B] to-[#D4AF37] transition-all duration-500 rounded-full" :style="'width: ' + (Math.min(currentStep, totalSteps) / totalSteps * 100) + '%'"></div>
+                </div>
+            </div>
             
             <!-- Steps Content Include -->
-            <div class="space-y-6">
+            <div class="space-y-3 sm:space-y-4">
                 @include('ai-planner.steps.step-1-budget')
                 @include('ai-planner.steps.step-2-guests')
                 @include('ai-planner.steps.step-5-location')
@@ -580,37 +606,49 @@
 
             <!-- Action Controls (Back / Continue Buttons) -->
             @if($errors->any())
-                <div role="alert" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                <div role="alert" class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs text-rose-800">
                     <p class="font-bold">Your answers are still here. Please correct these details:</p>
-                    <ul class="mt-2 list-disc pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                    <ul class="mt-1 list-disc pl-5">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
                 </div>
             @endif
-            <p x-show="plannerError" x-text="plannerError" class="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700"></p>
-            <div x-show="currentStep <= totalSteps" class="pt-8 border-t border-slate-100 flex items-center justify-between gap-4 mt-8">
+            <p x-show="plannerError" x-text="plannerError" class="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-700"></p>
+            
+            <div x-show="currentStep <= totalSteps" class="pt-3.5 border-t border-slate-200 flex items-center justify-between gap-4 mt-3.5">
                 <button type="button" 
                     @click="prevStep()" 
                     x-show="currentStep > 1" 
-                    class="px-6 py-3 rounded-full border border-slate-300 hover:border-[#850625] text-slate-700 hover:text-[#850625] text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Back</span>
+                    class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-full border-2 border-slate-300 hover:border-[#850625] bg-white text-slate-800 hover:text-[#850625] text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs hover:shadow">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                    <span class="font-bold text-slate-800 hover:text-[#850625]" style="color: inherit !important;">Back</span>
                 </button>
 
                 <div x-show="currentStep <= 1"></div>
 
+                <!-- Keyboard Enter Hint (Crystal Clear, User-Friendly & High Contrast) -->
+                <div class="hidden sm:inline-flex items-center gap-2 select-none ml-auto mr-3 text-xs sm:text-sm font-semibold" style="color: #334155 !important;">
+                    <span style="color: #475569 !important; font-size: 13px; font-weight: 600;">Press</span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold shadow-sm"
+                          style="background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #334155 !important; box-shadow: 0 2px 0 #020617 !important;">
+                        <span style="color: #ffffff !important; font-weight: 800; font-size: 12px; letter-spacing: 0.08em;">ENTER</span>
+                        <span style="color: #fbbf24 !important; font-size: 14px; font-weight: 900; line-height: 1;">↵</span>
+                    </span>
+                    <span style="color: #475569 !important; font-size: 13px; font-weight: 600;">to continue</span>
+                </div>
+
                 <button type="button" 
                     @click="nextStep()" 
                     x-show="currentStep < totalSteps"
-                    class="px-8 py-3.5 rounded-full bg-[#850625] hover:bg-[#6b041e] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#850625]/20 hover:shadow-xl transition-all flex items-center gap-2.5 ml-auto cursor-pointer">
-                    <span>Continue</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+                    class="px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-gradient-to-r from-[#850625] to-[#6E0720] hover:from-[#6E0720] hover:to-[#540417] text-white text-sm sm:text-base font-extrabold shadow-lg shadow-[#850625]/30 hover:shadow-xl transition-all flex items-center gap-3 cursor-pointer">
+                    <span class="text-white font-extrabold text-sm sm:text-base tracking-wide inline-block" style="color: #ffffff !important; display: inline-block !important; visibility: visible !important;">Continue</span>
+                    <i class="fa-solid fa-arrow-right text-sm text-[#D4AF37]" style="color: #D4AF37 !important;"></i>
                 </button>
 
                 <button type="button" 
                     @click="generatePlan()" 
                     x-show="currentStep === totalSteps"
-                    class="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#D4AF37] to-amber-400 hover:from-amber-400 hover:to-[#D4AF37] text-slate-950 text-xs sm:text-sm font-extrabold shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 ml-auto cursor-pointer">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>{{ $editingPlan ? 'Update Plan' : 'Generate AI Plan' }}</span>
+                    class="px-8 py-3.5 rounded-full bg-gradient-to-r from-[#D4AF37] to-amber-400 hover:from-amber-400 hover:to-[#D4AF37] text-slate-950 text-sm sm:text-base font-extrabold shadow-xl transition-all transform hover:scale-105 flex items-center gap-2.5 cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sm text-slate-950"></i>
+                    <span class="text-slate-950 font-extrabold tracking-wide" style="color: #020617 !important;">{{ $editingPlan ? 'Update Plan' : 'Generate AI Plan' }}</span>
                 </button>
             </div>
 

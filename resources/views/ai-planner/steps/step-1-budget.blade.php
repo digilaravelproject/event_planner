@@ -1,16 +1,16 @@
 <!-- Step 1: Budget Selection -->
-<div x-show="currentStep === {{ $stepNumbers['wedding_budget'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
-    <div class="space-y-2">
+<div x-show="currentStep === {{ $stepNumbers['wedding_budget'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+    <div class="space-y-1.5">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-calculator text-[10px]"></i>
             <span>Step {{ str_pad((string) ($stepNumbers['wedding_budget'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Financial Comfort</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('wedding_budget')?->question ?? 'What is your total estimated wedding budget?' }}</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Drag the slider, select a preset, or type your exact budget manually in Lakhs.</p>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('wedding_budget')?->question ?? 'What is your total estimated wedding budget?' }}</h2>
+        <p class="text-xs sm:text-sm text-slate-600">Drag the slider, select a preset, or type your exact budget manually in Lakhs.</p>
     </div>
 
     <!-- Interactive Budget Card -->
-    <div class="bg-white p-6 sm:p-8 rounded-3xl border border-rose-100 shadow-xl space-y-6">
+    <div class="bg-white p-5 sm:p-6 rounded-3xl border border-rose-100 shadow-lg space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-rose-100/60">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Estimated Budget Target</span>
             

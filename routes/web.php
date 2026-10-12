@@ -169,6 +169,7 @@ Route::prefix('user')->group(function () {
     });
 });
 
+/*
 // Vendor Portal Routes
 Route::prefix('vendor')->name('vendor.')->group(function () {
     Route::middleware('guest:vendor')->group(function () {
@@ -192,6 +193,7 @@ Route::prefix('vendor')->name('vendor.')->group(function () {
             ->except(['dashboard', 'profile']);
     });
 });
+*/
 
 Route::get('/', function () {
     $content = fn (string $type) => Schema::hasTable('landing_contents')

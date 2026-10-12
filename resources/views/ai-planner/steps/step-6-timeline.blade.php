@@ -1,12 +1,12 @@
 <!-- Step 7: Dates, Reference Event Date & Timeline Selection -->
-<div x-show="currentStep === {{ $stepNumbers['event_timeline'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
-    <div class="space-y-2">
+<div x-show="currentStep === {{ $stepNumbers['event_timeline'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+    <div class="space-y-1.5">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-calendar-star text-[10px]"></i>
             <span>Step {{ str_pad((string) ($stepNumbers['event_timeline'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Timeline & Event Date</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('event_timeline')?->question ?? 'When is the big day planned?' }}</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Choose the event date and start time for your personalized plan.</p>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('event_timeline')?->question ?? 'When is the big day planned?' }}</h2>
+        <p class="text-xs sm:text-sm text-slate-600">Choose the event date and start time for your personalized plan.</p>
     </div>
 
     <!-- 1. Custom Interactive Reference Event Date Picker Card -->

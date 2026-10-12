@@ -1,12 +1,12 @@
 <!-- Step 5: Venue Ambience & Dynamic Decor Styling (With High-Resolution Visual Previews) -->
-<div x-show="currentStep === {{ $stepNumbers['decoration_type'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
-    <div class="space-y-2">
+<div x-show="currentStep === {{ $stepNumbers['decoration_type'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+    <div class="space-y-1.5">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
             <span>Step {{ str_pad((string) ($stepNumbers['decoration_type'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Venue Ambience & Decor Visualizer</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('decoration_type')?->question ?? 'Select your Venue Vibe & Mandap Decor' }}</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Visual previews & decor themes tailored for <span class="font-bold text-[#850625]" x-text="planner.culture"></span> tradition.</p>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('decoration_type')?->question ?? 'Select your Venue Vibe & Mandap Decor' }}</h2>
+        <p class="text-xs sm:text-sm text-slate-600">Visual previews & decor themes tailored for <span class="font-bold text-[#850625]" x-text="planner.culture"></span> tradition.</p>
     </div>
 
     <!-- 1. Venue Setting Environment Cards (Dynamically Loaded from Admin Question) -->

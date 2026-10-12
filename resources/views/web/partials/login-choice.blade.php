@@ -11,12 +11,14 @@
                 <strong>User Login</strong><span>Plan your event, explore vendors<br>and keep every detail together.</span>
                 <b>Plan my celebration <span aria-hidden="true">→</span></b>
             </a>
-            <a href="{{ route('vendor.login') }}" class="login-choice-option login-choice-vendor">
-                <span class="login-choice-icon" aria-hidden="true"><i class="fa-solid fa-store"></i></span>
-                <strong>Vendor Login</strong><span>Showcase your services, manage<br>your business and connect.</span>
-                <b>Open my business <span aria-hidden="true">→</span></b>
-            </a>
+            @if(Route::has('vendor.login'))
+                <a href="{{ route('vendor.login') }}" class="login-choice-option login-choice-vendor">
+                    <span class="login-choice-icon" aria-hidden="true"><i class="fa-solid fa-store"></i></span>
+                    <strong>Vendor Login</strong><span>Showcase your services, manage<br>your business and connect.</span>
+                    <b>Open my business <span aria-hidden="true">→</span></b>
+                </a>
+            @endif
         </div>
-        <p class="login-choice-footer">New here? <a href="{{ route('user.register') }}">Create an account</a> <span aria-hidden="true">·</span> <a href="{{ route('vendor.register') }}">Join as a vendor</a></p>
+        <p class="login-choice-footer">New here? <a href="{{ route('user.register') }}">Create an account</a>@if(Route::has('vendor.register')) <span aria-hidden="true">·</span> <a href="{{ route('vendor.register') }}">Join as a vendor</a>@endif</p>
     </div>
 </dialog>

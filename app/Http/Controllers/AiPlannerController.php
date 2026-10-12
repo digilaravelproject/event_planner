@@ -382,15 +382,49 @@ class AiPlannerController extends Controller
     {
         $optionImages = array_values($question->option_images ?? []);
         $vendorImages = array_values($question->vendor_attribute_images ?? []);
-        $count = max(count($question->options ?? []), count($optionImages), count($vendorImages));
+        $options = array_values($question->options ?? []);
+        $count = max(count($options), count($optionImages), count($vendorImages));
         if ($count === 0) {
             return [];
         }
 
-        return collect(range(0, $count - 1))->map(function (int $index) use ($optionImages, $vendorImages): ?string {
+        $fallbacks = [
+            'event_category' => [
+                'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1606800052052-a08af7148866?auto=format&fit=crop&w=800&q=80',
+            ],
+            'wedding_tradition' => [
+                'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1544078751-58fee2d8a03b?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+                'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80',
+            ],
+        ];
+
+        return collect(range(0, $count - 1))->map(function (int $index) use ($optionImages, $vendorImages, $question, $fallbacks): ?string {
             $path = ($optionImages[$index] ?? null) ?: ($vendorImages[$index] ?? null);
 
-            return $path ? (str_starts_with($path, 'http') ? $path : asset('storage/'.ltrim($path, '/'))) : null;
+            if ($path) {
+                if (str_starts_with($path, 'http')) {
+                    return $path;
+                }
+                $cleanPath = ltrim($path, '/');
+                if (file_exists(public_path('storage/'.$cleanPath)) || file_exists(storage_path('app/public/'.$cleanPath))) {
+                    return asset('storage/'.$cleanPath);
+                }
+            }
+
+            // Fallback provision if storage image doesn't exist
+            $code = $question->question_code;
+            if (isset($fallbacks[$code][$index])) {
+                return $fallbacks[$code][$index];
+            }
+
+            return $path ? asset('storage/'.ltrim($path, '/')) : null;
         })->values()->all();
     }
 

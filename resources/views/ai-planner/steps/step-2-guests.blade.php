@@ -1,16 +1,16 @@
 <!-- Step 2: Guest Count -->
-<div x-show="currentStep === {{ $stepNumbers['guest_capacity'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
-    <div class="space-y-2">
+<div x-show="currentStep === {{ $stepNumbers['guest_capacity'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+    <div class="space-y-1.5">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
             <i class="fa-solid fa-users text-[10px]"></i>
             <span>Step {{ str_pad((string) ($stepNumbers['guest_capacity'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Hospitality & Capacity</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('guest_capacity')?->question ?? 'How many guests will celebrate with you?' }}</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Select a tier preset below OR enter your exact expected guest count for precise catering & plate estimation.</p>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('guest_capacity')?->question ?? 'How many guests will celebrate with you?' }}</h2>
+        <p class="text-xs sm:text-sm text-slate-600">Select a tier preset below OR enter your exact expected guest count for precise catering & plate estimation.</p>
     </div>
 
     <!-- Manual Exact Guest Input Card -->
-    <div class="bg-white p-6 rounded-3xl border border-rose-100 shadow-md space-y-3">
+    <div class="bg-white p-4 sm:p-5 rounded-3xl border border-rose-100 shadow-md space-y-2">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
                 <label class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Exact Expected Guest Count</label>

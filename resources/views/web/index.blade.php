@@ -37,8 +37,8 @@
     </div>
 
     <div class="max-w-[1600px] mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-center">
-        <!-- Hero Details (Col 7) -->
-        <div class="lg:col-span-7 space-y-4 md:space-y-5 text-left">
+        <!-- Hero Details (Col 6) -->
+        <div class="lg:col-span-6 space-y-4 md:space-y-5 text-left">
             <!-- Premium Badge -->
             <div class="inline-flex items-center gap-2.5 bg-white/10 border border-white/20 rounded-full px-3.5 py-1.5 shadow-sm backdrop-blur-md">
                 <span class="relative flex h-2 w-2">
@@ -64,7 +64,7 @@
 
             <!-- CTA Buttons -->
             <div class="flex flex-wrap items-center gap-3 pt-1">
-                <a href="#estimator" class="group px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#850625] to-[#6E0720] hover:from-[#6E0720] hover:to-[#540417] text-white font-sans-ui font-semibold text-sm shadow-[0_12px_28px_-6px_rgba(133,6,37,0.5)] hover:shadow-[0_16px_36px_-6px_rgba(133,6,37,0.7)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 inline-flex items-center gap-2.5 border border-[#D4AF37]/30">
+                <a href="{{ route('ai-planner') }}" class="group px-6 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-[#850625] to-[#6E0720] hover:from-[#6E0720] hover:to-[#540417] text-white font-sans-ui font-semibold text-sm shadow-[0_12px_28px_-6px_rgba(133,6,37,0.5)] hover:shadow-[0_16px_36px_-6px_rgba(133,6,37,0.7)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 inline-flex items-center gap-2.5 border border-[#D4AF37]/30">
                     <i class="fa-solid fa-calculator text-[#D4AF37] text-xs transition-transform group-hover:rotate-12"></i>
                     <span>Calculate Event Estimate</span>
                 </a>
@@ -75,42 +75,40 @@
             </div>
         </div>
 
-        <!-- Interactive Quick Selector Widget (Col 5) -->
-        <div class="lg:col-span-5 bg-white/92 backdrop-blur-xl border border-[#850625]/15 p-5 sm:p-6.5 rounded-3xl shadow-[0_25px_60px_-15px_rgba(133,6,37,0.12),0_10px_25px_-5px_rgba(0,0,0,0.03)] relative"
+        <!-- Interactive Quick Selector Widget (Col 6) -->
+        <div class="lg:col-span-6 bg-white/95 backdrop-blur-xl border border-[#850625]/20 p-6 sm:p-8 rounded-[32px] shadow-[0_30px_70px_-15px_rgba(133,6,37,0.18),0_12px_30px_-5px_rgba(0,0,0,0.05)] relative"
              x-data="{ 
                 selectedType: @js((string) $eventCategoryOptions->keys()->first()),
                 selectedTypeLabel: @js((string) $eventCategoryOptions->first()),
-                selectedGuest: @js((string) $guestOptions->keys()->first()),
-                selectedGuestLabel: @js($guestOptions->first()),
+                selectedGuest: @js((string) ($guestOptions->keys()->first() ?? '500')),
                 typeOpen: false,
                 guestOpen: false
              }"
              @click.outside="typeOpen = false; guestOpen = false"
         >
-            <div class="absolute -top-3.5 right-6 bg-gradient-to-r from-[#850625] via-[#A8163B] to-[#D4AF37] text-white text-[10px] font-bold uppercase tracking-[0.18em] px-3.5 py-1 rounded-full shadow-md shadow-[#850625]/20 border border-white/20 font-cinzel">
+            <div class="absolute -top-3.5 right-6 bg-gradient-to-r from-[#850625] via-[#A8163B] to-[#D4AF37] text-white text-[11px] font-bold uppercase tracking-[0.2em] px-4 py-1.5 rounded-full shadow-md shadow-[#850625]/20 border border-white/20 font-cinzel">
                 Quick Planner
             </div>
             
-            <div class="mb-4">
-                <h3 class="text-slate-900 font-serif-luxury font-bold text-xl sm:text-2xl tracking-tight mb-0.5">Plan Your Celebration</h3>
-                <p class="text-xs text-slate-500 font-sans-ui font-normal">Configure basic details to initiate instant planning & vendor quotes.</p>
+            <div class="mb-5">
+                <h3 class="text-slate-900 font-serif-luxury font-bold text-2xl sm:text-[28px] tracking-tight mb-1">Plan Your Celebration</h3>
+                <p class="text-xs sm:text-sm text-slate-500 font-sans-ui font-normal">Configure basic details to initiate instant planning & vendor quotes.</p>
             </div>
             
-            <form action="{{ route('ai-planner') }}" method="GET" class="space-y-3.5">
+            <form action="{{ route('ai-planner') }}" method="GET" class="space-y-4">
                 <input type="hidden" name="type" :value="selectedType">
-                <input type="hidden" name="guests" :value="selectedGuest">
 
                 <!-- Event Category Custom Dropdown -->
-                <div class="relative">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 font-cinzel mb-1">Event Category</label>
+                <div class="relative" @click.outside="typeOpen = false">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-cinzel mb-1.5">Event Category</label>
                     
                     <!-- Dropdown Trigger Button -->
                     <button 
                         type="button" 
                         @click="typeOpen = !typeOpen; guestOpen = false" 
-                        class="w-full bg-[#FAF7F2]/90 hover:bg-[#FAF7F2] border border-slate-200/90 hover:border-[#850625]/30 focus:border-[#850625] focus:ring-2 focus:ring-[#850625]/10 rounded-xl px-3.5 py-2.5 text-left transition-all duration-200 flex items-center justify-between group"
+                        class="w-full bg-[#FAF7F2]/90 hover:bg-[#FAF7F2] border border-slate-200/90 hover:border-[#850625]/30 focus:border-[#850625] focus:ring-2 focus:ring-[#850625]/10 rounded-xl px-4 py-3 sm:py-3.5 text-left transition-all duration-200 flex items-center justify-between group"
                     >
-                        <span class="text-xs font-semibold text-slate-800 truncate font-sans-ui" x-text="selectedTypeLabel"></span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-800 truncate font-sans-ui" x-text="selectedTypeLabel"></span>
                         <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300" :class="typeOpen ? 'rotate-180 text-[#850625]' : 'text-slate-400 group-hover:text-slate-600'"></i>
                     </button>
 
@@ -123,33 +121,61 @@
                         x-transition:leave="transition ease-in duration-150" 
                         x-transition:leave-start="opacity-100 translate-y-0 scale-100" 
                         x-transition:leave-end="opacity-0 translate-y-1 scale-[0.98]"
-                        class="absolute left-0 right-0 top-full mt-1.5 bg-white/95 backdrop-blur-2xl border border-[#850625]/15 rounded-2xl shadow-[0_20px_45px_-10px_rgba(133,6,37,0.18)] p-1.5 z-50 space-y-0.5"
+                        class="absolute left-0 right-0 top-full mt-1.5 bg-white/98 backdrop-blur-2xl border border-[#850625]/15 rounded-2xl shadow-[0_20px_45px_-10px_rgba(133,6,37,0.2)] p-2 z-50 space-y-1 max-h-60 overflow-y-auto"
                         style="display: none;"
                     >
                         @foreach($eventCategoryOptions as $value => $label)
-                            <button type="button" @click="selectedType = @js((string) $value); selectedTypeLabel = @js($label); typeOpen = false" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedType === @js((string) $value) ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
+                            <button type="button" @click="selectedType = @js((string) $value); selectedTypeLabel = @js($label); typeOpen = false" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedType === @js((string) $value) ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
                                 <span>🎉 {{ $label }}</span>
-                                <i x-show="selectedType === @js((string) $value)" class="fa-solid fa-check text-[10px] text-[#850625]"></i>
+                                <i x-show="selectedType === @js((string) $value)" class="fa-solid fa-check text-xs text-[#850625]"></i>
                             </button>
                         @endforeach
                     </div>
                 </div>
 
-                <!-- Guest Count Custom Dropdown -->
-                <div class="relative">
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-700 font-cinzel mb-1">Estimated Guest Count</label>
+                <!-- Guest Count Input & Custom Presets Dropdown -->
+                <div class="relative" @click.outside="guestOpen = false">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="guest-count-input" class="block text-xs font-bold uppercase tracking-wider text-slate-700 font-cinzel">Estimated Guest Count</label>
+                        <span class="text-[11px] font-medium text-slate-400 font-sans-ui">Type number or choose</span>
+                    </div>
                     
-                    <!-- Dropdown Trigger Button -->
-                    <button 
-                        type="button" 
-                        @click="guestOpen = !guestOpen; typeOpen = false" 
-                        class="w-full bg-[#FAF7F2]/90 hover:bg-[#FAF7F2] border border-slate-200/90 hover:border-[#850625]/30 focus:border-[#850625] focus:ring-2 focus:ring-[#850625]/10 rounded-xl px-3.5 py-2.5 text-left transition-all duration-200 flex items-center justify-between group"
-                    >
-                        <span class="text-xs font-semibold text-slate-800 truncate font-sans-ui" x-text="selectedGuestLabel"></span>
-                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300" :class="guestOpen ? 'rotate-180 text-[#850625]' : 'text-slate-400 group-hover:text-slate-600'"></i>
-                    </button>
+                    <!-- Input with Icon and Preset Chevron -->
+                    <div class="relative flex items-center">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-users text-xs text-[#850625]/70"></i>
+                        </span>
 
-                    <!-- Dropdown Panel -->
+                        <input 
+                            id="guest-count-input"
+                            type="number" 
+                            name="guests" 
+                            x-model="selectedGuest"
+                            min="10"
+                            max="10000"
+                            step="10"
+                            placeholder="e.g. 500"
+                            class="w-full bg-[#FAF7F2]/90 hover:bg-[#FAF7F2] focus:bg-white border border-slate-200/90 hover:border-[#850625]/30 focus:border-[#850625] focus:ring-2 focus:ring-[#850625]/10 rounded-xl pl-9 pr-24 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold text-slate-800 transition-all duration-200 font-sans-ui [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            required
+                        >
+
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 gap-1.5">
+                            <span class="text-xs font-semibold text-slate-400 select-none font-sans-ui">
+                                Guests
+                            </span>
+                            <button 
+                                type="button" 
+                                @click.stop="guestOpen = !guestOpen; typeOpen = false" 
+                                class="w-8 h-8 rounded-lg hover:bg-slate-200/60 active:bg-slate-300/60 flex items-center justify-center text-slate-400 hover:text-[#850625] transition-colors"
+                                title="Choose from preset options"
+                                aria-label="Toggle preset guest counts"
+                            >
+                                <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300" :class="guestOpen ? 'rotate-180 text-[#850625]' : ''"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dropdown Panel (ABSOLUTE: floats on top, will never stretch the card!) -->
                     <div 
                         x-show="guestOpen" 
                         x-transition:enter="transition ease-out duration-200" 
@@ -158,13 +184,25 @@
                         x-transition:leave="transition ease-in duration-150" 
                         x-transition:leave-start="opacity-100 translate-y-0 scale-100" 
                         x-transition:leave-end="opacity-0 translate-y-1 scale-[0.98]"
-                        class="relative mt-1.5 w-full bg-white/95 backdrop-blur-2xl border border-[#850625]/15 rounded-2xl shadow-[0_20px_45px_-10px_rgba(133,6,37,0.18)] p-1.5 z-50 space-y-0.5"
+                        class="absolute left-0 right-0 top-full mt-1.5 bg-white/98 backdrop-blur-2xl border border-[#850625]/15 rounded-2xl shadow-[0_20px_45px_-10px_rgba(133,6,37,0.22)] p-2 z-50 space-y-1 max-h-56 overflow-y-auto"
                         style="display: none;"
                     >
+                        <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-cinzel border-b border-slate-100 flex items-center justify-between">
+                            <span>Popular Presets</span>
+                            <span class="text-[9px] text-[#850625] font-normal lowercase font-sans">or type above</span>
+                        </div>
                         @foreach($guestOptions as $value => $label)
-                            <button type="button" @click="selectedGuest = @js((string) $value); selectedGuestLabel = @js($label); guestOpen = false" class="w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium font-sans-ui transition-colors flex items-center justify-between" :class="selectedGuest === @js((string) $value) ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'">
-                                <span>👥 {{ $label }}</span>
-                                <i x-show="selectedGuest === @js((string) $value)" class="fa-solid fa-check text-[10px] text-[#850625]"></i>
+                            <button 
+                                type="button" 
+                                @click="selectedGuest = @js((string) $value); guestOpen = false" 
+                                class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium font-sans-ui transition-colors flex items-center justify-between group" 
+                                :class="selectedGuest == @js((string) $value) ? 'bg-[#850625]/10 text-[#850625] font-semibold' : 'text-slate-700 hover:bg-[#850625]/5 hover:text-[#850625]'"
+                            >
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-users text-[#850625]/70 text-xs group-hover:text-[#850625]"></i>
+                                    <span>{{ $label }}</span>
+                                </span>
+                                <i x-show="selectedGuest == @js((string) $value)" class="fa-solid fa-check text-xs text-[#850625]"></i>
                             </button>
                         @endforeach
                     </div>
@@ -173,14 +211,14 @@
                 <!-- Submit Button -->
                 <button 
                     type="submit" 
-                    class="w-full bg-gradient-to-r from-[#850625] to-[#6E0720] hover:from-[#6E0720] hover:to-[#540417] text-white font-sans-ui font-semibold text-sm py-3 rounded-xl shadow-[0_10px_25px_-5px_rgba(133,6,37,0.3)] hover:shadow-[0_16px_32px_-6px_rgba(133,6,37,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 group mt-1.5"
+                    class="w-full bg-gradient-to-r from-[#850625] to-[#6E0720] hover:from-[#6E0720] hover:to-[#540417] text-white font-sans-ui font-semibold text-sm sm:text-base py-3.5 sm:py-4 rounded-xl shadow-[0_12px_28px_-6px_rgba(133,6,37,0.35)] hover:shadow-[0_18px_36px_-6px_rgba(133,6,37,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2.5 group mt-2"
                 >
                     <span>Begin Planning</span>
-                    <i class="fa-solid fa-arrow-right text-xs transition-transform duration-200 group-hover:translate-x-1 text-[#D4AF37]"></i>
+                    <i class="fa-solid fa-arrow-right text-xs transition-transform duration-200 group-hover:translate-x-1.5 text-[#D4AF37]"></i>
                 </button>
             </form>
 
-            <div class="mt-4 flex items-center justify-between text-[11px] text-slate-500 font-sans-ui font-medium border-t border-slate-100 pt-3">
+            <div class="mt-5 flex items-center justify-between text-xs text-slate-500 font-sans-ui font-medium border-t border-slate-100 pt-4">
                 <span class="inline-flex items-center"><i class="fa-solid fa-circle-check text-[#850625] mr-1.5 text-xs"></i> Verified Vendor List</span>
                 <span class="inline-flex items-center"><i class="fa-solid fa-circle-check text-[#850625] mr-1.5 text-xs"></i> Real-time Budget Matrix</span>
             </div>
@@ -188,6 +226,7 @@
     </div>
 </section>
 
+{{-- 
 <!-- VENDOR PORTAL CTA -->
 <section class="bg-[#FFFDF9] px-4 py-10 sm:px-8 md:px-12 lg:px-16">
     <div class="relative mx-auto flex max-w-[1500px] flex-col items-start justify-between gap-7 overflow-hidden rounded-[2rem] border border-[#D4AF37]/40 px-7 py-9 text-white shadow-2xl shadow-rose-950/20 md:flex-row md:items-center md:px-10" style="background:linear-gradient(120deg,#2f0612 0%,#850625 58%,#9b6a1a 100%);">
@@ -196,6 +235,7 @@
         <div class="relative z-10 flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row"><a href="{{ route('vendor.login') }}" class="rounded-xl border border-white/30 bg-white/10 px-6 py-3 text-center text-sm font-extrabold backdrop-blur hover:bg-white/20">Vendor Login</a><a href="{{ route('vendor.register') }}" class="rounded-xl bg-[#D4AF37] px-6 py-3 text-center text-sm font-extrabold text-[#3b0915] shadow-lg hover:bg-[#edcf6c]">Register as Vendor →</a></div>
     </div>
 </section>
+--}}
 
 @include('web.partials.how-it-works', ['items' => $howItWorks])
 @if(false)
