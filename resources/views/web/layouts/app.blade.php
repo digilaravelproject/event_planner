@@ -11,7 +11,7 @@
     <!-- Google Fonts: Luxury Typography Palette -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Instrument+Serif:ital@0;1&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Sora:wght@100..800&display=swap" rel="stylesheet">
 
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -50,8 +50,8 @@
             background-color: #FFFDF9;
             color: #1e293b;
         }
-        h1, h2, h3, h4, h5, h6, .font-serif-luxury {
-            font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+        h1, h2, h3, h4, h5, h6, .font-serif-luxury, .font-sora {
+            font-family: 'Sora', sans-serif;
         }
         .font-cinzel {
             font-family: 'Cinzel', Georgia, serif;

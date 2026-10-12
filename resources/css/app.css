@@ -9,6 +9,8 @@
 @theme {
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sora: 'Sora', sans-serif;
+    --font-heading: 'Sora', sans-serif;
     
     --color-ivory: #FFFDF9;
     --color-primary: #850625;
