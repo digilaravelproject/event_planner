@@ -728,17 +728,7 @@
 
                     <div x-show="currentStep <= 1"></div>
 
-                    <!-- Keyboard Enter Hint (Crystal Clear, User-Friendly & High Contrast) -->
-                    <div class="hidden sm:inline-flex items-center gap-2 select-none ml-auto mr-3 text-xs sm:text-sm font-semibold" style="color: #334155 !important;">
-                        <span style="color: #475569 !important; font-size: 13px; font-weight: 600;">Press</span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-mono font-bold shadow-sm"
-                              style="background-color: #0f172a !important; color: #ffffff !important; border: 1px solid #334155 !important; box-shadow: 0 2px 0 #020617 !important;">
-                            <span style="color: #ffffff !important; font-weight: 800; font-size: 12px; letter-spacing: 0.08em;">ENTER</span>
-                            <span style="color: #fbbf24 !important; font-size: 14px; font-weight: 900; line-height: 1;">↵</span>
-                        </span>
-                        <span style="color: #475569 !important; font-size: 13px; font-weight: 600;">to continue</span>
-                    </div>
-
+              
                     <button type="button" 
                         @click="nextStep()" 
                         x-show="currentStep < totalSteps"
