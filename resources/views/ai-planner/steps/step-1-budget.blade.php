@@ -7,7 +7,7 @@
             <i class="fa-solid fa-calculator text-[10px]"></i>
             <span>Step {{ str_pad((string) ($stepNumbers['wedding_budget'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Financial Comfort</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-serif-luxury leading-tight">What is your wedding budget?</h2>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-serif-luxury leading-tight">{{ $questions->get('wedding_budget')?->question ?? 'What is your total estimated wedding budget?' }}</h2>
         <p class="text-sm sm:text-base text-slate-500">Select a preset, drag the slider, or enter your exact budget. We will tailor everything accordingly.</p>
     </div>
 
@@ -44,9 +44,9 @@
             </div>
         </div>
 
-        <!-- Preset Pill Grid -->
+        <!-- Preset Pill Grid (Dynamically loaded from database / admin options) -->
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 relative z-10">
-            <template x-for="b in [10, 25, 50, 75, 100]" :key="b">
+            <template x-for="b in optionsFor('wedding_budget', ['10', '25', '50', '75', '100']).map(Number)" :key="b">
                 <button type="button" @click="planner.budget = b"
                     :class="planner.budget == b ? 'bg-gradient-to-br from-[#850625] to-[#6E0720] text-white shadow-xl shadow-[#850625]/30 scale-[1.03] ring-2 ring-[#D4AF37]/50' : 'bg-white text-slate-700 hover:bg-rose-50 border border-slate-200 hover:border-rose-300 hover:shadow-md'"
                     class="py-4 px-3 rounded-2xl text-sm font-extrabold transition-all flex flex-col items-center gap-1 cursor-pointer">
