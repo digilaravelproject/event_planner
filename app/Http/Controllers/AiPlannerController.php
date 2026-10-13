@@ -127,6 +127,16 @@ class AiPlannerController extends Controller
                 ];
             })->values()->all();
 
+        $budgetStepNumber = $stepNumbers['wedding_budget'] ?? 2;
+        $hasPrefilledType = $request->filled('type') && ! empty(trim((string) $request->query('type')));
+        $hasPrefilledGuests = $request->filled('guests') && ! empty(trim((string) $request->query('guests')));
+
+        $defaultInitialStep = ($hasPrefilledType && ! $editingPlan && ! old('planner_step'))
+            ? $budgetStepNumber
+            : 1;
+
+        $initialStep = max(1, min(count($plannerSteps), (int) old('planner_step', $defaultInitialStep)));
+
         return view('ai-planner.index', [
             'questions' => $questions,
             'plannerSteps' => $plannerSteps->values()->all(),
@@ -143,7 +153,9 @@ class AiPlannerController extends Controller
             'category' => old('category', $editingPlan?->category ?: $pending['category'] ?? $this->selectedCategory($questions->get('event_category'), (string) $request->query('type', ''))),
             'editingPlan' => $editingPlan,
             'initialAnswers' => (array) old('answers', $editingPlan?->answers ?? $pending['answers'] ?? []),
-            'initialStep' => max(1, min(count($plannerSteps), (int) old('planner_step', 1))),
+            'initialStep' => $initialStep,
+            'hasPrefilledGuests' => $hasPrefilledGuests && ! $editingPlan,
+            'hasPrefilledType' => $hasPrefilledType && ! $editingPlan,
         ]);
     }
 

@@ -31,7 +31,9 @@
     totalSteps: {{ count($plannerSteps) }},
     plannerSteps: @js($plannerSteps),
     dynamicAnswers: @js($genericInitialAnswers),
-    maxVisitedStep: {{ $initialStep ?? 1 }},
+    maxVisitedStep: {{ max($initialStep ?? 1, !empty($hasPrefilledGuests) ? ($stepNumbers['guest_capacity'] ?? 3) : ($initialStep ?? 1)) }},
+    autoSkipGuests: @js((bool) ($hasPrefilledGuests ?? false)),
+    guestStepNumber: {{ $stepNumbers['guest_capacity'] ?? 3 }},
     isCalculating: false,
     calculationStage: 0,
     calculationTimer: null,
@@ -451,6 +453,9 @@
     },
     goToStep(step) {
         if (step > this.maxVisitedStep) return;
+        if (step === this.guestStepNumber) {
+            this.autoSkipGuests = false;
+        }
         this.currentStep = step;
         this.plannerError = '';
         this.scrollToPlanner();
@@ -461,7 +466,15 @@
     nextStep() {
         if (!this.validateCurrentStep()) return;
         if (this.currentStep < this.totalSteps) {
-            this.currentStep++;
+            let nextTarget = this.currentStep + 1;
+
+            // If user is advancing and guest count was prefilled from homepage, auto-skip guest step on initial pass
+            if (this.autoSkipGuests && nextTarget === this.guestStepNumber) {
+                this.autoSkipGuests = false;
+                nextTarget = Math.min(this.totalSteps, this.guestStepNumber + 1);
+            }
+
+            this.currentStep = nextTarget;
             this.maxVisitedStep = Math.max(this.maxVisitedStep, this.currentStep);
             this.plannerError = '';
             this.scrollToPlanner();
@@ -472,6 +485,9 @@
     prevStep() {
         if (this.currentStep > 1) {
             this.currentStep--;
+            if (this.currentStep === this.guestStepNumber) {
+                this.autoSkipGuests = false;
+            }
             this.plannerError = '';
             this.scrollToPlanner();
         }
