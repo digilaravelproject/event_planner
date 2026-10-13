@@ -24,7 +24,7 @@
             return [$step['code'] => $value];
         })->all();
 @endphp
-<div class="min-h-0 sm:min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF7F2] to-[#F5ECE3] text-slate-800 pt-12 sm:pt-14 md:pt-16 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8 font-sans-ui relative flex flex-col justify-start overflow-x-hidden" 
+<div class="min-h-0 sm:min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF7F2] to-[#F5ECE3] text-slate-800 pt-24 sm:pt-28 md:pt-32 pb-8 sm:pb-12 px-3 sm:px-6 lg:px-8 font-sans-ui relative flex flex-col justify-start overflow-x-hidden" 
     @keydown.window.enter="handleEnterKey($event)"
     x-data="{
     currentStep: {{ $initialStep ?? 1 }},
@@ -675,22 +675,23 @@
         --}}
 
         <!-- Main Interactive Questionnaire & Steps Area (Covers Full Viewport, Eliminates Artificial Scrollbars) -->
-        <div class="w-full bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-[28px] p-4 sm:p-6 lg:p-7 shadow-[0_20px_50px_-15px_rgba(133,6,37,0.1)] border border-[#850625]/15 flex flex-col justify-between relative scroll-mt-16 sm:scroll-mt-24"
-             style="min-height: calc(100vh - 140px);">
+        <div class="w-full bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-[28px] p-4 sm:p-6 lg:p-7 shadow-[0_20px_50px_-15px_rgba(133,6,37,0.1)] border border-[#850625]/15 flex flex-col justify-between relative scroll-mt-24 sm:scroll-mt-32"
+             style="min-height: calc(100vh - 160px);">
 
             <!-- Slim Header Progress Tracker (Permanently Pinned at Top) -->
-            <div class="shrink-0 mb-2 sm:mb-2.5 space-y-1 border-b border-rose-100/70 pb-2 sm:pb-2.5">
-                <div class="flex items-center justify-between text-xs font-bold font-cinzel">
-                    <span class="text-[#850625] tracking-widest uppercase flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
+            <div class="shrink-0 mb-3 sm:mb-4 space-y-1.5 border-b border-rose-100/70 pb-3 sm:pb-3.5">
+                <div class="flex items-center justify-between text-xs font-bold">
+                    <span class="text-[#850625] font-cinzel tracking-wider uppercase flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
                         <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-[#D4AF37]"></i>
-                        <span>Shaadi Sense AI Planner</span>
+                        <span>AI Event Studio</span>
                     </span>
-                    <span class="text-slate-500 font-sans-ui text-[11px] sm:text-xs font-medium">
-                        Step <span class="font-bold text-[#850625]" x-text="currentStep"></span> of <span class="font-bold text-slate-800" x-text="totalSteps"></span>
-                        <span class="text-slate-400 font-normal ml-0.5 sm:ml-1">(<span x-text="Math.round(Math.min(currentStep, totalSteps) / totalSteps * 100) + '%'"></span>)</span>
+                    <span class="text-slate-500 font-sans-ui text-[11px] sm:text-xs font-semibold flex items-center gap-1.5">
+                        <span class="inline-block px-2 py-0.5 rounded-full bg-rose-50 text-[#850625] text-[10px] font-extrabold uppercase tracking-wide border border-rose-100">Progress</span>
+                        <span>Step <span class="font-extrabold text-[#850625]" x-text="currentStep"></span> of <span class="font-extrabold text-slate-800" x-text="totalSteps"></span></span>
+                        <span class="text-slate-400 font-normal">(<span class="font-semibold text-slate-600" x-text="Math.round(Math.min(currentStep, totalSteps) / totalSteps * 100) + '%'"></span>)</span>
                     </span>
                 </div>
-                <div class="w-full h-1.5 bg-rose-100/60 rounded-full overflow-hidden">
+                <div class="w-full h-1.5 bg-rose-100/70 rounded-full overflow-hidden shadow-inner">
                     <div class="h-full bg-gradient-to-r from-[#850625] via-[#A8163B] to-[#D4AF37] transition-all duration-500 rounded-full" :style="'width: ' + (Math.min(currentStep, totalSteps) / totalSteps * 100) + '%'"></div>
                 </div>
             </div>

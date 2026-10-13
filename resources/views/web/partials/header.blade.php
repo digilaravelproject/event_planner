@@ -38,9 +38,9 @@
             <span>Why Shaadi Sense</span>
             <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
-        <a href="{{ route('ai-planner') }}" class="text-slate-700 hover:text-[#850625] font-bold text-xs xl:text-sm px-2.5 xl:px-4 py-1.5 xl:py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group whitespace-nowrap shrink-0">
+        <a href="{{ route('ai-planner') }}" class="{{ request()->routeIs('ai-planner*') ? 'text-[#850625] bg-rose-50/90 shadow-xs' : 'text-slate-700 hover:text-[#850625]' }} font-bold text-xs xl:text-sm px-2.5 xl:px-4 py-1.5 xl:py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group whitespace-nowrap shrink-0">
             <span>AI Estimator</span>
-            <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
+            <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 {{ request()->routeIs('ai-planner*') ? 'w-6' : 'w-0' }} h-0.5 bg-[#850625] rounded-full transition-all duration-300 group-hover:w-6"></span>
         </a>
         <a href="{{ route('home') }}#testimonials" class="text-slate-700 hover:text-[#850625] font-bold text-xs xl:text-sm px-2.5 xl:px-4 py-1.5 xl:py-2 rounded-full transition-all duration-300 hover:bg-rose-50/80 relative group whitespace-nowrap shrink-0">
             <span>Reviews</span>
