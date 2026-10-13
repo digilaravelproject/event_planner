@@ -24,7 +24,7 @@
             return [$step['code'] => $value];
         })->all();
 @endphp
-<div class="min-h-0 sm:min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF7F2] to-[#F5ECE3] text-slate-800 pt-18 sm:pt-22 md:pt-24 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8 font-sans-ui relative flex flex-col justify-start overflow-x-hidden" 
+<div class="min-h-0 sm:min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF7F2] to-[#F5ECE3] text-slate-800 pt-12 sm:pt-14 md:pt-16 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8 font-sans-ui relative flex flex-col justify-start overflow-x-hidden" 
     @keydown.window.enter="handleEnterKey($event)"
     x-data="{
     currentStep: {{ $initialStep ?? 1 }},
