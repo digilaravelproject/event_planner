@@ -1,5 +1,5 @@
 <!-- Step 3: Location / Service Area Selection (Redesigned with luxury aesthetic & responsive 2-col mobile grid) -->
-<div x-show="currentStep === {{ $stepNumbers['service_area'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+<div x-show="currentStep === {{ $stepNumbers['service_area'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-3">
 
     <!-- Header -->
     <div class="space-y-1 text-center sm:text-left">
@@ -27,7 +27,7 @@
                 :class="planner.locations.includes(loc.id)
                     ? 'border-[#850625] ring-2 ring-[#850625]/25 shadow-xl scale-[1.01] bg-rose-50/20'
                     : 'border-slate-200 bg-white hover:border-rose-300 hover:shadow-md'"
-                class="p-4 sm:p-5 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 relative overflow-hidden group select-none min-h-[140px] sm:min-h-[160px]">
+                class="p-3 sm:p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 relative overflow-hidden group select-none min-h-[120px] sm:min-h-[140px]">
 
                 <!-- Background Image on Selection / Hover -->
                 <div class="absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-opacity duration-300 group-hover:opacity-60"
