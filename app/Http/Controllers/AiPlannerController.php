@@ -23,6 +23,7 @@ class AiPlannerController extends Controller
         /** @var UserEventPlan|null $editingPlan */
         $editingPlan = $request->attributes->get('editingPlan');
         $orderedQuestions = EventRequirementQuestion::enabled()->get();
+        $allQuestions = EventRequirementQuestion::all()->keyBy('question_code');
         $questions = $orderedQuestions->keyBy('question_code');
         $pending = (array) $request->session()->get('pending_event_plan', []);
         $guestCount = max(10, min(5000, (int) old('guest_count', $editingPlan?->guest_count ?? $pending['guest_count'] ?? $request->integer('guests', 150))));
@@ -138,12 +139,12 @@ class AiPlannerController extends Controller
         $initialStep = max(1, min(count($plannerSteps), (int) old('planner_step', $defaultInitialStep)));
 
         return view('ai-planner.index', [
-            'questions' => $questions,
+            'questions' => $allQuestions,
             'plannerSteps' => $plannerSteps->values()->all(),
             'stepNumbers' => $stepNumbers,
             'vendorPackages' => $vendorPackages,
             'cateringVendors' => $cateringVendors,
-            'plannerOptions' => $questions->map(fn (EventRequirementQuestion $question): array => [
+            'plannerOptions' => $allQuestions->map(fn (EventRequirementQuestion $question): array => [
                 'question' => $question->question,
                 'options' => $this->plannerOptions($question),
                 'images' => $this->questionImages($question),

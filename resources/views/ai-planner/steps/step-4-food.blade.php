@@ -30,7 +30,7 @@
                     <div class="flex items-center gap-2 truncate">
                         <i class="fa-solid fa-store text-rose-200 text-xs"></i>
                         <span class="truncate" x-text="getSelectedCateringVendor()?.name || 'Choose Vendor'"></span>
-                        <span class="text-[9px] bg-rose-950/60 text-rose-200 border border-rose-400/30 px-2 py-0.5 rounded-full font-bold uppercase" x-text="getSelectedCateringVendor()?.category || 'Venue'"></span>
+                        <span class="text-[9px] bg-rose-950/60 text-rose-200 border border-rose-400/30 px-2 py-0.5 rounded-full font-bold uppercase" x-text="getSelectedCateringVendor()?.category || 'Catering'"></span>
                     </div>
                     <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" :class="isVendorDropdownOpen ? 'rotate-180' : ''"></i>
                 </button>
@@ -82,7 +82,7 @@
         </template>
     </div>
 
-    <!-- Mode Selector Tabs: Vendor Packages vs Custom Selection -->
+    {{-- COMMENTED OUT: Mode Selector Tabs (User requested only Food Packages for now)
     <div class="flex items-center justify-center p-1.5 bg-slate-100 rounded-2xl max-w-md mx-auto">
         <button type="button" @click="planner.cateringMode = 'package'"
             :class="planner.cateringMode === 'package' ? 'bg-[#850625] text-white shadow-md' : 'text-slate-600 hover:text-slate-900'"
@@ -98,6 +98,7 @@
             <span>Caterer Menu Items</span>
         </button>
     </div>
+    --}}
 
     <!-- TAB 1: Vendor Food Packages (Classic, Deluxe, Elite) -->
     <div x-show="planner.cateringMode === 'package'" class="space-y-6">
@@ -189,6 +190,7 @@
         </div>
     </div>
 
+    {{-- COMMENTED OUT: TAB 2 Caterer Menu Items (User requested only food packages for now)
     <!-- TAB 2: Admin-managed food items -->
     <div x-show="planner.cateringMode === 'custom'" class="space-y-5">
         <div class="rounded-2xl border border-rose-100 bg-rose-50/60 px-4 py-3 text-xs font-semibold text-slate-700">
@@ -226,6 +228,7 @@
         <div x-show="!getSelectedCateringVendor()" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Select a caterer to view its menu items.</div>
         <div x-show="getSelectedCateringVendor() && foodOptions().length === 0" class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">This caterer has no menu-card items configured yet.</div>
     </div>
+    --}}
 
     <!-- SHORT LIVE RANGE CALCULATION SUMMARY CARD -->
     <div class="bg-gradient-to-br from-amber-500/10 via-rose-50 to-amber-100/50 p-6 rounded-3xl border-2 border-amber-300/60 shadow-xl space-y-4">

@@ -62,28 +62,82 @@
         const currentBudget = Number(this.planner.budget || 20);
         const currentCulture = this.planner.culture || '';
         const currentLocations = this.planner.locations || [];
-        const currentSetting = this.planner.setting || '';
+        const currentSetting = (this.planner.setting || '').trim().toLowerCase();
 
-        return this.vendorPackages.filter(pkg => {
-            // 1. Capacity Range Check
+        // 1. Strict Filter (All criteria satisfied)
+        const strictMatches = this.vendorPackages.filter(pkg => {
+            const pkgCat = (pkg.category || '').toLowerCase();
+            const settingOk = !currentSetting || pkgCat.includes(currentSetting) || currentSetting.includes(pkgCat);
+            if (!settingOk) return false;
+
             const capacityOk = currentGuest >= pkg.min_capacity && currentGuest <= pkg.max_capacity;
-            
-            // 2. Budget Range Check
             const budgetOk = currentBudget >= pkg.min_budget && currentBudget <= pkg.max_budget;
-            
-            // 3. Location Check (If user selected locations, must match at least one)
             const locationOk = !currentLocations.length || currentLocations.some(loc => 
-                pkg.locations.includes(loc) || pkg.locations.includes('All Mumbai')
+                (pkg.locations || []).includes(loc) || (pkg.locations || []).includes('All Mumbai')
             );
-
-            // 4. Tradition Check
             const traditionOk = !currentCulture || !pkg.traditions || !pkg.traditions.length || !pkg.traditions[0] || pkg.traditions.some(t => t.toLowerCase().includes(currentCulture.toLowerCase()) || currentCulture.toLowerCase().includes(t.toLowerCase()));
 
-            // 5. Venue Setting Category Check (Must match clicked environment e.g. Sea-Facing, Lawn, Ballroom, Heritage)
-            const settingOk = !currentSetting || !pkg.category || pkg.category.toLowerCase().includes(currentSetting.toLowerCase()) || currentSetting.toLowerCase().includes(pkg.category.toLowerCase());
-
-            return capacityOk && budgetOk && locationOk && traditionOk && settingOk;
+            return capacityOk && budgetOk && locationOk && traditionOk;
         });
+
+        if (strictMatches.length) return strictMatches;
+
+        // 2. Setting-Aware Relaxed Filter (Category matches selected environment)
+        const settingMatches = this.vendorPackages.filter(pkg => {
+            const pkgCat = (pkg.category || '').toLowerCase();
+            return !currentSetting || pkgCat.includes(currentSetting) || currentSetting.includes(pkgCat);
+        });
+
+        if (settingMatches.length) return settingMatches;
+
+        // 3. Dynamic Fallback: Top available packages so screen is never blank
+        return this.vendorPackages.slice(0, 6);
+    },
+    selectVenueSetting(settingOption) {
+        this.planner.setting = settingOption;
+        this.dynamicAnswers['venue_setting'] = settingOption;
+        this.plannerError = '';
+        this.$nextTick(() => {
+            const matches = this.getMatchingVendorPackages();
+            if (matches.length && !matches.some(pkg => pkg.name === this.planner.decorTheme)) {
+                this.planner.decorTheme = matches[0].name;
+                this.planner.selectedDecorVendorId = matches[0].id;
+                this.autoMatchCateringVendor(matches[0]);
+            }
+        });
+    },
+    autoMatchCateringVendor(pkg) {
+        if (!pkg || !this.cateringVendors || !this.cateringVendors.length) return;
+
+        let matched = this.cateringVendors.find(v => v.id === pkg.id);
+
+        if (!matched && pkg.vendor_name) {
+            const brand = (pkg.vendor_name || '').trim().split(' ')[0].toLowerCase();
+            if (brand) {
+                matched = this.cateringVendors.find(v => (v.name || '').toLowerCase().includes(brand));
+            }
+        }
+
+        if (!matched) {
+            matched = this.cateringVendors.find(v => v.id === this.planner.selectedVendorId) || this.cateringVendors[0];
+        }
+
+        if (matched) {
+            this.planner.selectedVendorId = matched.id;
+            if (!this.planner.selectedVendorIds.includes(matched.id)) {
+                this.planner.selectedVendorIds = [matched.id];
+            }
+        }
+    },
+    selectPackageAndNext(pkg) {
+        if (!pkg) return;
+        this.planner.decorTheme = pkg.name || pkg.decor_type || '';
+        this.planner.selectedDecorVendorId = pkg.id;
+        this.plannerError = '';
+        this.autoMatchCateringVendor(pkg);
+        setTimeout(() => {
+            this.nextStep();
+        }, 220);
     },
     optionsFor(code, fallback = []) {
         const options = this.managedOptions[code]?.options || [];
@@ -121,7 +175,7 @@
             this.planner.selectedVendorIds = [this.cateringVendors[0].id];
         }
         if (!this.planner.selectedVendorId || !this.planner.selectedVendorIds.includes(this.planner.selectedVendorId)) {
-            this.planner.selectedVendorId = this.planner.selectedVendorIds[0] || null;
+            this.planner.selectedVendorId = this.planner.selectedVendorIds[0] || (this.cateringVendors[0]?.id || null);
         }
         if (this.planner.eventDate && this.planner.eventDate < this.todayDate) {
             this.planner.eventDate = '';
@@ -130,6 +184,15 @@
             const selectedDate = this.planner.eventDate.split('-').map(Number);
             this.calendarYear = selectedDate[0];
             this.calendarMonth = selectedDate[1] - 1;
+        }
+        if (!this.planner.setting) {
+            this.planner.setting = this.optionsFor('venue_setting', this.optionsFor('decoration_type', []))[0] || '';
+        }
+        const initialPackages = this.getMatchingVendorPackages();
+        if (initialPackages.length && (!this.planner.decorTheme || !initialPackages.some(pkg => pkg.name === this.planner.decorTheme))) {
+            this.planner.decorTheme = initialPackages[0].name;
+            this.planner.selectedDecorVendorId = initialPackages[0].id;
+            this.autoMatchCateringVendor(initialPackages[0]);
         }
     },
     foodOptions() {
@@ -158,6 +221,20 @@
         if (this.planner.selectedVendorId) {
             const found = this.cateringVendors.find(v => v.id === this.planner.selectedVendorId);
             if (found) return found;
+        }
+        if (this.planner.selectedVendorIds && this.planner.selectedVendorIds.length) {
+            const found = this.cateringVendors.find(v => v.id === this.planner.selectedVendorIds[0]);
+            if (found) {
+                this.planner.selectedVendorId = found.id;
+                return found;
+            }
+        }
+        if (this.cateringVendors && this.cateringVendors.length) {
+            this.planner.selectedVendorId = this.cateringVendors[0].id;
+            if (!this.planner.selectedVendorIds.includes(this.cateringVendors[0].id)) {
+                this.planner.selectedVendorIds.push(this.cateringVendors[0].id);
+            }
+            return this.cateringVendors[0];
         }
         return null;
     },
@@ -332,9 +409,10 @@
         decorTheme: @js($savedAnswers['decoration_type'] ?? $plannerOptions['decoration_type']['options'][0] ?? 'Traditional Marigold & Brass'),
         ceremonies: @js($savedArray('ceremonies', ['Sakharpuda (Ring Ceremony)', 'Haldi & Mehendi', 'Lagna Phere', 'Satyanarayan & Reception'])),
         customCeremony: '',
+        selectedDecorVendorId: null,
         selectedVendorIds: @js($savedArray('selected_caterers')),
         selectedVendorId: @js(data_get($savedAnswers, 'food_menu_items.0.vendor_id')),
-        cateringMode: '{{ !empty($savedAnswers['selected_food_package']) ? 'package' : 'custom' }}',
+        cateringMode: 'package',
         selectedFoodPackageId: @js(data_get($savedAnswers, 'selected_food_package.id', 'deluxe_menu')),
         selectedFoodExtras: @js($savedArray('selected_food_extras', ['chinese_counter', 'chat_counter'])),
         foodType: '',
@@ -344,7 +422,7 @@
         timeline: @js($savedAnswers['event_timeline'] ?? $plannerOptions['event_timeline']['options'][1] ?? $plannerOptions['event_timeline']['options'][0] ?? '3 - 6 Months'),
         eventDate: @js($savedAnswers['event_date'] ?? ''),
         eventTime: @js($savedAnswers['event_time'] ?? ''),
-        setting: @js($savedAnswers['venue_setting'] ?? 'Indoor AC Banquet')
+        setting: @js($savedAnswers['venue_setting'] ?? ($plannerOptions['venue_setting']['options'][0] ?? ($plannerOptions['decoration_type']['options'][0] ?? '')))
     },
     todayDate: @js(now()->toDateString()),
     calendarMonth: @js((int) now()->format('n') - 1),
@@ -440,7 +518,8 @@
             guest_capacity: Number(this.planner.exactGuest) >= 10,
             service_area: this.planner.locations.length > 0,
             wedding_tradition: Boolean(this.planner.culture),
-            decoration_type: Boolean(this.planner.setting),
+            decoration_type: Boolean(this.planner.setting || this.planner.decorTheme),
+            venue_setting: Boolean(this.planner.setting),
             food_type: (this.planner.cateringMode === 'package' && this.planner.selectedFoodPackageId) || (this.planner.cateringMode === 'custom' && this.planner.foodItems.length > 0),
             event_timeline: Boolean(this.planner.timeline)
         };
@@ -746,6 +825,7 @@
         <input type="hidden" name="answers[wedding_tradition]" :value="planner.culture">
         <input type="hidden" name="answers[ceremonies]" :value="JSON.stringify(planner.ceremonies)">
         <input type="hidden" name="answers[decoration_type]" :value="planner.decorTheme">
+        <input type="hidden" name="answers[selected_decor_vendor_id]" :value="planner.selectedDecorVendorId">
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
         <input type="hidden" name="answers[food_type]" :value="planner.cateringMode === 'package' ? (getSelectedPackage()?.name || '') : planner.foodItems.map(item => item.title).join(', ')">
         <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.cateringMode === 'custom' ? planner.foodItems : [])">
@@ -843,13 +923,13 @@
                     
                     <button type="button" 
                         @click="
-                            planner.decorTheme = activeModalPackage.decor_type;
-                            planner.selectedVendorId = activeModalPackage.id;
+                            const pkg = activeModalPackage;
                             closePackageModal();
+                            selectPackageAndNext(pkg);
                         "
-                        class="px-6 py-2.5 rounded-full bg-[#850625] text-white text-xs font-extrabold hover:bg-[#6b041e] shadow-md transition-all flex items-center gap-2">
+                        class="px-6 py-2.5 rounded-full bg-[#850625] text-white text-xs font-extrabold hover:bg-[#6b041e] shadow-md transition-all flex items-center gap-2 cursor-pointer">
                         <i class="fa-solid fa-check"></i>
-                        <span>Select This Theme Package</span>
+                        <span>Select & Next →</span>
                     </button>
                 </div>
             </div>

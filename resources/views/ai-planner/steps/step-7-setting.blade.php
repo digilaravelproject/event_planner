@@ -13,23 +13,13 @@
     <div class="space-y-3">
         <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">1. What venue setting environment do you prefer?</span>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <template x-for="(settingOption, index) in optionsFor('decoration_type', [
-                'Sea-Facing Beachfront',
-                'Lawn & Poolside',
-                'Grand AC Ballroom',
-                'Heritage Resort'
-            ])">
-                <div @click="planner.setting = settingOption; planner.decorTheme = settingOption"
+            <template x-for="(settingOption, index) in optionsFor('venue_setting', optionsFor('decoration_type', []))">
+                <div @click="selectVenueSetting(settingOption)"
                     :class="planner.setting === settingOption ? 'border-[#850625] shadow-xl ring-2 ring-[#850625]/30 scale-[1.02]' : 'border-slate-200 hover:border-rose-300 hover:shadow-md'"
                     class="bg-white rounded-3xl border-2 overflow-hidden transition-all cursor-pointer group flex flex-col justify-between">
                     
                     <div class="relative h-32 w-full overflow-hidden bg-slate-900">
-                        <img :src="imageFor('decoration_type', index, [
-                            'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
-                            'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80',
-                            'https://images.unsplash.com/photo-1544078751-58fee2d8a03b?auto=format&fit=crop&w=600&q=80',
-                            'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
-                        ][index % 4])" :alt="settingOption" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <img :src="imageFor('venue_setting', index, imageFor('decoration_type', index, 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80'))" :alt="settingOption" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent"></div>
                         <span x-show="planner.setting === settingOption" class="absolute top-2.5 right-2.5 bg-[#850625] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
                             <i class="fa-solid fa-circle-check mr-1"></i> Selected
@@ -58,8 +48,9 @@
         <!-- Matching Packages Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <template x-for="pkg in getMatchingVendorPackages()">
-                <div :class="planner.decorTheme === pkg.name ? 'border-[#850625] shadow-xl ring-2 ring-[#850625]/30 scale-[1.01]' : 'border-slate-200 hover:border-rose-300 hover:shadow-md'"
-                    class="bg-white rounded-3xl border-2 overflow-hidden transition-all flex flex-col justify-between group relative">
+                <div @click="selectPackageAndNext(pkg)"
+                    :class="planner.decorTheme === pkg.name ? 'border-[#850625] shadow-xl ring-2 ring-[#850625]/30 scale-[1.01]' : 'border-slate-200 hover:border-rose-300 hover:shadow-md'"
+                    class="bg-white rounded-3xl border-2 overflow-hidden transition-all flex flex-col justify-between group relative cursor-pointer">
                     
                     <div class="relative h-44 w-full bg-slate-900 overflow-hidden">
                         <template x-if="pkg.images && pkg.images.length">
@@ -97,20 +88,17 @@
                         <!-- Card Action Buttons: View Details (Popup) & Select Package -->
                         <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                             <button type="button" 
-                                @click="openPackageModal(pkg)"
+                                @click.stop="openPackageModal(pkg)"
                                 class="px-3.5 py-1.5 rounded-full border border-slate-300 hover:border-[#850625] text-slate-700 hover:text-[#850625] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
                                 <i class="fa-solid fa-eye text-[11px]"></i>
                                 <span>View Details</span>
                             </button>
 
                             <button type="button" 
-                                @click="
-                                    planner.decorTheme = pkg.name;
-                                    planner.selectedVendorId = pkg.id;
-                                "
+                                @click.stop="selectPackageAndNext(pkg)"
                                 :class="planner.decorTheme === pkg.name ? 'bg-[#850625] text-white' : 'bg-rose-50 text-[#850625] hover:bg-[#850625] hover:text-white'"
                                 class="px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
-                                <span x-text="planner.decorTheme === pkg.name ? 'Selected' : 'Select'"></span>
+                                <span x-text="planner.decorTheme === pkg.name ? 'Selected →' : 'Select & Next →'"></span>
                             </button>
                         </div>
                     </div>
