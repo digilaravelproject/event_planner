@@ -86,6 +86,18 @@ class AiPlannerController extends Controller
 
                     $vendorBrandName = data_get($vendor->vendor_json, 'identity.name') ?: data_get($vendor->vendor_json, 'name') ?: 'Vendor';
 
+                    $offeringImages = (array) data_get($offering, 'images', []);
+                    $pkgImages = !empty($offeringImages) ? $offeringImages : $imageUrls;
+                    if (empty($pkgImages)) {
+                        $categoryFallbacks = [
+                            'Sea-Facing Beachfront' => ['https://images.unsplash.com/photo-1544077960-604201fe74bc?auto=format&fit=crop&w=800&q=80', 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80'],
+                            'Lawn & Poolside' => ['https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=800&q=80', 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80'],
+                            'Grand AC Ballroom' => ['https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80', 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80'],
+                            'Heritage Resort' => ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80', 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80'],
+                        ];
+                        $pkgImages = $categoryFallbacks[$decorCategory] ?? ['https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80'];
+                    }
+
                     return [
                         'id' => $vendor->id,
                         'vendor_name' => $vendorBrandName,
@@ -99,7 +111,7 @@ class AiPlannerController extends Controller
                         'traditions' => array_values(array_filter($traditionsList)),
                         'decor_type' => $pkgName,
                         'note' => is_array($note) ? implode(' ', $note) : (string) $note,
-                        'images' => $imageUrls,
+                        'images' => $pkgImages,
                         'food_packages' => data_get($vendor->vendor_json, 'food_packages', []),
                         'food_extras' => data_get($vendor->vendor_json, 'food_extras', []),
                     ];
