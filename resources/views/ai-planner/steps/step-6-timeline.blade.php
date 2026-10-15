@@ -1,21 +1,21 @@
 <!-- Step 8: Timeline & Event Date Selection (Redesigned & Aligned with Design System) -->
-<div x-show="currentStep === {{ $stepNumbers['event_timeline'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-4 sm:space-y-5">
+<div x-show="currentStep === {{ $stepNumbers['event_timeline'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-2 sm:space-y-5">
     
     <!-- Step Header -->
-    <div class="space-y-1">
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#850625]/10 text-[#850625] text-[11px] font-extrabold uppercase tracking-wider">
-            <i class="fa-solid fa-calendar-star text-[10px] text-[#D4AF37]"></i>
+    <div class="space-y-0.5 sm:space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#850625]/10 text-[#850625] text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">
+            <i class="fa-solid fa-calendar-star text-[9px] sm:text-[10px] text-[#D4AF37]"></i>
             <span>Step {{ str_pad((string) ($stepNumbers['event_timeline'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Timeline & Big Day</span>
         </div>
-        <h2 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('event_timeline')?->question ?? 'When is the big day planned?' }}</h2>
-        <p class="text-xs text-slate-500">Choose your approximate planning window or pick an exact confirmed date & start time.</p>
+        <h2 class="text-base sm:text-2xl lg:text-3xl font-extrabold text-slate-900 font-serif-luxury leading-snug">{{ $questions->get('event_timeline')?->question ?? 'When is the big day planned?' }}</h2>
+        <p class="text-[11px] sm:text-xs text-slate-500 leading-tight">Choose your approximate planning window or pick an exact confirmed date & start time.</p>
     </div>
 
     <!-- 1. Interactive Planning Window Cards Grid (Primary Question Selection) -->
-    <div class="space-y-2.5">
-        <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider block">1. Select Your Planning Window</span>
+    <div class="space-y-1.5 sm:space-y-2.5">
+        <span class="text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wider block">1. Select Your Planning Window</span>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
             <template x-for="(time, index) in optionsFor('event_timeline', ['1 - 3 Months', '3 - 6 Months', '6 - 12 Months', '12+ Months']).map((value, idx) => {
                 const title = String(typeof value === 'object' ? (value.title || value.name || value.id) : value);
                 const id = String(typeof value === 'object' ? (value.id || title) : value);
@@ -37,32 +37,32 @@
                 
                 <div @click="planner.timeline = time.id"
                     :class="planner.timeline === time.id ? 'border-[#850625] bg-rose-50/40 shadow-lg ring-2 ring-[#850625]/20 scale-[1.01]' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-md'"
-                    class="p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-3 relative group select-none">
+                    class="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-2 sm:space-y-3 relative group select-none">
 
                     <!-- Top Row: Icon + Selection Pill -->
                     <div class="flex items-center justify-between">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors shadow-2xs"
+                        <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center transition-colors shadow-2xs"
                             :class="planner.timeline === time.id ? 'bg-[#850625] text-white' : 'bg-rose-50 text-[#850625] group-hover:bg-[#850625] group-hover:text-white'">
-                            <i :class="time.icon" class="text-xs"></i>
+                            <i :class="time.icon" class="text-[10px] sm:text-xs"></i>
                         </div>
 
                         <span :class="planner.timeline === time.id ? 'bg-[#850625] text-white font-extrabold' : 'bg-rose-50/70 text-slate-600 font-semibold'"
-                            class="text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider"
+                            class="text-[9px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider"
                             x-text="planner.timeline === time.id ? 'Selected' : time.tag">
                         </span>
                     </div>
 
                     <!-- Title & Description -->
-                    <div class="space-y-1">
-                        <h4 class="font-extrabold text-slate-900 text-sm leading-snug" x-text="time.title"></h4>
-                        <p class="text-[11px] text-slate-500 leading-tight" x-text="time.desc"></p>
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm leading-snug truncate" x-text="time.title"></h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 leading-tight line-clamp-2" x-text="time.desc"></p>
                     </div>
 
                     <!-- Bottom Status Indicator -->
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold"
+                    <div class="pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] font-bold"
                         :class="planner.timeline === time.id ? 'text-[#850625]' : 'text-slate-400 group-hover:text-[#850625]'">
-                        <span x-text="planner.timeline === time.id ? 'Active Window' : 'Choose Window'"></span>
-                        <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-0.5 transition-transform"></i>
+                        <span class="truncate" x-text="planner.timeline === time.id ? 'Active Window' : 'Choose'"></span>
+                        <i class="fa-solid fa-arrow-right text-[8px] sm:text-[9px] group-hover:translate-x-0.5 transition-transform"></i>
                     </div>
                 </div>
             </template>

@@ -1,59 +1,59 @@
 <!-- Step 3: Location / Service Area Selection (Redesigned with luxury aesthetic & rich cards matching Budget & Guests standard) -->
-<div x-show="currentStep === {{ $stepNumbers['service_area'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+<div x-show="currentStep === {{ $stepNumbers['service_area'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-2.5 sm:space-y-5">
 
     <!-- Header -->
-    <div class="space-y-1 text-center sm:text-left">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-[#850625]/10 to-rose-100 text-[#850625] text-[11px] font-extrabold uppercase tracking-widest mx-auto sm:mx-0">
-            <i class="fa-solid fa-location-dot text-[10px]"></i>
+    <div class="space-y-0.5 sm:space-y-1 text-center sm:text-left">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-gradient-to-r from-[#850625]/10 to-rose-100 text-[#850625] text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider sm:tracking-widest mx-auto sm:mx-0">
+            <i class="fa-solid fa-location-dot text-[9px] sm:text-[10px]"></i>
             <span>Step {{ str_pad((string) ($stepNumbers['service_area'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Venue Destinations</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-serif-luxury leading-tight">{{ $questions->get('service_area')?->question ?? 'Where would you like to host?' }}</h2>
-        <p class="text-sm sm:text-base text-slate-500">Select one or multiple preferred destination hubs across Mumbai. (Multi-select enabled)</p>
+        <h2 class="text-base sm:text-2xl lg:text-3xl font-extrabold text-slate-900 font-serif-luxury leading-snug">{{ $questions->get('service_area')?->question ?? 'Where would you like to host?' }}</h2>
+        <p class="text-[11px] sm:text-sm text-slate-500 leading-tight">Select one or multiple preferred destination hubs across Mumbai. (Multi-select enabled)</p>
     </div>
 
     <!-- Main Location Card Container -->
-    <div class="bg-gradient-to-br from-white via-rose-50/20 to-amber-50/10 rounded-3xl border border-rose-100 shadow-xl shadow-rose-900/5 p-5 sm:p-7 space-y-5 relative overflow-hidden">
+    <div class="bg-gradient-to-br from-white via-rose-50/20 to-amber-50/10 rounded-2xl sm:rounded-3xl border border-rose-100 shadow-xl shadow-rose-900/5 p-2.5 sm:p-7 space-y-2.5 sm:space-y-5 relative overflow-hidden">
 
         <!-- Decorative Background Glows -->
         <div class="absolute -top-12 -right-12 w-32 h-32 bg-[#D4AF37]/10 rounded-full blur-2xl"></div>
         <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-rose-200/20 rounded-full blur-2xl"></div>
 
         <!-- Top Destination Selector & Quick Controls -->
-        <div class="bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-rose-100/80 shadow-sm relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-            <div class="space-y-1">
+        <div class="bg-white/90 backdrop-blur-md p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-rose-100/80 shadow-xs relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+            <div class="space-y-0.5">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-city text-[#850625]"></i>
+                    <span class="text-[11px] sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
+                        <i class="fa-solid fa-city text-[#850625] text-xs"></i>
                         <span>Selected Wedding Hubs</span>
                     </span>
-                    <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 bg-rose-50 text-[#850625] rounded-full border border-rose-100">
+                    <span class="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 bg-rose-50 text-[#850625] rounded-full border border-rose-100">
                         <span class="w-1.5 h-1.5 rounded-full bg-[#850625] animate-pulse"></span>
-                        <span x-text="planner.locations.length ? `${planner.locations.length} Selected` : 'No preference set'"></span>
+                        <span x-text="planner.locations.length ? `${planner.locations.length} Selected` : 'None'"></span>
                     </span>
                 </div>
-                <p class="text-xs text-slate-500">Pick specific regions, or select all for maximum venue variety & budget matching.</p>
+                <p class="hidden sm:block text-xs text-slate-500">Pick specific regions, or select all for maximum venue variety & budget matching.</p>
             </div>
 
             <!-- Quick Action Buttons -->
             <div class="flex items-center gap-2 shrink-0">
                 <button type="button"
                     @click="planner.locations = optionsFor('service_area', []).map(val => typeof val === 'object' ? val.id : val)"
-                    class="px-3.5 py-2 rounded-xl text-xs font-bold text-[#850625] bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs">
-                    <i class="fa-solid fa-check-double text-[10px]"></i>
+                    class="px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold text-[#850625] bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all flex items-center gap-1 cursor-pointer shadow-2xs">
+                    <i class="fa-solid fa-check-double text-[9px]"></i>
                     <span>Select All Hubs</span>
                 </button>
                 <button type="button"
                     x-show="planner.locations.length > 0"
                     @click="planner.locations = []"
-                    class="px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-rose-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all flex items-center gap-1 cursor-pointer shadow-xs">
-                    <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                    class="px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold text-slate-500 hover:text-rose-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all flex items-center gap-1 cursor-pointer shadow-2xs">
+                    <i class="fa-solid fa-rotate-left text-[9px]"></i>
                     <span>Clear</span>
                 </button>
             </div>
         </div>
 
-        <!-- Location Cards Grid: 1 col on mobile, 2 on sm, 4 on lg -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+        <!-- Location Cards Grid: 2 cols on mobile, 4 on lg -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 relative z-10">
             <template x-for="(loc, idx) in optionsFor('service_area', []).map((val, i) => {
                 const name = typeof val === 'object' ? val.id : val;
                 const img = imageFor('service_area', i, [
@@ -114,10 +114,10 @@
                     :class="planner.locations.includes(loc.id)
                         ? 'border-[#850625] bg-rose-50/30 ring-2 ring-[#850625]/25 shadow-xl scale-[1.01]'
                         : 'border-slate-200 bg-white hover:border-rose-300 hover:shadow-lg'"
-                    class="group relative overflow-hidden rounded-3xl border-2 text-left text-slate-900 transition-all cursor-pointer flex flex-col justify-between select-none">
+                    class="group relative overflow-hidden rounded-2xl sm:rounded-3xl border-2 text-left text-slate-900 transition-all cursor-pointer flex flex-col justify-between select-none">
 
                     <!-- Top Visual Image Banner (Full-Width, Vibrant) -->
-                    <div class="relative h-36 sm:h-40 w-full overflow-hidden bg-slate-900 shrink-0">
+                    <div class="relative h-28 sm:h-40 w-full overflow-hidden bg-slate-900 shrink-0">
                         <img :src="loc.image" :alt="loc.title"
                             onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80'"
                             class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -125,44 +125,44 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"></div>
 
                         <!-- Top Left Icon Badge -->
-                        <span class="absolute top-3 left-3 flex h-8 w-8 items-center justify-center rounded-xl bg-white/90 backdrop-blur-md text-[#850625] shadow-sm border border-white/50">
-                            <i :class="loc.icon" class="text-xs"></i>
+                        <span class="absolute top-2 left-2 sm:top-3 sm:left-3 flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-white/90 backdrop-blur-md text-[#850625] shadow-xs border border-white/50">
+                            <i :class="loc.icon" class="text-[10px] sm:text-xs"></i>
                         </span>
 
                         <!-- Top Right Selected Badge -->
-                        <div class="absolute top-3 right-3">
+                        <div class="absolute top-2 right-2 sm:top-3 sm:right-3">
                             <span x-show="planner.locations.includes(loc.id)"
-                                class="rounded-full bg-[#850625] px-2.5 py-1 text-[10px] font-extrabold text-white shadow-md flex items-center gap-1.5 border border-rose-300/30">
-                                <i class="fa-solid fa-circle-check text-[9px] text-[#D4AF37]"></i>
+                                class="rounded-full bg-[#850625] px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-extrabold text-white shadow-md flex items-center gap-1 sm:gap-1.5 border border-rose-300/30">
+                                <i class="fa-solid fa-circle-check text-[8px] sm:text-[9px] text-[#D4AF37]"></i>
                                 <span>Selected</span>
                             </span>
                             <span x-show="!planner.locations.includes(loc.id)"
-                                class="rounded-full bg-slate-900/60 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold text-white/90 border border-white/20 group-hover:bg-[#850625] group-hover:border-transparent transition-colors">
+                                class="rounded-full bg-slate-900/60 backdrop-blur-md px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold text-white/90 border border-white/20 group-hover:bg-[#850625] group-hover:border-transparent transition-colors">
                                 <span>Select</span>
                             </span>
                         </div>
 
                         <!-- Bottom Tag Inside Image -->
-                        <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between">
-                            <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full backdrop-blur-md border shadow-xs"
+                        <div class="absolute bottom-1.5 left-2 right-2 sm:bottom-2.5 sm:left-3 sm:right-3 flex items-center justify-between">
+                            <span class="text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-full backdrop-blur-md border shadow-xs truncate"
                                 :class="loc.tagColor"
                                 x-text="loc.tag"></span>
                         </div>
                     </div>
 
                     <!-- Card Body -->
-                    <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                    <div class="p-2.5 sm:p-4 space-y-1 sm:space-y-2 flex-1 flex flex-col justify-between">
                         <div>
-                            <h4 class="text-base font-extrabold text-slate-900 group-hover:text-[#850625] transition-colors font-serif-luxury leading-tight" x-text="loc.title"></h4>
-                            <p class="text-xs text-slate-500 leading-relaxed mt-1" x-text="loc.desc"></p>
+                            <h4 class="text-xs sm:text-base font-bold sm:font-extrabold text-slate-900 group-hover:text-[#850625] transition-colors font-serif-luxury leading-tight line-clamp-1" x-text="loc.title"></h4>
+                            <p class="text-[10px] sm:text-xs text-slate-500 leading-snug mt-0.5 sm:mt-1 line-clamp-2" x-text="loc.desc"></p>
                         </div>
 
                         <!-- Card Action Bottom Row -->
-                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold"
+                        <div class="pt-2 sm:pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-xs font-bold"
                             :class="planner.locations.includes(loc.id) ? 'text-[#850625]' : 'text-slate-400 group-hover:text-[#850625]'">
-                            <span x-text="planner.locations.includes(loc.id) ? 'Preferred Hub Active' : 'Tap to Include'"></span>
-                            <i class="fa-solid fa-check text-[11px]" x-show="planner.locations.includes(loc.id)"></i>
-                            <i class="fa-solid fa-plus text-[10px] group-hover:translate-x-0.5 transition-transform" x-show="!planner.locations.includes(loc.id)"></i>
+                            <span class="truncate" x-text="planner.locations.includes(loc.id) ? 'Hub Active' : 'Include'"></span>
+                            <i class="fa-solid fa-check text-[9px] sm:text-[11px]" x-show="planner.locations.includes(loc.id)"></i>
+                            <i class="fa-solid fa-plus text-[9px] sm:text-[10px] group-hover:translate-x-0.5 transition-transform" x-show="!planner.locations.includes(loc.id)"></i>
                         </div>
                     </div>
                 </div>

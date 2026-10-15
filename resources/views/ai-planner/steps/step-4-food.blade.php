@@ -1,24 +1,24 @@
 <!-- Step 6: Food & Catering Preferences (Vendor-Specific Food Packages, Extras & Live Range Calculator) -->
-<div x-show="currentStep === {{ $stepNumbers['food_type'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-8">
-    <div class="space-y-2">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#850625]/10 text-[#850625] text-xs font-extrabold uppercase tracking-widest">
-            <i class="fa-solid fa-utensils text-[10px]"></i>
+<div x-show="currentStep === {{ $stepNumbers['food_type'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-2.5 sm:space-y-6">
+    <div class="space-y-0.5 sm:space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-[#850625]/10 text-[#850625] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider sm:tracking-widest">
+            <i class="fa-solid fa-utensils text-[9px] sm:text-[10px]"></i>
             <span>Step {{ str_pad((string) ($stepNumbers['food_type'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Catering Packages & Extra Counters</span>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('food_type')?->question ?? 'What are your food & catering preferences?' }}</h2>
-        <p class="text-slate-600 text-sm sm:text-base">Select from curated vendor food packages (Classic, Deluxe, Elite) or build a custom menu. Price ranges calculate live based on your guest count.</p>
+        <h2 class="text-base sm:text-3xl lg:text-4xl font-extrabold text-slate-900 font-serif-luxury leading-snug">{{ $questions->get('food_type')?->question ?? 'What are your food & catering preferences?' }}</h2>
+        <p class="text-[11px] sm:text-sm text-slate-600 leading-tight">Select from curated vendor food packages or extras. Price ranges calculate live based on your guest count.</p>
     </div>
 
     <!-- Vendor Menu Filter Bar -->
-    <div x-data="{ isVendorDropdownOpen: false }" class="bg-gradient-to-r from-rose-900 via-[#850625] to-rose-950 p-5 rounded-3xl text-white shadow-xl relative">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-3.5">
-                <div class="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md border border-white/25 flex items-center justify-center text-white shrink-0 shadow-sm">
-                    <i class="fa-solid fa-utensils text-lg"></i>
+    <div x-data="{ isVendorDropdownOpen: false }" class="bg-gradient-to-r from-rose-900 via-[#850625] to-rose-950 p-2.5 sm:p-5 rounded-2xl sm:rounded-3xl text-white shadow-xl relative">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4">
+            <div class="flex items-center gap-2.5 sm:gap-3.5">
+                <div class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-white/10 backdrop-blur-md border border-white/25 flex items-center justify-center text-white shrink-0 shadow-xs">
+                    <i class="fa-solid fa-utensils text-xs sm:text-lg"></i>
                 </div>
                 <div>
-                    <span class="text-[10px] uppercase font-bold text-rose-200 tracking-widest block">Active Caterer</span>
-                    <h3 class="font-extrabold text-lg text-white leading-tight flex items-center gap-2" x-text="getSelectedCateringVendor()?.name || 'Select Caterer'">
+                    <span class="text-[9px] sm:text-[10px] uppercase font-bold text-rose-200 tracking-widest block">Active Caterer</span>
+                    <h3 class="font-extrabold text-xs sm:text-lg text-white leading-tight flex items-center gap-1.5 sm:gap-2" x-text="getSelectedCateringVendor()?.name || 'Select Caterer'">
                     </h3>
                 </div>
             </div>
@@ -162,25 +162,25 @@
                 <p class="text-xs text-slate-500">Enhance your catering experience with live counters & extra services.</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3.5">
                 <template x-for="extra in getFoodExtras()" :key="extra.id">
                     <div @click="toggleFoodExtra(extra.id)"
                         :class="isFoodExtraSelected(extra.id) ? 'border-[#850625] bg-rose-50 shadow-md ring-2 ring-[#850625]/20' : 'border-slate-200 bg-white hover:border-rose-200'"
-                        class="p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 select-none">
+                        class="p-2 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-1.5 sm:gap-3 select-none">
                         
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0"
                                 :class="isFoodExtraSelected(extra.id) ? 'bg-[#850625] text-white' : 'bg-rose-50 text-[#850625]'">
-                                <i :class="extra.icon || 'fa-solid fa-utensils'" class="text-sm"></i>
+                                <i :class="extra.icon || 'fa-solid fa-utensils'" class="text-xs sm:text-sm"></i>
                             </div>
-                            <div>
-                                <h4 class="text-xs font-extrabold text-slate-900 leading-snug" x-text="extra.name"></h4>
-                                <span class="text-[11px] font-bold text-[#850625]"
-                                    x-text="extra.unit === 'fixed' ? ('+ ₹' + extra.min_price.toLocaleString() + ' / hr') : ('+ ₹' + extra.min_price + ' – ₹' + extra.max_price + ' / plate')"></span>
+                            <div class="min-w-0">
+                                <h4 class="text-[11px] sm:text-xs font-extrabold text-slate-900 leading-snug truncate" x-text="extra.name"></h4>
+                                <span class="text-[9px] sm:text-[11px] font-bold text-[#850625] block truncate"
+                                    x-text="extra.unit === 'fixed' ? ('+ ₹' + extra.min_price.toLocaleString() + '/hr') : ('+ ₹' + extra.min_price + '–' + extra.max_price + '/p')"></span>
                             </div>
                         </div>
 
-                        <div class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px]"
+                        <div class="flex h-4 w-4 sm:h-5 sm:w-5 shrink-0 items-center justify-center rounded-full border text-[9px] sm:text-[10px]"
                             :class="isFoodExtraSelected(extra.id) ? 'border-[#850625] bg-[#850625] text-white' : 'border-slate-300 text-transparent'">
                             ✓
                         </div>

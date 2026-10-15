@@ -1,16 +1,16 @@
 <!-- Step 4: Wedding Tradition & Ceremony Selection -->
-<div x-show="currentStep === {{ $stepNumbers['wedding_tradition'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-4">
+<div x-show="currentStep === {{ $stepNumbers['wedding_tradition'] ?? -1 }}" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-2.5 sm:space-y-4">
     <div class="space-y-1">
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#850625]/10 text-[#850625] text-[11px] font-extrabold uppercase tracking-wider">
-            <i class="fa-solid fa-hands-praying text-[10px]"></i>
-            <span>Step {{ str_pad((string) ($stepNumbers['wedding_tradition'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Cultural Traditions & Ceremonies</span>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#850625]/10 text-[#850625] text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider">
+            <i class="fa-solid fa-hands-praying text-[9px] sm:text-[10px]"></i>
+            <span>Step {{ str_pad((string) ($stepNumbers['wedding_tradition'] ?? 0), 2, '0', STR_PAD_LEFT) }} / {{ count($plannerSteps) }} • Cultural Traditions</span>
         </div>
-        <h2 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 font-serif-luxury">{{ $questions->get('wedding_tradition')?->question ?? 'What type of wedding celebration is this?' }}</h2>
-        <p class="text-xs text-slate-500">Select your tradition to customize ceremonial rituals, decor theme & mandap styling.</p>
+        <h2 class="text-base sm:text-2xl lg:text-3xl font-extrabold text-slate-900 font-serif-luxury leading-snug">{{ $questions->get('wedding_tradition')?->question ?? 'What type of wedding celebration is this?' }}</h2>
+        <p class="text-[11px] sm:text-xs text-slate-500">Select your tradition to customize ceremonial rituals, decor theme & mandap styling.</p>
     </div>
 
     <!-- Micro-Level Tradition Cards Grid (Click to Select & Customize Ceremonies in Popup) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
         <template x-for="(culture, index) in optionsFor('wedding_tradition', [
             { id: 'Maharashtrian Lagna', name: 'Maharashtrian Lagna', icon: 'fa-solid fa-scroll', tag: 'Traditional Peshwai & Shehnai Vibe', defaultDecor: 'Traditional Marigold & Brass' },
             { id: 'Muslim Nikah & Walima', name: 'Muslim Nikah & Walima', icon: 'fa-solid fa-mosque', tag: 'Royal Mogul & Emerald Green Glow', defaultDecor: 'Arabian Night Floral Glow' },
@@ -51,7 +51,7 @@
                 openCeremonyModal();
             "
                 :class="planner.culture === culture.id ? 'border-rose-400 bg-rose-50/70 shadow-md ring-1 ring-rose-300' : 'border-slate-100 bg-white hover:border-rose-200 hover:shadow-xs'"
-                class="p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 relative overflow-hidden group select-none min-h-[110px] sm:min-h-[115px]">
+                class="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 sm:space-y-2 relative overflow-hidden group select-none min-h-[95px] sm:min-h-[115px]">
                 
                 <!-- Background Culture Photo with Luxury Gradient Overlay -->
                 <div class="absolute inset-0 w-full h-full pointer-events-none opacity-25 transition-opacity duration-300 group-hover:opacity-40"
@@ -62,28 +62,28 @@
 
                 <!-- Top Row: Icon Badge & Selected Checkmark -->
                 <div class="relative z-10 flex items-center justify-between">
-                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shadow-xs transition-colors shrink-0 backdrop-blur-xs"
+                    <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center shadow-xs transition-colors shrink-0 backdrop-blur-xs"
                         :class="planner.culture === culture.id ? 'bg-[#850625] text-white shadow-xs' : 'bg-white/95 text-[#850625] border border-rose-100 group-hover:bg-[#850625] group-hover:text-white'">
                         <i :class="culture.icon" class="text-xs sm:text-sm"></i>
                     </div>
-                    <span x-show="planner.culture === culture.id" class="text-[11px] font-bold text-white bg-[#850625] px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
-                        <i class="fa-solid fa-circle-check text-[10px]"></i> Selected
+                    <span x-show="planner.culture === culture.id" class="text-[9px] sm:text-[11px] font-bold text-white bg-[#850625] px-1.5 sm:px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                        <i class="fa-solid fa-circle-check text-[8px] sm:text-[10px]"></i> Selected
                     </span>
                 </div>
 
                 <!-- Bottom Row: Tradition Name, Tag & Ceremonies Summary Pill -->
                 <div class="relative z-10 space-y-0.5">
                     <h4 class="font-bold text-slate-900 text-xs sm:text-sm leading-tight truncate group-hover:text-[#850625] transition-colors" x-text="culture.name"></h4>
-                    <p class="text-[10px] text-slate-500 leading-tight truncate font-medium" x-text="culture.tag"></p>
+                    <p class="text-[9px] sm:text-[10px] text-slate-500 leading-tight truncate font-medium" x-text="culture.tag"></p>
                     
                     <template x-if="planner.culture === culture.id">
-                        <div class="pt-1.5 flex items-center justify-between text-[10px] font-bold text-[#850625]">
+                        <div class="pt-1 sm:pt-1.5 flex items-center justify-between text-[9px] sm:text-[10px] font-bold text-[#850625]">
                             <span class="inline-flex items-center gap-1">
-                                <i class="fa-solid fa-list-check text-[9px]"></i>
-                                <span x-text="(planner.ceremonies?.length || 0) + ' rituals configured'"></span>
+                                <i class="fa-solid fa-list-check text-[8px] sm:text-[9px]"></i>
+                                <span x-text="(planner.ceremonies?.length || 0) + ' rituals'"></span>
                             </span>
-                            <span class="text-[10px] underline hover:text-[#6b041e] font-extrabold flex items-center gap-0.5">
-                                Edit <i class="fa-solid fa-pen text-[8px]"></i>
+                            <span class="text-[9px] sm:text-[10px] underline hover:text-[#6b041e] font-extrabold flex items-center gap-0.5">
+                                Edit <i class="fa-solid fa-pen text-[7px] sm:text-[8px]"></i>
                             </span>
                         </div>
                     </template>
