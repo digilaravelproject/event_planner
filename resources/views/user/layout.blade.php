@@ -24,6 +24,9 @@
         }
     </script>
 
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
@@ -40,22 +43,24 @@
 
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div 
+        id="sidebar-backdrop"
         x-show="mobileSidebarOpen" 
         @click="mobileSidebarOpen = false" 
+        onclick="closeMobileSidebar()"
         x-transition:enter="transition-opacity ease-linear duration-300"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
         x-transition:leave="transition-opacity ease-linear duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 lg:hidden"
-        style="display: none;"
+        class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 lg:hidden hidden"
     ></div>
 
     <!-- Responsive Sidebar Drawer -->
     <aside 
+        id="user-sidebar"
         :class="mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'"
-        class="fixed lg:static inset-y-0 left-0 z-50 w-72 lg:w-64 border-r border-slate-200/80 bg-white flex flex-col justify-between shrink-0 select-none transition-transform duration-300 ease-in-out h-full"
+        class="fixed lg:static inset-y-0 left-0 z-50 w-72 lg:w-64 border-r border-slate-200/80 bg-white flex flex-col justify-between shrink-0 select-none transition-transform duration-300 ease-in-out h-full -translate-x-full lg:translate-x-0"
     >
         <div class="p-5 sm:p-6 space-y-6 overflow-y-auto">
             <!-- Brand Logo & Close Button (Mobile) -->
@@ -69,6 +74,7 @@
 
                 <button 
                     @click="mobileSidebarOpen = false" 
+                    onclick="closeMobileSidebar()"
                     type="button"
                     class="lg:hidden p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
                     aria-label="Close sidebar"
@@ -172,6 +178,7 @@
             <div class="flex items-center gap-3">
                 <button 
                     @click="mobileSidebarOpen = true" 
+                    onclick="openMobileSidebar()"
                     type="button"
                     class="lg:hidden p-2 rounded-xl text-slate-700 hover:text-[#850625] hover:bg-rose-50 transition border border-slate-200/80"
                     aria-label="Open sidebar"
@@ -242,6 +249,49 @@
             @yield('content')
         </main>
     </div>
+
+    <!-- Vanilla JS Fallback Handler for Mobile Sidebar -->
+    <script>
+        function openMobileSidebar() {
+            const sidebar = document.getElementById('user-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (sidebar) {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0', 'shadow-2xl');
+            }
+            if (backdrop) {
+                backdrop.classList.remove('hidden');
+                backdrop.style.display = 'block';
+            }
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('user-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (sidebar) {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0', 'shadow-2xl');
+            }
+            if (backdrop) {
+                backdrop.classList.add('hidden');
+                backdrop.style.display = 'none';
+            }
+            document.body.style.overflow = '';
+        }
+
+        // Auto close sidebar when a navigation link is clicked on mobile
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('#user-sidebar nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth < 1024) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>
