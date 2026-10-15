@@ -15,8 +15,10 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserPlanController;
 use App\Http\Controllers\Admin\UserQueryController as AdminUserQueryController;
 use App\Http\Controllers\Admin\VendorAnalyticsController;
+use App\Http\Controllers\Admin\VendorEnquiryController as AdminVendorEnquiryController;
 use App\Http\Controllers\AiPlannerController;
 use App\Http\Controllers\PublicQueryController;
+use App\Http\Controllers\VendorEnquiryController;
 use App\Http\Controllers\User\UserAuthController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserNotificationController;
@@ -109,6 +111,7 @@ Route::prefix('admin')->group(function () {
         Route::resource('/users', UserController::class)->except(['create', 'show', 'store'])->middleware('admin.permission:users')->names('admin.users');
         Route::post('/user-queries/{query}/reply', [AdminUserQueryController::class, 'reply'])->middleware('admin.permission:user_queries')->name('admin.user-queries.reply');
         Route::resource('/user-queries', AdminUserQueryController::class)->only(['index', 'update', 'destroy'])->parameters(['user-queries' => 'query'])->middleware('admin.permission:user_queries')->names('admin.user-queries');
+        Route::resource('/vendor-enquiries', AdminVendorEnquiryController::class)->only(['index', 'show', 'update', 'destroy'])->parameters(['vendor-enquiries' => 'vendorEnquiry'])->middleware('admin.permission:vendor_enquiries')->names('admin.vendor-enquiries');
     });
 });
 
@@ -233,3 +236,6 @@ Route::get('/', function () {
 Route::get('/ai-planner', [AiPlannerController::class, 'index'])->name('ai-planner');
 Route::post('/ai-planner/generate', [AiPlannerController::class, 'generate'])->name('ai-planner.generate');
 Route::post('/queries', [PublicQueryController::class, 'store'])->name('queries.store');
+Route::get('/vendor-enquiry', [VendorEnquiryController::class, 'create'])->name('vendor-enquiry.create');
+Route::post('/vendor-enquiry', [VendorEnquiryController::class, 'store'])->name('vendor-enquiry.store');
+

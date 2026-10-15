@@ -10,6 +10,7 @@ class AdminMenu
             'dashboard' => ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'prefix' => 'admin.dashboard', 'icon' => 'DB'],
             'users' => ['label' => 'Manage Users', 'route' => 'admin.users.index', 'prefix' => 'admin.users', 'icon' => 'MU'],
             'user_queries' => ['label' => 'User Queries', 'route' => 'admin.user-queries.index', 'prefix' => 'admin.user-queries', 'icon' => 'UQ'],
+            'vendor_enquiries' => ['label' => 'Vendor Enquiries', 'route' => 'admin.vendor-enquiries.index', 'prefix' => 'admin.vendor-enquiries', 'icon' => 'VE'],
             'vendors' => ['label' => 'Manage Vendors', 'route' => 'admin.dynamic-vendors.index', 'prefix' => 'admin.dynamic-vendors', 'icon' => 'MV'],
             'subscriptions' => ['label' => 'Subscription Manager', 'route' => 'admin.subscriptions.index', 'prefix' => 'admin.subscriptions', 'icon' => 'SM'],
             'transactions' => ['label' => 'Transactions', 'route' => 'admin.transactions.index', 'prefix' => 'admin.transactions', 'icon' => 'TX'],

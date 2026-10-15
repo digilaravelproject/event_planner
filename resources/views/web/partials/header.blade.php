@@ -52,6 +52,10 @@
     <div class="hidden lg:flex items-center space-x-2 xl:space-x-3 shrink-0">
         @auth('web')
             @include('user.partials.notification-bell')
+            <a href="{{ route('vendor-enquiry.create') }}" class="text-slate-700 hover:text-[#850625] text-xs font-bold px-3 xl:px-4 py-2 rounded-full hover:bg-rose-50 transition-all duration-200 whitespace-nowrap flex items-center gap-1.5">
+                <i class="fa-solid fa-handshake text-xs text-[#850625]"></i>
+                <span>Vendor Enquiry</span>
+            </a>
             <a href="{{ route('user.dashboard') }}" class="px-4 xl:px-5 py-2 xl:py-2.5 rounded-full text-white bg-[#850625] hover:bg-[#6b041e] text-xs font-bold shadow-md shadow-[#850625]/20 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 whitespace-nowrap shrink-0">
                 <i class="fa-solid fa-gauge text-xs"></i>
                 <span>Dashboard</span>
@@ -63,6 +67,10 @@
                 </button>
             </form>
         @else
+            <a href="{{ route('vendor-enquiry.create') }}" class="text-[#850625] hover:text-[#6b041e] text-xs font-bold px-3 xl:px-3.5 py-2 rounded-full bg-rose-50/90 hover:bg-rose-100/90 border border-rose-200/80 transition-all duration-200 whitespace-nowrap flex items-center gap-1.5 shadow-xs">
+                <i class="fa-solid fa-handshake text-[11px] text-[#850625]"></i>
+                <span>Vendor Enquiry</span>
+            </a>
             <a href="{{ route('user.login') }}" data-login-choice aria-haspopup="dialog" aria-controls="login-choice" class="text-slate-700 hover:text-[#850625] text-xs font-bold px-3 xl:px-4 py-2 rounded-full hover:bg-rose-50 transition-all duration-200 whitespace-nowrap">
                 Sign In
             </a>
@@ -128,6 +136,10 @@
                     <span>Dashboard</span>
                 </a>
             @else
+                <a @click="mobileMenuOpen = false" href="{{ route('vendor-enquiry.create') }}" class="w-full text-center text-[#850625] bg-rose-50 border border-rose-200 hover:border-[#850625] px-4 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-handshake"></i>
+                    <span>Vendor Enquiry</span>
+                </a>
                 <a @click="mobileMenuOpen = false" href="{{ route('user.login') }}" data-login-choice aria-haspopup="dialog" aria-controls="login-choice" class="w-full text-center text-slate-800 border border-slate-200 hover:border-[#850625] px-4 py-2.5 rounded-full text-xs font-bold transition-all">
                     Sign In
                 </a>
