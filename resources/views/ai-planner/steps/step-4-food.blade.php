@@ -234,7 +234,7 @@
                         <!-- Included Menu Items List -->
                         <div class="space-y-2 pt-2">
                             <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block">Package Inclusions</span>
-                            <ul class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                            <ul class="space-y-1.5 max-h-64 overflow-y-auto pr-2 custom-slim-scrollbar">
                                 <template x-for="item in pkg.items" :key="item">
                                     <li class="flex items-start gap-2 text-xs text-slate-700">
                                         <i class="fa-solid fa-check-double text-[#850625] text-[11px] mt-0.5 shrink-0"></i>

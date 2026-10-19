@@ -24,7 +24,41 @@
             return [$step['code'] => $value];
         })->all();
 @endphp
-<div class="min-h-0 sm:min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF7F2] to-[#F5ECE3] text-slate-800 pt-24 sm:pt-28 md:pt-32 pb-4 sm:pb-12 px-2 sm:px-6 lg:px-8 font-sans-ui relative flex flex-col justify-start overflow-x-hidden" 
+
+<style>
+    /* Custom Luxury Sleek Scrollbar for AI Planner */
+    .ai-planner-wrapper *::-webkit-scrollbar,
+    .custom-slim-scrollbar::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+    .ai-planner-wrapper *::-webkit-scrollbar-track,
+    .custom-slim-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .ai-planner-wrapper *::-webkit-scrollbar-thumb,
+    .custom-slim-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(133, 6, 37, 0.22);
+        border-radius: 9999px;
+    }
+    .ai-planner-wrapper *::-webkit-scrollbar-thumb:hover,
+    .custom-slim-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(133, 6, 37, 0.55);
+    }
+    .ai-planner-wrapper *::-webkit-scrollbar-button,
+    .custom-slim-scrollbar::-webkit-scrollbar-button {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+    .ai-planner-wrapper *,
+    .custom-slim-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(133, 6, 37, 0.22) transparent;
+    }
+</style>
+
+<div class="ai-planner-wrapper min-h-0 sm:min-h-screen bg-gradient-to-b from-[#FFFDF9] via-[#FAF7F2] to-[#F5ECE3] text-slate-800 pt-24 sm:pt-28 md:pt-32 pb-4 sm:pb-12 px-2 sm:px-6 lg:px-8 font-sans-ui relative flex flex-col justify-start overflow-x-hidden" 
     @keydown.window.enter="handleEnterKey($event)"
     x-data="{
     currentStep: {{ $initialStep ?? 1 }},
