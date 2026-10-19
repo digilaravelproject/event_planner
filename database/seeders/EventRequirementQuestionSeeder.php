@@ -54,8 +54,34 @@ class EventRequirementQuestionSeeder extends Seeder
                 'question' => 'What are your catering preferences?',
                 'question_code' => 'food_type',
                 'question_type' => 'radio',
-                'options' => ['Pure Vegetarian / Jain', 'Veg & Non-Veg Multi-Cuisine', 'Gourmet Luxury Live Counters'],
-                'vendor_attribute_key' => 'menu_card_items',
+                'options' => [
+                    'Pure Vegetarian',
+                    'Jain Food Available',
+                    'Non-Vegetarian',
+                    'Mixed Food (Veg & Non-Veg)',
+                ],
+                'option_metadata' => [
+                    'Pure Vegetarian' => [
+                        'label' => 'Pure Vegetarian',
+                        'subtitle' => '100% strictly vegetarian delicacies & authentic recipes',
+                        'icon' => 'fa-solid fa-leaf',
+                    ],
+                    'Jain Food Available' => [
+                        'label' => 'Jain Food Available',
+                        'subtitle' => 'Prepared strictly without onion, garlic, or root vegetables',
+                        'icon' => 'fa-solid fa-seedling',
+                    ],
+                    'Non-Vegetarian' => [
+                        'label' => 'Non-Vegetarian',
+                        'subtitle' => 'Rich poultry, tender mutton, coastal seafood & authentic biryanis',
+                        'icon' => 'fa-solid fa-drumstick-bite',
+                    ],
+                    'Mixed Food (Veg & Non-Veg)' => [
+                        'label' => 'Mixed Food (Veg & Non-Veg)',
+                        'subtitle' => 'Separate Veg & Non-Veg live counters catering to all your guests',
+                        'icon' => 'fa-solid fa-utensils',
+                    ],
+                ],
                 'is_required' => true,
             ],
             [
@@ -88,6 +114,7 @@ class EventRequirementQuestionSeeder extends Seeder
                     'question_code' => $definition['question_code'],
                     'question_type' => $definition['question_type'],
                     'options' => $attribute ? array_column($attribute['values'] ?? [], 'label') : $definition['options'],
+                    'option_metadata' => $definition['option_metadata'] ?? null,
                     'vendor_attribute_key' => $attributeKey,
                     'vendor_attribute_label' => $attribute['label'] ?? null,
                     'vendor_attribute_values' => $mappedValues,

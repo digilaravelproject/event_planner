@@ -54,6 +54,7 @@
             <span class="bg-white px-3 py-1.5 rounded-xl border border-rose-200 font-semibold text-slate-800" x-text="'Culture: ' + planner.culture"></span>
             <span class="bg-white px-3 py-1.5 rounded-xl border border-rose-200 font-semibold text-slate-800" x-text="'Location: ' + (planner.locations.length ? planner.locations.join(', ') : 'None Selected')"></span>
             <span class="bg-white px-3 py-1.5 rounded-xl border border-rose-200 font-semibold text-slate-800" x-text="'Decor: ' + planner.decorTheme"></span>
+            <span x-show="planner.foodPreference" class="bg-white px-3 py-1.5 rounded-xl border border-rose-200 font-semibold text-slate-800" x-text="'Food: ' + getFoodPreferenceTitle() + (planner.selectedFoodPackageId ? ' (' + (getSelectedPackage()?.name || '') + ')' : '')"></span>
             <template x-for="c in planner.ceremonies">
                 <span class="bg-[#850625]/10 text-[#850625] px-3 py-1.5 rounded-xl font-bold" x-text="'✓ ' + c"></span>
             </template>

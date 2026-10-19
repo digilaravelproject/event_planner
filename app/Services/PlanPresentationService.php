@@ -100,6 +100,7 @@ class PlanPresentationService
             'ceremonies' => 'Which ceremonies would you like to include?',
             'venue_setting' => 'What venue setting did you select?',
             'food_menu_items' => 'Which food menu items did you select?',
+            'food_preference' => 'What is your dietary & catering preference?',
         ];
         $answerDetails = collect($displayAnswers)->map(function ($value, $key) use ($questionLabels, $fallbackLabels): array {
             return [

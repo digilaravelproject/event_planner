@@ -265,49 +265,267 @@
     selectedCateringVendors() {
         return this.cateringVendors.filter(vendor => this.planner.selectedVendorIds.includes(vendor.id));
     },
+    managedFoodPreferences: @js($foodPreferences ?? []),
+    get foodPreferences() {
+        const adminOptions = (this.managedFoodPreferences && this.managedFoodPreferences.length)
+            ? this.managedFoodPreferences
+            : (this.managedOptions['food_type']?.option_details || []);
+
+        if (adminOptions && adminOptions.length) {
+            return adminOptions.map(opt => {
+                const title = String(opt.title || opt.name || opt.value || '').trim();
+                const lower = title.toLowerCase();
+                let defaultIcon = 'fa-solid fa-leaf';
+                let defaultBadge = 'Catering';
+                let defaultTag = 'Special Feast';
+                let typeKey = 'pure_veg';
+
+                if (lower.includes('jain')) {
+                    defaultIcon = 'fa-solid fa-seedling';
+                    defaultBadge = 'Jain Special';
+                    defaultTag = 'No Onion • No Garlic';
+                    typeKey = 'jain';
+                } else if (lower.includes('non') && (lower.includes('veg') || lower.includes('meat') || lower.includes('chicken') || lower.includes('mutton') || lower.includes('halal'))) {
+                    defaultIcon = 'fa-solid fa-drumstick-bite';
+                    defaultBadge = 'Non-Veg';
+                    defaultTag = 'Gourmet Meats';
+                    typeKey = 'non_veg';
+                } else if (lower.includes('mix') || (lower.includes('veg') && lower.includes('&') && lower.includes('non')) || lower.includes('multi')) {
+                    defaultIcon = 'fa-solid fa-utensils';
+                    defaultBadge = 'Most Popular';
+                    defaultTag = 'Dual Kitchen';
+                    typeKey = 'mixed';
+                } else if (lower.includes('veg')) {
+                    defaultIcon = 'fa-solid fa-leaf';
+                    defaultBadge = 'Pure Veg';
+                    defaultTag = 'Shakahari Feast';
+                    typeKey = 'pure_veg';
+                }
+
+                return {
+                    id: opt.value || title,
+                    typeKey: typeKey,
+                    title: title,
+                    subtitle: opt.subtitle || 'Personalized catering package for your celebration.',
+                    badge: defaultBadge,
+                    icon: (opt.icon && opt.icon !== 'fa-solid fa-star') ? opt.icon : defaultIcon,
+                    image: opt.image || null,
+                    tag: defaultTag
+                };
+            });
+        }
+
+        return [
+            { id: 'Pure Vegetarian', typeKey: 'pure_veg', title: 'Pure Vegetarian', subtitle: '100% strictly vegetarian delicacies & authentic recipes', badge: 'Pure Veg', icon: 'fa-solid fa-leaf', tag: 'Shakahari Feast' },
+            { id: 'Jain Food Available', typeKey: 'jain', title: 'Jain Food Available', subtitle: 'Prepared strictly without onion, garlic, or root vegetables', badge: 'Jain Special', icon: 'fa-solid fa-seedling', tag: 'No Onion • No Garlic' },
+            { id: 'Non-Vegetarian', typeKey: 'non_veg', title: 'Non-Vegetarian', subtitle: 'Rich poultry, tender mutton, coastal seafood & biryanis', badge: 'Non-Veg', icon: 'fa-solid fa-drumstick-bite', tag: 'Gourmet Meats' },
+            { id: 'Mixed Food (Veg & Non-Veg)', typeKey: 'mixed', title: 'Mixed Food (Veg & Non-Veg)', subtitle: 'Separate Veg & Non-Veg live counters catering to all guests', badge: 'Most Popular', icon: 'fa-solid fa-utensils', tag: 'Dual Kitchen' }
+        ];
+    },
+    selectFoodPreference(prefId) {
+        this.planner.foodPreference = prefId;
+        this.plannerError = '';
+        const packages = this.getFoodPackages();
+        if (packages.length && !packages.some(p => p.id === this.planner.selectedFoodPackageId)) {
+            this.planner.selectedFoodPackageId = packages[1]?.id || packages[0]?.id || 'deluxe_menu';
+        }
+        this.$nextTick(() => {
+            const pkgSection = document.getElementById('catering-packages-section');
+            if (pkgSection) {
+                pkgSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    },
+    getFoodPreferenceTitle() {
+        const pref = this.foodPreferences.find(p => p.id === this.planner.foodPreference);
+        return pref ? pref.title : 'Food Preference';
+    },
+    getCombinedFoodAnswer() {
+        const pref = this.foodPreferences.find(p => p.id === this.planner.foodPreference);
+        const prefTitle = pref ? pref.title : (this.planner.foodPreference || 'Pure Vegetarian');
+        if (this.planner.cateringMode === 'package') {
+            const pkg = this.getSelectedPackage();
+            return pkg ? `${prefTitle} • ${pkg.name}` : prefTitle;
+        }
+        return `${prefTitle} • ${this.planner.foodItems.map(item => item.title).join(', ')}`;
+    },
     getFoodPackages() {
         const vendor = this.getSelectedCateringVendor();
         if (vendor && vendor.food_packages && vendor.food_packages.length) {
             return vendor.food_packages;
         }
+        const activePref = this.foodPreferences.find(p => p.id === this.planner.foodPreference);
+        const pref = activePref ? activePref.typeKey : (
+            (this.planner.foodPreference || '').toLowerCase().includes('jain') ? 'jain' : (
+            (this.planner.foodPreference || '').toLowerCase().includes('non') ? 'non_veg' : (
+            (this.planner.foodPreference || '').toLowerCase().includes('mix') ? 'mixed' : 'pure_veg'
+        )));
+        if (pref === 'jain') {
+            return [
+                {
+                    id: 'classic_menu',
+                    name: 'Classic Jain Menu',
+                    min_price_per_plate: 700,
+                    max_price_per_plate: 900,
+                    tagline: 'Traditional pure Jain feast prepared strictly without onion, garlic, or root vegetables',
+                    items: [
+                        'Mineral Water Cups', 'Jain Soft Drinks', 'Jain Farsan (Khandvi / Methi Gota)',
+                        '1 Jain Green Sabzi & 1 Jain Special Paneer (No Onion/Garlic)', 'Jain Dal Fry',
+                        'Steamed Basmati Rice', 'Assorted Phulka & Tandoori Roti', 'Cucumber & Tomato Salad, Papad, Chutney',
+                        'Moong Dal Halwa (Any 1)', 'Gourmet Ice Cream (Any 1)'
+                    ]
+                },
+                {
+                    id: 'deluxe_menu',
+                    name: 'Deluxe Jain Menu',
+                    min_price_per_plate: 800,
+                    max_price_per_plate: 1100,
+                    tagline: 'Expanded Jain celebration with live Jain Chinese counter & fresh mocktails',
+                    items: [
+                        'Mineral Water Bottle', 'Fresh Fruit Juice & Mocktail (Any 2)', 'Jain Paneer Tikka & Crisp Corn Tikki Starters',
+                        'Jain Paneer Butter Masala & Malai Kofta', 'Panchratna Dal (Jain)', 'Jain Veg Dum Biryani & Pulao',
+                        'Assorted Butter Naan & Roti', 'Jain Farsan Platter', 'Live Jain Chinese Counter (Jain Noodles & Fried Veg)',
+                        'Salad, Papad, Pickle, Chutney', 'Kesar Peda / Rasgulla', 'Ice Cream (Any 1)'
+                    ]
+                },
+                {
+                    id: 'elite_menu',
+                    name: 'Elite Royal Jain Menu',
+                    min_price_per_plate: 1000,
+                    max_price_per_plate: 1400,
+                    tagline: 'Royal Jain luxury banquet with live Jain Chaat, Dosa & Italian Pasta counters',
+                    items: [
+                        'Mineral Water Bottle', 'Welcome Exotic Fruit Mocktail Bar', '3 Royal Jain Starters (Tandoori Paneer, Corn Cheese Balls, Crispy Roll)',
+                        '3 Grand Jain Curries (Paneer Lababdar, Kofta, Kaju Curry)', 'Jain Dal Bukhara', 'Royal Kaju Pulao & Jeera Rice',
+                        'Assorted Breads & Naan', 'Live Jain Chaat Counter (Sev Puri & Dahi Puri - No Onion/Potato)', 'Live Dosa Counter (Any 3)',
+                        'Live Jain Pasta Counter', 'Malai Kulfi Falooda & Angoori Rabdi', 'Jain Salad, Papad & Chutney'
+                    ]
+                }
+            ];
+        }
+        if (pref === 'non_veg') {
+            return [
+                {
+                    id: 'classic_menu',
+                    name: 'Classic Non-Veg Menu',
+                    min_price_per_plate: 850,
+                    max_price_per_plate: 1100,
+                    tagline: 'Classic Non-Veg feast with tender chicken starters, dum biryani & desserts',
+                    items: [
+                        'Mineral Water Cups', 'Assorted Soft Drinks', 'Chicken Tikka & Crispy Veg Starter',
+                        'Butter Chicken & 1 Veg Gravy', 'Yellow Dal Tadka', 'Chicken Dum Biryani & Steamed Rice',
+                        'Assorted Indian Breads & Roti', 'Fresh Green Salad, Papad, Raita', 'Gulab Jamun (Any 1)', 'Ice Cream (Any 1)'
+                    ]
+                },
+                {
+                    id: 'deluxe_menu',
+                    name: 'Deluxe Non-Veg Feast',
+                    min_price_per_plate: 1050,
+                    max_price_per_plate: 1350,
+                    tagline: 'Rich Non-Veg spread with live Tandoori BBQ, Mutton gravies & welcome drinks',
+                    items: [
+                        'Mineral Water Bottle', 'Fresh Welcome Mocktails (Any 2)', 'Chicken Malai Tikka & Amritsari Fish Fry',
+                        'Mutton Rogan Josh & Butter Chicken', 'Dal Makhani', 'Hyderabadi Chicken Biryani & Peas Pulao',
+                        'Butter Naan & Rumali Roti', 'Chicken Seekh Kebab Counter', 'Live Tandoori BBQ & Grill Counter',
+                        'Salad, Papad, Raita, Chutney', 'Shahi Tukda & Rasmalai', 'Gourmet Ice Cream (Any 1)'
+                    ]
+                },
+                {
+                    id: 'elite_menu',
+                    name: 'Elite Imperial Non-Veg Feast',
+                    min_price_per_plate: 1350,
+                    max_price_per_plate: 1750,
+                    tagline: 'Imperial royal feast with Mutton Seekh, Prawns, Awadhi Gosht & live stations',
+                    items: [
+                        'Mineral Water Bottle', 'Welcome Premium Mocktail Lounge', '3 Premium Non-Veg Starters (Mutton Seekh, Tandoori Prawns, Chicken Angara)',
+                        'Royal Awadhi Gosht Korma, Butter Chicken & 1 Paneer Dish', 'Dal Bukhara', 'Royal Awadhi Mutton Dum Biryani',
+                        'Assorted Gourmet Breads', 'Live Tandoori BBQ & Grill Station', 'Live Shawarma Station', 'Live Chinese Wok Counter',
+                        'Kulfi Falooda & Shahi Phirni', 'Salad Bar, Raita & Chutneys'
+                    ]
+                }
+            ];
+        }
+        if (pref === 'mixed') {
+            return [
+                {
+                    id: 'classic_menu',
+                    name: 'Classic Mixed Menu',
+                    min_price_per_plate: 800,
+                    max_price_per_plate: 1050,
+                    tagline: 'Balanced celebration with dedicated Veg & Non-Veg courses for all guests',
+                    items: [
+                        'Mineral Water Cups', 'Assorted Soft Drinks', '1 Chicken & 1 Paneer Starter',
+                        '1 Chicken Curry & 1 Shahi Paneer Dish', 'Dal Fry', 'Chicken Biryani & Veg Pulao',
+                        'Assorted Tandoori Breads', 'Salad, Papad, Raita, Chutney', 'Traditional Sweet (Any 1)', 'Ice Cream (Any 1)'
+                    ]
+                },
+                {
+                    id: 'deluxe_menu',
+                    name: 'Deluxe Multi-Cuisine Feast',
+                    min_price_per_plate: 950,
+                    max_price_per_plate: 1250,
+                    tagline: 'Dual kitchen celebration with separate Veg & Non-Veg counters and live stations',
+                    items: [
+                        'Mineral Water Bottle', 'Fresh Juices & Mocktails (Any 2)', '2 Non-Veg (Chicken Tikka, Fish Fry) & 2 Veg Starters',
+                        'Butter Chicken & Mutton Curry + 2 Spl Veg Dishes', 'Dal Makhani', 'Chicken Dum Biryani & Veg Dum Pulao',
+                        'Assorted Naan & Roti', 'Live Chinese Counter (Veg & Non-Veg)', 'Salad, Papad, Pickle, Chutney',
+                        'Rasmalai (Any 1)', 'Gourmet Ice Cream (Any 1)'
+                    ]
+                },
+                {
+                    id: 'elite_menu',
+                    name: 'Elite Royal Multi-Cuisine Feast',
+                    min_price_per_plate: 1200,
+                    max_price_per_plate: 1600,
+                    tagline: 'Grand royal banquet with dual live kitchen stations and full multi-cuisine buffet',
+                    items: [
+                        'Mineral Water Bottle', 'Welcome Mocktail Lounge (Any 3)', '3 Non-Veg (Mutton Seekh, Prawns, Chicken Malai) & 3 Veg Starters',
+                        'Grand Buffet: Mutton Rogan Josh, Butter Chicken, Paneer Lababdar & Veg Handi', 'Dal Bukhara',
+                        'Awadhi Mutton Biryani & Kashmiri Veg Pulao', 'Assorted Tandoori Breads & Naan', 'Live Chaat Counter (Any 2)',
+                        'Live BBQ Grill Station', 'Live Dosa & Chinese Stations', 'Kulfi Falooda & Hot Jalebi Rabdi'
+                    ]
+                }
+            ];
+        }
+        // Default: Pure Vegetarian
         return [
             {
                 id: 'classic_menu',
-                name: 'Classic Menu',
+                name: 'Classic Pure Veg Menu',
                 min_price_per_plate: 700,
                 max_price_per_plate: 900,
-                tagline: 'Essential wedding feast with traditional starters & desserts',
+                tagline: 'Essential 100% pure vegetarian wedding feast with traditional starters & desserts',
                 items: [
-                    'Mineral Water Cups', 'Assorted Soft Drinks', 'Farsan (Any 1)',
-                    '1 Veg & 1 Spl Veg - Main Course', 'Dal (Any 1)', 'Rice (Any 1)',
-                    'Assorted Breads', 'Salad, Papad, Pickle, Chutney', 'Sweet (Any 1)', 'Ice Cream (Any 1)'
+                    'Mineral Water Cups', 'Assorted Soft Drinks', 'Farsan (Paneer Pakoda / Dhokla)',
+                    '1 Veg & 1 Special Paneer Gravy', 'Dal Tadka', 'Steamed Jeera Rice',
+                    'Assorted Breads & Roti', 'Salad, Papad, Pickle, Chutney', 'Gulab Jamun (Any 1)', 'Ice Cream (Any 1)'
                 ]
             },
             {
                 id: 'deluxe_menu',
-                name: 'Deluxe Menu',
+                name: 'Deluxe Pure Veg Feast',
                 min_price_per_plate: 800,
                 max_price_per_plate: 1100,
-                tagline: 'Expanded menu with live Chinese counter & fresh welcome drinks',
+                tagline: 'Grand pure vegetarian feast with live Chinese counter & fresh welcome mocktails',
                 items: [
-                    'Mineral Water Bottle', 'Welcome Drink (Any 2: Fresh Juice & Mocktail)',
-                    '1 Veg & 1 Spl Veg - Starters', '1 Veg & 1 Spl Veg - Main Course',
-                    'Dal (Any 1)', 'Rice (Any 2)', 'Assorted Breads', 'Farsan (Any 1)',
-                    'Salad, Papad, Pickle, Chutney', 'Sweet (Any 1)', 'Ice Cream (Any 1)', 'Chinese Counter (Any 3)'
+                    'Mineral Water Bottle', 'Welcome Drink (Any 2: Fresh Juice & Mocktail)', 'Paneer Tikka & Hara Bhara Kabab Starters',
+                    'Paneer Butter Masala & Veg Kofta Gravy', 'Dal Makhani', 'Veg Dum Biryani & Pulao',
+                    'Assorted Breads & Garlic Naan', 'Farsan (Any 1)', 'Salad, Papad, Pickle, Chutney',
+                    'Live Chinese Counter (Any 3)', 'Shahi Rasmalai', 'Ice Cream (Any 1)'
                 ]
             },
             {
                 id: 'elite_menu',
-                name: 'Elite Menu',
+                name: 'Elite Royal Pure Veg Feast',
                 min_price_per_plate: 1000,
                 max_price_per_plate: 1400,
-                tagline: 'Luxury feast with Chat, Chinese & Dosa live counters + Kulfi Falooda',
+                tagline: 'Luxury pure vegetarian royal feast with Chaat, Chinese & Dosa live counters',
                 items: [
                     'Mineral Water Bottle', 'Welcome Drink (Any 2: Fresh Juice & Mocktail)',
-                    'Starters Veg (Any 2) & 1 Spl Veg', '2 Veg & 1 Spl Veg - Main Course',
-                    'Dal (Any 1)', 'Rice (Any 2)', 'Assorted Breads',
-                    'Salad, Papad, Pickle, Chutney', 'Sweet (Any 2) & Kulfi Falooda',
-                    'Chat Counter (Any 2)', 'Chinese Counter (Any 3)', 'Dosa Counter (Any 3)'
+                    '3 Exotic Veg Starters (Paneer Achari, Mushroom, Dahi Kebab)', '3 Royal Veg Curries (Paneer Lababdar, Kaju Curry, Subz Handi)',
+                    'Dal Bukhara', 'Kashmiri Pulao & Peas Rice', 'Assorted Gourmet Breads',
+                    'Live Chaat Counter (Pani Puri & Dahi Bhalla)', 'Live Dosa Counter (Any 3)',
+                    'Live Chinese Counter (Any 3)', 'Kulfi Falooda & Angoori Rabdi'
                 ]
             }
         ];
@@ -420,6 +638,12 @@
         selectedVendorIds: @js($savedArray('selected_caterers')),
         selectedVendorId: @js(data_get($savedAnswers, 'food_menu_items.0.vendor_id')),
         cateringMode: 'package',
+        foodPreference: @js($savedAnswers['food_preference'] ?? (
+            str_contains(strtolower($savedAnswers['food_type'] ?? ''), 'jain') ? 'jain' : (
+            str_contains(strtolower($savedAnswers['food_type'] ?? ''), 'non') ? 'non_veg' : (
+            str_contains(strtolower($savedAnswers['food_type'] ?? ''), 'mixed') ? 'mixed' : (
+            !empty($savedAnswers['food_type']) ? 'pure_veg' : ''
+        ))))),
         selectedFoodPackageId: @js(data_get($savedAnswers, 'selected_food_package.id', 'deluxe_menu')),
         selectedFoodExtras: @js($savedArray('selected_food_extras', ['chinese_counter', 'chat_counter'])),
         foodType: '',
@@ -527,15 +751,29 @@
             wedding_tradition: Boolean(this.planner.culture),
             decoration_type: Boolean(this.planner.setting || this.planner.decorTheme),
             venue_setting: Boolean(this.planner.setting),
-            food_type: (this.planner.cateringMode === 'package' && this.planner.selectedFoodPackageId) || (this.planner.cateringMode === 'custom' && this.planner.foodItems.length > 0),
+            food_type: Boolean(this.planner.foodPreference) && ((this.planner.cateringMode === 'package' && this.planner.selectedFoodPackageId) || (this.planner.cateringMode === 'custom' && this.planner.foodItems.length > 0)),
             event_timeline: Boolean(this.planner.timeline)
         };
         if (!(step.code in valid)) {
             const answer = this.dynamicAnswers[step.code];
             valid[step.code] = !step.required || (Array.isArray(answer) ? answer.length > 0 : String(answer ?? '').trim() !== '');
         }
-        this.plannerError = valid[step.code] ? '' : `Please answer “${step.question}” to continue.`;
-        return this.plannerError === '';
+        if (!valid[step.code]) {
+            if (step.code === 'food_type') {
+                if (!this.planner.foodPreference) {
+                    this.plannerError = 'Please choose your food preference (Pure Veg, Jain, Non-Veg, or Mixed) to continue.';
+                    return false;
+                }
+                if (this.planner.cateringMode === 'package' && !this.planner.selectedFoodPackageId) {
+                    this.plannerError = 'Please select a catering package to continue.';
+                    return false;
+                }
+            }
+            this.plannerError = `Please answer “${step.question}” to continue.`;
+            return false;
+        }
+        this.plannerError = '';
+        return true;
     },
     goToStep(step) {
         if (step > this.maxVisitedStep) return;
@@ -825,7 +1063,8 @@
         <input type="hidden" name="answers[decoration_type]" :value="planner.decorTheme">
         <input type="hidden" name="answers[selected_decor_vendor_id]" :value="planner.selectedDecorVendorId">
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
-        <input type="hidden" name="answers[food_type]" :value="planner.cateringMode === 'package' ? (getSelectedPackage()?.name || '') : planner.foodItems.map(item => item.title).join(', ')">
+        <input type="hidden" name="answers[food_preference]" :value="planner.foodPreference">
+        <input type="hidden" name="answers[food_type]" :value="getCombinedFoodAnswer()">
         <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.cateringMode === 'custom' ? planner.foodItems : [])">
         <input type="hidden" name="answers[selected_caterers]" :value="JSON.stringify(planner.selectedVendorIds)">
         <input type="hidden" name="answers[selected_food_package]" :value="planner.cateringMode === 'package' ? JSON.stringify(getSelectedPackage()) : ''">
