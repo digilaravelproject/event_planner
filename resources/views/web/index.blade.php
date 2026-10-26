@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- SECTION 1: HERO SECTION -->
-<section id="hero-section" class="group relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex items-center justify-center pt-24 md:pt-28 pb-8 md:pb-12 px-4 sm:px-8 md:px-12 lg:px-16 overflow-hidden">
+<section id="hero-section" class="group relative min-h-[85vh] lg:min-h-[88vh] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4ED] to-[#F5ECE3] flex flex-col justify-center items-center pt-24 md:pt-28 pb-8 md:pb-12 px-4 sm:px-6 md:px-10 lg:px-16 overflow-hidden">
     <span id="categories" class="pointer-events-none absolute top-0 scroll-mt-24" aria-hidden="true"></span>
     <!-- Full-Width Hero Background Video with Hover Scale -->
     <video 
@@ -38,7 +38,7 @@
 
     <div class="max-w-[1600px] mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-center">
         <!-- Hero Details (Col 6) -->
-        <div class="lg:col-span-6 space-y-4 md:space-y-5 text-left">
+        <div class="lg:col-span-6 space-y-4 md:space-y-5 text-left w-full">
             <!-- Premium Badge -->
             <div class="inline-flex items-center gap-2.5 bg-white/10 border border-white/20 rounded-full px-3.5 py-1.5 shadow-sm backdrop-blur-md">
                 <span class="relative flex h-2 w-2">
@@ -76,7 +76,7 @@
         </div>
 
         <!-- Interactive Quick Selector Widget (Col 6) -->
-        <div class="lg:col-span-6 bg-white/95 backdrop-blur-xl border border-[#850625]/20 p-6 sm:p-8 rounded-[32px] shadow-[0_30px_70px_-15px_rgba(133,6,37,0.18),0_12px_30px_-5px_rgba(0,0,0,0.05)] relative"
+        <div class="lg:col-span-6 w-full max-w-xl lg:max-w-none mx-auto bg-white/95 backdrop-blur-xl border border-[#850625]/20 p-5 sm:p-8 rounded-[24px] sm:rounded-[32px] shadow-[0_30px_70px_-15px_rgba(133,6,37,0.18),0_12px_30px_-5px_rgba(0,0,0,0.05)] relative"
              x-data="{ 
                 selectedType: @js((string) $eventCategoryOptions->keys()->first()),
                 selectedTypeLabel: @js((string) $eventCategoryOptions->first()),
@@ -218,7 +218,7 @@
                 </button>
             </form>
 
-            <div class="mt-5 flex items-center justify-between text-xs text-slate-500 font-sans-ui font-medium border-t border-slate-100 pt-4">
+            <div class="mt-4 sm:mt-5 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-500 font-sans-ui font-medium border-t border-slate-100 pt-3 sm:pt-4">
                 <span class="inline-flex items-center"><i class="fa-solid fa-circle-check text-[#850625] mr-1.5 text-xs"></i> Verified Vendor List</span>
                 <span class="inline-flex items-center"><i class="fa-solid fa-circle-check text-[#850625] mr-1.5 text-xs"></i> Real-time Budget Matrix</span>
             </div>

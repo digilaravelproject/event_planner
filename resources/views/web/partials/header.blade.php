@@ -85,7 +85,7 @@
     </div>
 
     <!-- Mobile Menu Hamburger Button -->
-    <button @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Toggle navigation" :aria-expanded="mobileMenuOpen" class="lg:hidden text-slate-900 hover:text-[#850625] p-2 focus:outline-none transition-transform duration-200" :class="{ 'rotate-90': mobileMenuOpen }">
+    <button @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Toggle navigation" :aria-expanded="mobileMenuOpen" class="lg:hidden text-slate-900 hover:text-[#850625] p-2 -mr-1.5 focus:outline-none transition-transform duration-200 flex items-center justify-center" :class="{ 'rotate-90': mobileMenuOpen }">
         <i class="fa-solid" :class="mobileMenuOpen ? 'fa-xmark text-2xl text-[#850625]' : 'fa-bars-staggered text-2xl'"></i>
     </button>
 
