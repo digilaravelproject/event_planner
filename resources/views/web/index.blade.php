@@ -16,7 +16,7 @@
         preload="auto"
         class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none transition-transform duration-1000 ease-out scale-100 group-hover:scale-105"
     >
-        <source src="https://cdn.pixabay.com/video/2024/05/20/212698_large.mp4" type="video/mp4">
+        <source src="https://cdn.pixabay.com/video/2026/07/21/365252_large.mp4" type="video/mp4">
     </video>
 
     <!-- Interactive Mouse Spotlight Radial Glow (Active on Hover) -->
