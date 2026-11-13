@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal - SaaS Event Planner</title>
+    <title>Shaadi Sense Admin</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Tailwind CSS / Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -16,11 +17,11 @@
     <!-- Font styling overrides for premium feel -->
     <style>
         body {
-            font-family: 'Open Sans', 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background:
-                radial-gradient(circle at 88% 6%, rgba(0, 198, 137, 0.07), transparent 24rem),
-                radial-gradient(circle at 24% -5%, rgba(57, 80, 162, 0.09), transparent 28rem),
-                #f5f7fb;
+                radial-gradient(circle at 88% 6%, rgba(212, 175, 55, 0.10), transparent 24rem),
+                radial-gradient(circle at 24% -5%, rgba(133, 6, 37, 0.10), transparent 28rem),
+                #fffaf6;
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -28,14 +29,14 @@
             height: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: #f8f9fe;
+            background: #160a0e;
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: #d9c7ca;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: #d4af37;
         }
         
         /* Sidebar transition details */
@@ -51,15 +52,15 @@
         #admin-sidebar nav a[class*="border-[#3950a2]"] {
             border-left-color: transparent;
             color: #fff;
-            background: linear-gradient(135deg, #4058b0, #2f438f);
-            box-shadow: 0 14px 28px -18px rgba(47, 67, 143, 0.95);
+            background: linear-gradient(135deg, #9f0b32, #72031e);
+            box-shadow: 0 14px 28px -18px rgba(133, 6, 37, 0.95);
         }
         #admin-sidebar nav a[class*="border-[#3950a2]"] > span:first-child {
-            color: #6ee7b7;
+            color: #f3cf5d;
             background: rgba(255, 255, 255, 0.12);
         }
         #admin-sidebar > div:first-child {
-            background: linear-gradient(145deg, rgba(238, 242, 255, 0.72), rgba(236, 253, 245, 0.35));
+            background: linear-gradient(145deg, rgba(255, 247, 240, 0.9), rgba(255, 252, 245, 0.62));
         }
         #main-content-area > header {
             backdrop-filter: blur(18px);
@@ -110,13 +111,8 @@
         <!-- Sidebar Brand / Logo -->
         <div class="flex h-20 items-center justify-between px-6 border-b border-slate-100 shrink-0">
             <a href="{{ \App\Support\AdminMenu::firstRouteFor(Auth::guard('admin')->user()) }}" class="flex items-center gap-3">
-                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00c689] text-white shadow-sm">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
-                    </svg>
-                </span>
-                <span class="text-base font-extrabold text-[#3950a2] tracking-tight">Event<span class="text-[#00c689]">Planner</span></span>
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#850625] text-[#f3cf5d] shadow-sm ring-2 ring-[#d4af37]/20">✦</span>
+                <span><span class="block text-base font-extrabold text-slate-900 tracking-tight">Shaadi <span class="text-[#850625]">Sense</span></span><span class="block text-[8px] font-bold uppercase tracking-[.18em] text-[#b68d16]">Admin Studio</span></span>
             </a>
             
             <!-- Hide Sidebar Button (inside sidebar, mobile only) -->
@@ -128,7 +124,7 @@
         </div>
 
         <!-- Sidebar Navigation (Argon menu lists) -->
-        <nav class="flex-1 space-y-1.5 px-4.5 py-6 overflow-y-auto">
+        <nav id="admin-sidebar-nav" class="flex-1 space-y-1.5 px-4.5 py-6 overflow-y-auto">
             @php
                 $currentRoute = Route::currentRouteName();
             @endphp
@@ -147,15 +143,36 @@
             @endif
 
             @if($adminUser->canAccess('users'))
-            <!-- Manage Users -->
-            <a href="{{ route('admin.users.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.users') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
+            @php($usersOpen = str_starts_with($currentRoute, 'admin.users'))
+            <details class="group" @if($usersOpen) open @endif>
+              <summary class="flex cursor-pointer list-none items-center gap-x-3.5 border-l-4 px-4 py-3 text-xs font-bold tracking-tight transition-all {{ $usersOpen ? 'border-[#d4af37] bg-[#97052d] text-white' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ $usersOpen ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-400' }}">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0 1 8.625 21 11.357 11.357 0 0 1 3 19.5v-.109v-.003c0-1.113.285-2.16.786-3.07M15 7.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-6 0a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Zm4.5 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                     </svg>
                 </span>
-                Manage Users
-            </a>
+                <span class="flex-1">Manage Users</span>
+                <svg class="h-4 w-4 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+              </summary>
+              <div class="mt-1 space-y-1 border-l border-[#d4af37]/30 pl-3" style="margin-left: 25% !important;">
+                <a href="{{ route('admin.users.index') }}" class="admin-submenu-link {{ $currentRoute !== 'admin.users.create' ? 'is-active' : '' }}">User List</a>
+                <a href="{{ route('admin.users.create') }}" class="admin-submenu-link {{ $currentRoute === 'admin.users.create' ? 'is-active' : '' }}">Add User</a>
+              </div>
+            </details>
+            @endif
+
+            @if($adminUser->isSuperAdmin())
+            @php($staffOpen = str_starts_with($currentRoute, 'admin.staff'))
+            <details class="group" @if($staffOpen) open @endif>
+              <summary class="flex cursor-pointer list-none items-center gap-x-3.5 border-l-4 px-4 py-3 text-xs font-bold tracking-tight transition-all {{ $staffOpen ? 'border-[#d4af37] bg-[#97052d] text-white' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ $staffOpen ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-400' }}">ST</span>
+                <span class="flex-1">Staff</span><svg class="h-4 w-4 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+              </summary>
+              <div class="mt-1 space-y-1 border-l border-[#d4af37]/30 pl-3" style="margin-left: 25% !important;">
+                <a href="{{ route('admin.staff.index') }}" class="admin-submenu-link {{ $currentRoute !== 'admin.staff.create' ? 'is-active' : '' }}">Staff List</a>
+                <a href="{{ route('admin.staff.create') }}" class="admin-submenu-link {{ $currentRoute === 'admin.staff.create' ? 'is-active' : '' }}">Add Staff</a>
+              </div>
+            </details>
             @endif
 
             @if($adminUser->canAccess('user_queries'))
@@ -169,15 +186,13 @@
             @if($adminUser->canAccess('vendor_enquiries'))
             @php($pendingEnquiriesCount = \Illuminate\Support\Facades\Schema::hasTable('vendor_enquiries') ? \App\Models\VendorEnquiry::where('status', 'pending')->count() : 0)
             <!-- Vendor Enquiries -->
-            <a href="{{ route('admin.vendor-enquiries.index') }}" class="flex items-center justify-between rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.vendor-enquiries') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <div class="flex items-center gap-x-3.5">
-                    <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.vendor-enquiries') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                        </svg>
-                    </span>
-                    Vendor Enquiries
-                </div>
+            <a href="{{ route('admin.vendor-enquiries.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.vendor-enquiries') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.vendor-enquiries') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a3.375 3.375 0 1 0 0-6.75 3.375 3.375 0 0 0 0 6.75ZM15.75 8.25a2.625 2.625 0 1 0 0-5.25m-12 18v-1.125a6.375 6.375 0 0 1 12.75 0V21m1.5-8.25a4.5 4.5 0 0 1 4.5 4.5V18" />
+                    </svg>
+                </span>
+                <span class="flex-1">Vendor Enquiries</span>
                 @if($pendingEnquiriesCount > 0)
                     <span class="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-rose-500 text-white shadow-sm">{{ $pendingEnquiriesCount }}</span>
                 @endif
@@ -185,15 +200,18 @@
             @endif
 
             @if($adminUser->canAccess('vendors'))
-            <!-- Independent Dynamic Vendor Management -->
-            <a href="{{ route('admin.dynamic-vendors.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.dynamic-vendors') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg {{ str_starts_with($currentRoute, 'admin.dynamic-vendors') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m9-9H3m15.75-6.75-13.5 13.5" />
-                    </svg>
-                </span>
-                Manage Vendors
-            </a>
+            @php($vendorsOpen = str_starts_with($currentRoute, 'admin.dynamic-vendors'))
+            <details class="group" @if($vendorsOpen) open @endif>
+                <summary class="flex cursor-pointer list-none items-center gap-x-3.5 border-l-4 px-4 py-3 text-xs font-bold tracking-tight transition-all {{ $vendorsOpen ? 'border-[#3950a2] bg-slate-50 text-[#3950a2]' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ $vendorsOpen ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">MV</span>
+                    <span class="flex-1">Manage Vendors</span>
+                    <svg class="h-4 w-4 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+                </summary>
+                <div class="ml-10 mt-1 space-y-1 border-l border-[#d4af37]/30 pl-3" style="margin-left: 25% !important;">
+                    <a href="{{ route('admin.dynamic-vendors.index') }}" class="admin-submenu-link {{ $currentRoute === 'admin.dynamic-vendors.index' || $currentRoute === 'admin.dynamic-vendors.show' || $currentRoute === 'admin.dynamic-vendors.edit' ? 'is-active' : '' }}">Vendor List</a>
+                    <a href="{{ route('admin.dynamic-vendors.create') }}" class="admin-submenu-link {{ $currentRoute === 'admin.dynamic-vendors.create' ? 'is-active' : '' }}">Add Vendor</a>
+                </div>
+            </details>
             @endif
 
             @if($adminUser->canAccess('subscriptions'))
@@ -218,7 +236,6 @@
             <!-- Manage AI -->
             @foreach([
                 ['vendor_analytics', 'admin.vendor-analytics.index', 'admin.vendor-analytics', 'Vendor Analytics', 'VA'],
-                ['event_questions', 'admin.event-questions.index', 'admin.event-questions', 'Event Requirement Questions', 'EQ'],
                 ['notifications', 'admin.notifications.index', 'admin.notifications', 'Notification Management', 'NM'],
             ] as [$permission, $menuRoute, $routePrefix, $menuLabel, $menuIcon])
                 @if($adminUser->canAccess($permission))
@@ -228,6 +245,20 @@
                 </a>
                 @endif
             @endforeach
+
+            @if($adminUser->canAccess('event_questions'))
+            @php($questionsOpen = str_starts_with($currentRoute, 'admin.event-questions'))
+            <details class="group" @if($questionsOpen) open @endif>
+              <summary class="flex cursor-pointer list-none items-center gap-x-3.5 border-l-4 px-4 py-3 text-xs font-bold tracking-tight transition-all {{ $questionsOpen ? 'border-[#d4af37] bg-[#97052d] text-white' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ $questionsOpen ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-400' }}">EQ</span>
+                <span class="flex-1">Event Requirement Questions</span><svg class="h-4 w-4 shrink-0 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+              </summary>
+              <div class="mt-1 space-y-1 border-l border-[#d4af37]/30 pl-3" style="margin-left: 25% !important;">
+                <a href="{{ route('admin.event-questions.index') }}" class="admin-submenu-link {{ $currentRoute !== 'admin.event-questions.create' ? 'is-active' : '' }}">Question List</a>
+                <a href="{{ route('admin.event-questions.create') }}" class="admin-submenu-link {{ $currentRoute === 'admin.event-questions.create' ? 'is-active' : '' }}">Add Question</a>
+              </div>
+            </details>
+            @endif
 
             @if($adminUser->canAccess('pages'))
             @php($pagesOpen = str_starts_with($currentRoute, 'admin.pages') || str_starts_with($currentRoute, 'admin.landing-content'))
@@ -245,7 +276,7 @@
                         [route('admin.landing-content.index','testimonials'), 'testimonials', 'User Testimonials'],
                     ] as [$url,$match,$label])
                         @php($activeSub = $match === 'admin.pages' ? str_starts_with($currentRoute,'admin.pages') : (str_starts_with($currentRoute,'admin.landing-content') && request()->route('type') === $match))
-                        <a href="{{ $url }}" class="block rounded-lg px-3 py-2 text-[11px] font-bold {{ $activeSub ? 'bg-indigo-50 text-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">{{ $label }}</a>
+                        <a href="{{ $url }}" class="admin-submenu-link {{ $activeSub ? 'is-active' : '' }}">{{ $label }}</a>
                     @endforeach
                 </div>
             </details>
@@ -262,12 +293,6 @@
             </a>
             @endif
 
-            @if($adminUser->isSuperAdmin())
-            <a href="{{ route('admin.staff.index') }}" class="flex items-center gap-x-3.5 rounded-r-xl px-4 py-3 text-xs font-bold tracking-tight transition-all duration-150 {{ str_starts_with($currentRoute, 'admin.staff') ? 'bg-slate-50 text-[#3950a2] border-l-4 border-[#3950a2]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-l-4 border-transparent' }}">
-                <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ str_starts_with($currentRoute, 'admin.staff') ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">ST</span>
-                Staff
-            </a>
-            @endif
         </nav>
 
         <!-- Sidebar User Badge Card (Argon style) -->
@@ -288,11 +313,11 @@
     <div id="main-content-area" class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
         
         <!-- Top Horizontal Header (Navbar sits ON TOP with relative z-40) -->
-        <header class="mx-3 mt-3 flex h-[4.5rem] items-center justify-between rounded-2xl border border-white/80 bg-white/85 px-5 sm:px-7 lg:px-8 shrink-0 relative" style="z-index: 50;">
+        <header class="admin-topbar mx-3 mt-3 flex h-[4.5rem] items-center justify-between rounded-2xl border px-5 sm:px-7 lg:px-8 shrink-0 relative" style="z-index: 50;">
             <!-- Left Header elements (Breadcrumbs & Hide/Show button) -->
             <div class="flex items-center gap-4">
                 <!-- Hamburger Hide/Show toggle button -->
-                <button type="button" class="text-slate-500 hover:text-slate-800 focus:outline-none bg-slate-50 hover:bg-slate-100 p-2 rounded-xl border border-slate-200 transition" onclick="toggleSidebar()" title="Toggle Sidebar">
+                <button type="button" class="admin-header-toggle p-2 rounded-xl border transition" onclick="toggleSidebar()" title="Toggle Sidebar">
                     <span class="sr-only">Toggle Sidebar</span>
                     <!-- Hamburger / Sidebar Toggle Icon -->
                     <svg class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -316,7 +341,7 @@
 
                 <!-- User Profile actions -->
                 <div class="relative">
-                    <button type="button" class="flex items-center gap-2 focus:outline-none text-slate-700 font-semibold text-xs py-1.5 px-2 hover:bg-slate-50 rounded-xl transition" id="user-menu-button" onclick="toggleUserDropdown(event)">
+                    <button type="button" class="admin-profile-trigger flex items-center gap-2 focus:outline-none font-semibold text-xs py-2 px-3 rounded-xl transition" id="user-menu-button" onclick="toggleUserDropdown(event)">
                         <div class="h-7.5 w-7.5 rounded-full bg-slate-100 text-[#3950a2] border border-slate-200 flex items-center justify-center font-bold uppercase ring-1 ring-slate-100">
                             {{ substr(Auth::guard('admin')->user()->name ?? 'A', 0, 1) }}
                         </div>
@@ -327,13 +352,13 @@
                     </button>
 
                     <!-- Dropdown Panel (Highest z-index within header) -->
-                    <div id="user-menu-dropdown" class="absolute right-0 mt-2.5 w-48 origin-top-right rounded-xl bg-white p-1.5 shadow-lg border border-slate-150 focus:outline-none transition-all duration-150 scale-95 opacity-0 pointer-events-none" style="z-index: 100;">
-                        <a href="{{ route('admin.profile.edit') }}" class="block rounded-lg px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+                    <div id="user-menu-dropdown" class="admin-profile-dropdown absolute right-0 mt-2.5 w-48 origin-top-right rounded-xl p-1.5 shadow-lg border focus:outline-none transition-all duration-150 scale-95 opacity-0 pointer-events-none" style="z-index: 100;">
+                        <a href="{{ route('admin.profile.edit') }}" class="block rounded-lg px-4 py-2.5 text-xs font-bold text-white transition-colors">
                             My Profile
                         </a>
                         <form action="{{ route('admin.logout') }}" method="POST" class="block w-full">
                             @csrf
-                            <button type="submit" class="w-full text-left block rounded-lg px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors focus:outline-none">
+                            <button type="submit" class="w-full text-left block rounded-lg px-4 py-2.5 text-xs font-bold text-white transition-colors focus:outline-none">
                                 Log Out
                             </button>
                         </form>
@@ -385,12 +410,23 @@
             closeUserDropdown();
         });
 
+        // Keep the sidebar exactly where the administrator left it between page loads.
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarNav = document.getElementById('admin-sidebar-nav');
+            if (!sidebarNav) return;
+            const storageKey = 'shaadi-sense-admin-sidebar-scroll';
+            const savedPosition = Number(sessionStorage.getItem(storageKey));
+            if (Number.isFinite(savedPosition)) sidebarNav.scrollTop = savedPosition;
+            sidebarNav.addEventListener('scroll', () => sessionStorage.setItem(storageKey, String(sidebarNav.scrollTop)), { passive: true });
+            sidebarNav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => sessionStorage.setItem(storageKey, String(sidebarNav.scrollTop))));
+        });
+
         document.addEventListener('submit', function (event) {
             const form = event.target.closest('form[data-confirm]');
             if (!form || form.dataset.confirmed === 'true') return;
             event.preventDefault();
             const submit = () => { form.dataset.confirmed = 'true'; form.submit(); };
-            if (window.Swal) Swal.fire({title: form.dataset.confirm || 'Are you sure?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#3950a2', confirmButtonText: 'Yes, continue'}).then(result => result.isConfirmed && submit());
+            if (window.Swal) Swal.fire({title: form.dataset.confirm || 'Are you sure?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#850625', confirmButtonText: 'Yes, continue'}).then(result => result.isConfirmed && submit());
             else if (confirm(form.dataset.confirm || 'Are you sure?')) submit();
         });
 

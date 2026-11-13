@@ -16,7 +16,7 @@ class NotificationController extends Controller
     {
         $validated=$request->validate(['search'=>['nullable','string','max:100'],'status'=>['nullable','in:draft,scheduled,sent'],'sort'=>['nullable','in:title,notification_type,status,schedule_at,created_at'],'direction'=>['nullable','in:asc,desc']]);
         $sort=$validated['sort']??'created_at';$direction=$validated['direction']??'desc';
-        $notifications=AdminNotification::withCount('users')->when($validated['search']??null,fn($q,$s)=>$q->where(fn($q)=>$q->where('title','like',"%$s%")->orWhere('message','like',"%$s%")))->when($validated['status']??null,fn($q,$s)=>$q->where('status',$s))->orderBy($sort,$direction)->paginate(15)->withQueryString();
+        $notifications=AdminNotification::with('creator:id,name')->withCount('users')->when($validated['search']??null,fn($q,$s)=>$q->where(fn($q)=>$q->where('title','like',"%$s%")->orWhere('message','like',"%$s%")))->when($validated['status']??null,fn($q,$s)=>$q->where('status',$s))->orderBy($sort,$direction)->paginate(15)->withQueryString();
         return view('admin.notifications.index',compact('notifications'));
     }
     public function create(){return $this->form(new AdminNotification);}

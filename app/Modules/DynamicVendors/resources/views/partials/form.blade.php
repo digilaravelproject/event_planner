@@ -1,41 +1,37 @@
 @php
     $document = $vendor?->vendor_json ?? [];
-    $savedAttributes = data_get($document, 'attributes', []);
-    $blankAttribute = [[
-        'id' => '', 'label' => '', 'type' => 'text', 'value' => '', 'required' => false,
-        'min_length' => '', 'max_length' => '', 'min_value' => '', 'max_value' => '',
-        'allowed_values' => '', 'default_value' => '',
-    ]];
-    $formAttributes = old('attributes', collect($savedAttributes)->map(function ($attribute) {
+    $routePrefix = $routePrefix ?? 'admin.dynamic-vendors';
+    $defaultStatus = str_starts_with($routePrefix, 'admin.') ? 'active' : 'draft';
+    $categoryCatalog = \App\Modules\DynamicVendors\Support\VendorCategoryFieldCatalog::all();
+    $selectedCategory = old('category', data_get($document, 'identity.category', ''));
+    $savedAttributes = old('attributes', collect(data_get($document, 'attributes', []))->map(function ($attribute) {
         $validation = $attribute['validation'] ?? [];
         $value = $attribute['value'] ?? '';
-        if (is_array($value)) $value = json_encode($value, JSON_UNESCAPED_UNICODE);
         return array_merge($attribute, $validation, [
-            'value' => $value,
+            'value' => is_array($value) ? implode(', ', $value) : $value,
             'allowed_values' => implode(', ', $validation['allowed_values'] ?? []),
+            'pricing_unit' => data_get($attribute, 'pricing.unit', 'fixed'),
+            'pricing_rate' => data_get($attribute, 'pricing.rate', ''),
         ]);
     })->all());
-    if (count($formAttributes) === 0) $formAttributes = $blankAttribute;
     $existingImages = old('existing_images', data_get($document, 'media.images', []));
-    $routePrefix = $routePrefix ?? 'admin.dynamic-vendors';
 @endphp
 
-<div class="admin-page">
+<div class="admin-page vendor-wizard mx-auto max-w-6xl">
     @include('admin.partials.alerts')
-    <div class="admin-hero mb-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+
+    <div class="admin-hero mb-5 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div class="relative z-10">
-            <a href="{{ route($routePrefix.'.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-100 transition hover:text-white">← My Businesses</a>
-            <h1 class="mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{{ $title }}</h1>
-            <p class="mt-1 text-sm text-blue-100">{{ $subtitle }}</p>
+            <a href="{{ route($routePrefix.'.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-100 transition hover:text-white">← Vendor list</a>
+            <h1 class="mt-2 text-2xl font-extrabold tracking-tight text-white">{{ $title }}</h1>
+            <p class="mt-1 text-xs text-rose-100">Start with the vendor name and category. The right questions will appear automatically.</p>
         </div>
-        @if($vendor)
-            <a href="{{ route($routePrefix.'.show', $vendor) }}" class="relative z-10 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">View record</a>
-        @endif
+        <div class="relative z-10 flex items-center gap-2 text-[11px] font-bold text-amber-200"><span class="grid h-7 w-7 place-items-center rounded-full border border-amber-300/40">✓</span> Guided setup</div>
     </div>
 
     @if($errors->any())
-        <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
-            <p class="font-bold">Please correct the highlighted information.</p>
+        <div class="mb-5 rounded-2xl border border-rose-400/30 bg-rose-950/40 p-4 text-sm text-rose-100">
+            <p class="font-bold">Please review this information.</p>
             <ul class="mt-2 list-disc pl-5"><li>{{ $errors->first() }}</li></ul>
         </div>
     @endif
@@ -43,569 +39,174 @@
     <form method="POST" action="{{ $action }}" enctype="multipart/form-data" id="vendor-form" class="space-y-5">
         @csrf
         @if($method !== 'POST') @method($method) @endif
+        <input type="hidden" name="status" value="{{ old('status', $vendor?->status ?? $defaultStatus) }}">
 
-        <div class="admin-card flex gap-2 overflow-x-auto p-2" role="tablist">
-            @foreach(['details' => 'Vendor Details', 'attributes' => 'Dynamic Attributes', 'offerings' => 'Decor & Hall Offerings', 'food' => 'Food Packages & Extras', 'media' => 'Images', 'seo' => 'SEO'] as $tab => $label)
-                <button type="button" data-tab-button="{{ $tab }}" class="tab-button whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-bold {{ $loop->first ? 'bg-[#3950a2] text-white' : 'text-slate-600 hover:bg-slate-50' }}">{{ $label }}</button>
-            @endforeach
+        <section class="vendor-wizard-card p-5 sm:p-6">
+            <div class="mb-5 flex items-start gap-3">
+                <span class="vendor-step">1</span>
+                <div><h2 class="text-base font-extrabold text-white">Who is the vendor?</h2><p class="mt-1 text-xs text-stone-300">Only these two details are needed to prepare the correct form.</p></div>
+            </div>
+            <div class="grid gap-5 md:grid-cols-2">
+                <label class="block"><span class="vendor-label">Vendor name *</span><input name="name" required maxlength="255" autocomplete="organization" value="{{ old('name', data_get($document, 'identity.name')) }}" placeholder="Example: Royal Orchid Banquet" class="vendor-input"></label>
+                <label class="block"><span class="vendor-label">Category *</span><select id="vendor-category" name="category" required class="vendor-input"><option value="">Select the service category</option>@if($selectedCategory && !array_key_exists($selectedCategory, $categoryCatalog))<option value="{{ $selectedCategory }}" selected>{{ $selectedCategory }}</option>@endif @foreach(array_keys($categoryCatalog) as $category)<option value="{{ $category }}" @selected($selectedCategory === $category)>{{ $category }}</option>@endforeach</select><span class="vendor-help">Choose one category to display only relevant questions.</span></label>
+            </div>
+        </section>
+
+        <div id="category-empty" class="vendor-empty-state {{ $selectedCategory ? 'hidden' : '' }}">
+            <span class="text-2xl text-amber-300">✦</span>
+            <p class="mt-2 font-bold text-stone-200">Select a category to continue</p>
+            <p class="mt-1 text-xs text-stone-400">The rest of the form is created for that type of vendor.</p>
         </div>
 
-        <section data-tab-panel="details" class="admin-card tab-panel p-6">
-            <div class="mb-5"><h2 class="text-lg font-extrabold text-slate-900">Vendor details</h2><p class="text-sm text-slate-500">Name and category are also stored only inside the JSON document.</p></div>
-            <div class="grid gap-5 md:grid-cols-3">
-                <label class="block md:col-span-1"><span class="mb-2 block text-xs font-bold text-slate-700">Vendor name *</span><input name="name" required maxlength="255" value="{{ old('name', data_get($document, 'identity.name')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-[#3950a2] focus:outline-none focus:ring-2 focus:ring-[#3950a2]/10"></label>
-                <label class="block md:col-span-1"><span class="mb-2 block text-xs font-bold text-slate-700">Category *</span><input name="category" list="category-suggestions" required maxlength="255" value="{{ old('category', data_get($document, 'identity.category')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-[#3950a2] focus:outline-none focus:ring-2 focus:ring-[#3950a2]/10"><datalist id="category-suggestions">@foreach($categorySuggestions as $suggestion)<option value="{{ $suggestion }}">@endforeach</datalist></label>
-                <label class="block"><span class="mb-2 block text-xs font-bold text-slate-700">Status *</span><select name="status" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">@foreach(['draft', 'active', 'inactive', 'archived'] as $status)<option value="{{ $status }}" @selected(old('status', $vendor?->status ?? 'draft') === $status)>{{ ucfirst($status) }}</option>@endforeach</select></label>
-            </div>
-        </section>
-
-        <section data-tab-panel="attributes" class="admin-card tab-panel hidden p-6">
-            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div><h2 class="text-lg font-extrabold text-slate-900">Dynamic attributes</h2><p class="text-sm text-slate-500">Drag rows to reorder. Names are unrestricted.</p></div>
-                <div class="flex flex-wrap gap-2">
-                    <input id="attribute-search" type="search" placeholder="Search attributes" class="w-44 rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                    <a href="{{ route($routePrefix.'.attribute-sheet.sample') }}" class="inline-flex items-center rounded-xl border border-[#3950a2]/20 bg-indigo-50 px-4 py-2 text-sm font-bold text-[#3950a2] transition hover:bg-indigo-100">Download Sample Sheet</a>
-                    <button type="button" id="upload-attribute-sheet" data-import-url="{{ route($routePrefix.'.attribute-sheet.import') }}" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100">Upload Attribute Sheet</button>
-                    <input id="attribute-sheet-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden">
-                    <button type="button" id="add-attribute" class="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5">+ Add Attribute</button>
-                </div>
-            </div>
-            <div id="attribute-sheet-message" class="mb-4 hidden rounded-xl border px-4 py-3 text-sm" role="status" aria-live="polite"></div>
-            <datalist id="attribute-suggestions">@foreach($attributeSuggestions as $suggestion)<option value="{{ $suggestion }}">@endforeach</datalist>
-            <div id="attribute-list" class="space-y-4">
-                @foreach($formAttributes as $index => $attribute)
-                    @include('dynamic-vendors::partials.attribute-row', ['index' => $index, 'attribute' => $attribute])
-                @endforeach
-            </div>
-            <div id="empty-attributes" class="hidden rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">No attributes yet. Add one whenever you are ready.</div>
-        </section>
-
-        <section data-tab-panel="offerings" class="admin-card tab-panel hidden p-6">
-            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 class="text-lg font-extrabold text-slate-900">Decor & Hall Offerings</h2>
-                    <p class="text-sm text-slate-500">Add multiple custom halls, mandap decor themes & packages for AI Planner matching.</p>
-                </div>
-                <button type="button" id="add-offering-button" class="inline-flex items-center gap-2 rounded-xl bg-[#3950a2] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#2b3c7b] transition-all cursor-pointer">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                    <span>+ Add Package / Offering</span>
-                </button>
-            </div>
-
-            @php
-                $existingOfferings = old('offerings', data_get($document, 'offerings', []));
-                if (empty($existingOfferings) && !empty(data_get($document, 'offering'))) {
-                    $existingOfferings = [data_get($document, 'offering')];
-                }
-                if (empty($existingOfferings)) {
-                    $existingOfferings = [[
-                        'name' => '',
-                        'category' => 'Sea-Facing Beachfront',
-                        'min_capacity' => 50,
-                        'max_capacity' => 1000,
-                        'min_budget' => 5,
-                        'max_budget' => 50,
-                        'locations' => [],
-                        'traditions' => [],
-                        'notes' => ''
-                    ]];
-                }
-            @endphp
-
-            <div id="offerings-container" class="space-y-6">
-                @foreach($existingOfferings as $offIndex => $offering)
-                    <div class="offering-card rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-4 relative">
-                        <div class="flex items-center justify-between border-b border-slate-200/80 pb-3">
-                            <span class="text-xs font-extrabold text-[#3950a2] uppercase tracking-wider">Package / Hall Offering #<span class="offering-number">{{ $offIndex + 1 }}</span></span>
-                            <button type="button" class="remove-offering-btn text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer">
-                                Remove Package
-                            </button>
-                        </div>
-                        
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block">
-                                <span class="mb-1 block text-xs font-bold text-slate-700">Package / Hall Name *</span>
-                                <input name="offerings[{{ $offIndex }}][name]" placeholder="e.g. Royal Palace Mandap & Grand AC Hall" value="{{ old("offerings.{$offIndex}.name", data_get($offering, 'name')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-[#3950a2] focus:outline-none">
-                            </label>
-
-                            <label class="block">
-                                <span class="mb-1 block text-xs font-bold text-slate-700">Venue Setting Category *</span>
-                                <select name="offerings[{{ $offIndex }}][category]" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
-                                    @foreach($venueCategories as $catOption)
-                                        <option value="{{ $catOption }}" @selected(old("offerings.{$offIndex}.category", data_get($offering, 'category')) === $catOption)>{{ $catOption }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                        </div>
-
-                        <div class="grid gap-4 md:grid-cols-4">
-                            <label class="block">
-                                <span class="mb-1 block text-xs font-bold text-slate-700">Min Capacity (Guests)</span>
-                                <input type="number" name="offerings[{{ $offIndex }}][min_capacity]" placeholder="50" value="{{ old("offerings.{$offIndex}.min_capacity", data_get($offering, 'min_capacity', 50)) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
-                            </label>
-
-                            <label class="block">
-                                <span class="mb-1 block text-xs font-bold text-slate-700">Max Capacity (Guests)</span>
-                                <input type="number" name="offerings[{{ $offIndex }}][max_capacity]" placeholder="1000" value="{{ old("offerings.{$offIndex}.max_capacity", data_get($offering, 'max_capacity', 1000)) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
-                            </label>
-
-                            <label class="block">
-                                <span class="mb-1 block text-xs font-bold text-slate-700">Min Budget Range (Lakhs)</span>
-                                <input type="number" step="0.5" name="offerings[{{ $offIndex }}][min_budget]" placeholder="2.5" value="{{ old("offerings.{$offIndex}.min_budget", data_get($offering, 'min_budget', 5)) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
-                            </label>
-
-                            <label class="block">
-                                <span class="mb-1 block text-xs font-bold text-slate-700">Max Budget Range (Lakhs)</span>
-                                <input type="number" step="0.5" name="offerings[{{ $offIndex }}][max_budget]" placeholder="25.0" value="{{ old("offerings.{$offIndex}.max_budget", data_get($offering, 'max_budget', 50)) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
-                            </label>
-                        </div>
-
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <label class="block">
-                                <span class="mb-1 block text-xs font-bold text-slate-700">Supported Service Locations (Comma separated)</span>
-                                <input name="offerings[{{ $offIndex }}][locations]" placeholder="Juhu / Bandra Sea-Face, South Mumbai Heritage, Suburban AC Banquets" value="{{ old("offerings.{$offIndex}.locations", is_array(data_get($offering, 'locations')) ? implode(', ', data_get($offering, 'locations')) : data_get($offering, 'locations')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
-                            </label>
-
-                            <label class="block">
-                                <span class="mb-1 block text-xs font-bold text-slate-700">Supported Traditions (Comma separated)</span>
-                                <input name="offerings[{{ $offIndex }}][traditions]" placeholder="Muslim Nikah & Walima, Maharashtrian Lagna, North Indian Punjabi" value="{{ old("offerings.{$offIndex}.traditions", is_array(data_get($offering, 'traditions')) ? implode(', ', data_get($offering, 'traditions')) : data_get($offering, 'traditions')) }}" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">
-                            </label>
-                        </div>
-
-                        <label class="block">
-                            <span class="mb-1 block text-xs font-bold text-slate-700">Timing Provisions & Extra Notes</span>
-                            <textarea name="offerings[{{ $offIndex }}][notes]" rows="2" placeholder="Mention hall timing slots (e.g. 8 AM - 12 AM), extra charges, mandap setup inclusions..." class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm">{{ old("offerings.{$offIndex}.notes", data_get($offering, 'notes')) }}</textarea>
-                        </label>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-
-        <section data-tab-panel="food" class="admin-card tab-panel hidden p-6 space-y-8">
-            <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">
-                <div>
-                    <h2 class="text-lg font-extrabold text-slate-900">Food Packages & Extras</h2>
-                    <p class="text-sm text-slate-500">Configure custom catering packages (Classic, Deluxe, Elite) & extra live counters with per plate price ranges for this vendor.</p>
-                </div>
-            </div>
-
-            <!-- Food Packages Sub-Section -->
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-extrabold text-[#3950a2] uppercase tracking-wider">1. Food Packages (Classic / Deluxe / Elite)</h3>
-                    <button type="button" id="add-food-package-button" class="inline-flex items-center gap-1.5 rounded-xl bg-[#3950a2] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#2b3c7b] cursor-pointer">
-                        <i class="fa-solid fa-plus text-xs"></i>
-                        <span>+ Add Food Package</span>
-                    </button>
+        <div id="category-form" class="{{ $selectedCategory ? '' : 'hidden' }} space-y-5">
+            <section class="vendor-wizard-card p-5 sm:p-6">
+                <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="flex items-start gap-3"><span class="vendor-step">2</span><div><h2 id="category-heading" class="text-base font-extrabold text-white">{{ $selectedCategory ?: 'Vendor' }} information</h2><p class="mt-1 text-xs text-stone-300">Use everyday information. Technical settings are handled automatically.</p></div></div>
                 </div>
 
-                @php
-                    $existingFoodPackages = old('food_packages', data_get($document, 'food_packages', []));
-                    if (empty($existingFoodPackages)) {
-                        $existingFoodPackages = [
-                            [
-                                'name' => 'Classic Menu',
-                                'min_price_per_plate' => 700,
-                                'max_price_per_plate' => 900,
-                                'tagline' => 'Essential wedding feast with starters & desserts',
-                                'items' => ['Mineral Water Cups', 'Assorted Soft Drinks', 'Farsan (Any 1)', 'Main Course', 'Dal', 'Rice', 'Assorted Breads', 'Sweet (Any 1)', 'Ice Cream (Any 1)']
-                            ]
-                        ];
-                    }
-                @endphp
-
-                <div id="food-packages-container" class="space-y-4">
-                    @foreach($existingFoodPackages as $fpIndex => $fp)
-                        <div class="food-package-card rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-4 relative">
-                            <div class="flex items-center justify-between border-b border-slate-200/80 pb-3">
-                                <span class="text-xs font-extrabold text-[#3950a2] uppercase tracking-wider">Package #<span class="fp-number">{{ $fpIndex + 1 }}</span></span>
-                                <button type="button" class="remove-fp-btn text-xs font-bold text-rose-600 hover:text-rose-800 cursor-pointer">Remove Package</button>
-                            </div>
-                            <div class="grid gap-4 md:grid-cols-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Package Name</label>
-                                    <input name="food_packages[{{ $fpIndex }}][name]" placeholder="e.g. Classic Menu" value="{{ old("food_packages.{$fpIndex}.name", data_get($fp, 'name')) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:border-[#3950a2] focus:outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Min Price / Plate (₹)</label>
-                                    <input type="number" name="food_packages[{{ $fpIndex }}][min_price_per_plate]" placeholder="700" value="{{ old("food_packages.{$fpIndex}.min_price_per_plate", data_get($fp, 'min_price_per_plate', 700)) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Max Price / Plate (₹)</label>
-                                    <input type="number" name="food_packages[{{ $fpIndex }}][max_price_per_plate]" placeholder="900" value="{{ old("food_packages.{$fpIndex}.max_price_per_plate", data_get($fp, 'max_price_per_plate', 900)) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm">
-                                </div>
-                                <div class="md:col-span-3">
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Package Tagline / Description</label>
-                                    <input name="food_packages[{{ $fpIndex }}][tagline]" placeholder="e.g. Essential wedding feast with traditional starters & desserts" value="{{ old("food_packages.{$fpIndex}.tagline", data_get($fp, 'tagline')) }}" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm">
-                                </div>
-                                <div class="md:col-span-3">
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Included Menu Items <span class="font-normal text-slate-400">(comma-separated)</span></label>
-                                    @php
-                                        $fpItems = data_get($fp, 'items', []);
-                                        $fpItemsStr = is_array($fpItems) ? implode(', ', $fpItems) : $fpItems;
-                                    @endphp
-                                    <textarea name="food_packages[{{ $fpIndex }}][items]" rows="2" placeholder="e.g. Mineral Water, Soft Drinks, Farsan, Main Course, Dal, Rice, Breads, Sweets" class="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm">{{ old("food_packages.{$fpIndex}.items", $fpItemsStr) }}</textarea>
-                                </div>
-                            </div>
+                <div id="guided-fields" class="grid gap-4 md:grid-cols-2">
+                    @foreach($savedAttributes as $index => $attribute)
+                        @php
+                            $type = $attribute['type'] ?? 'text';
+                            $allowed = array_values(array_filter(array_map('trim', explode(',', (string) ($attribute['allowed_values'] ?? '')))));
+                            $value = $attribute['value'] ?? '';
+                        @endphp
+                        <div class="guided-field" data-guided-field>
+                            <input type="hidden" name="attributes[{{ $index }}][id]" value="{{ $attribute['id'] ?? '' }}">
+                            <input type="hidden" name="attributes[{{ $index }}][label]" value="{{ $attribute['label'] ?? '' }}">
+                            <input type="hidden" name="attributes[{{ $index }}][type]" value="{{ $type }}">
+                            <input type="hidden" name="attributes[{{ $index }}][required]" value="0">
+                            <input type="hidden" name="attributes[{{ $index }}][allowed_values]" value="{{ $attribute['allowed_values'] ?? '' }}">
+                            @foreach($attribute['images'] ?? [] as $image)<input type="hidden" name="existing_attribute_images[{{ $index }}][]" value="{{ $image }}">@endforeach
+                            <span class="vendor-label">{{ $attribute['label'] ?? 'Information' }}</span>
+                            @if($type === 'textarea' || $type === 'multi_select')
+                                <textarea name="attributes[{{ $index }}][value]" rows="2" class="vendor-input" placeholder="Enter {{ strtolower($attribute['label'] ?? 'information') }}">{{ $value }}</textarea>
+                            @elseif($type === 'dropdown' && count($allowed))
+                                <select name="attributes[{{ $index }}][value]" class="vendor-input"><option value="">Select an option</option>@foreach($allowed as $option)<option value="{{ $option }}" @selected((string) $value === $option)>{{ $option }}</option>@endforeach</select>
+                            @elseif($type === 'boolean')
+                                <select name="attributes[{{ $index }}][value]" class="vendor-input"><option value="0" @selected(!$value)>No</option><option value="1" @selected((bool) $value)>Yes</option></select>
+                            @elseif(in_array($type, ['image', 'file', 'video'], true))
+                                <input type="hidden" name="attributes[{{ $index }}][value]" value="{{ $value }}"><div class="rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-xs text-stone-300">Existing uploaded file will be kept.</div>
+                            @else
+                                <input type="{{ in_array($type, ['number', 'currency'], true) ? 'number' : ($type === 'email' ? 'email' : ($type === 'phone' ? 'tel' : 'text')) }}" @if(in_array($type, ['number', 'currency'], true)) step="0.01" min="0" @endif name="attributes[{{ $index }}][value]" value="{{ $value }}" class="vendor-input">
+                            @endif
+                            @if($type === 'currency' && ($attribute['pricing_rate'] ?? '') === '')
+                                <input type="hidden" name="attributes[{{ $index }}][pricing_unit]" value="{{ $attribute['pricing_unit'] ?? 'fixed' }}">
+                            @endif
+                            <button type="button" class="remove-guided-field mt-2 text-[11px] font-bold text-rose-300 hover:text-rose-200">Remove this field</button>
+                            @if(($attribute['pricing_rate'] ?? '') !== '')
+                                <details class="mt-3 rounded-xl border border-amber-300/15 bg-black/15 p-3">
+                                    <summary class="cursor-pointer text-[11px] font-bold text-amber-200">Planning cost</summary>
+                                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                        <label><span class="vendor-label">Price used in estimates</span><input type="number" min="0" step="0.01" name="attributes[{{ $index }}][pricing_rate]" value="{{ $attribute['pricing_rate'] }}" class="vendor-input"></label>
+                                        <label><span class="vendor-label">Charged by</span><select name="attributes[{{ $index }}][pricing_unit]" class="vendor-input">@foreach(['fixed' => 'One fixed amount', 'per_guest' => 'Per guest', 'per_unit' => 'Per item', 'per_hour' => 'Per hour', 'per_day' => 'Per day'] as $unit => $unitLabel)<option value="{{ $unit }}" @selected(($attribute['pricing_unit'] ?? 'fixed') === $unit)>{{ $unitLabel }}</option>@endforeach</select></label>
+                                    </div>
+                                </details>
+                            @endif
                         </div>
                     @endforeach
                 </div>
-            </div>
 
-            <!-- Food Extras Sub-Section -->
-            <div class="space-y-4 pt-6 border-t border-slate-200">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-extrabold text-[#3950a2] uppercase tracking-wider">2. Extra Live Counters & Add-ons</h3>
-                    <button type="button" id="add-food-extra-button" class="inline-flex items-center gap-1.5 rounded-xl bg-[#3950a2] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#2b3c7b] cursor-pointer">
-                        <i class="fa-solid fa-plus text-xs"></i>
-                        <span>+ Add Extra Counter</span>
-                    </button>
+                <button id="add-simple-field" type="button" class="mt-5 inline-flex items-center gap-2 rounded-xl border border-amber-300/25 px-4 py-2.5 text-xs font-bold text-amber-200 transition hover:bg-amber-300/10">+ Add another detail</button>
+                <!-- Optional validation is managed automatically and is intentionally not displayed. -->
+            </section>
+
+            <section class="vendor-wizard-card p-5 sm:p-6">
+                <div class="mb-5 flex items-start gap-3"><span class="vendor-step">3</span><div><h2 class="text-base font-extrabold text-white">Photos and description</h2><p class="mt-1 text-xs text-stone-300">Optional information that helps customers understand the service.</p></div></div>
+                @if(count($existingImages))
+                    <div class="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">@foreach($existingImages as $image)<label class="rounded-xl border border-white/10 bg-black/20 p-2"><img src="{{ asset('storage/'.$image) }}" alt="Vendor" class="h-24 w-full rounded-lg object-cover"><span class="mt-2 flex items-center gap-2 text-[11px] text-stone-300"><input type="checkbox" name="existing_images[]" value="{{ $image }}" checked> Keep photo</span></label>@endforeach</div>
+                @endif
+                <div class="grid gap-5 md:grid-cols-2">
+                    <label class="block md:col-span-2"><span class="vendor-label">Vendor photos</span><input type="file" name="images[]" multiple accept="image/*" class="vendor-file"><span class="vendor-help">Choose clear JPG, PNG or WebP photos. You can select more than one.</span></label>
+                    <label class="block md:col-span-2"><span class="vendor-label">Short introduction</span><textarea name="short_description" rows="2" maxlength="1000" class="vendor-input" placeholder="A short sentence shown in vendor summaries">{{ old('short_description', data_get($document, 'seo.short_description')) }}</textarea></label>
+                    <label class="block md:col-span-2"><span class="vendor-label">Full description</span><textarea name="description" rows="4" class="vendor-input" placeholder="Describe the experience, specialities and what customers can expect">{{ old('description', data_get($document, 'seo.description')) }}</textarea></label>
+                    <input type="hidden" name="tags" value="{{ old('tags', implode(', ', data_get($document, 'seo.tags', []))) }}">
+                    <input type="hidden" name="keywords" value="{{ old('keywords', implode(', ', data_get($document, 'seo.keywords', []))) }}">
                 </div>
+            </section>
 
-                @php
-                    $existingFoodExtras = old('food_extras', data_get($document, 'food_extras', []));
-                    if (empty($existingFoodExtras)) {
-                        $existingFoodExtras = [
-                            ['name' => 'Chinese Counter (Any 3)', 'min_price' => 90, 'max_price' => 120, 'unit' => 'per_plate', 'icon' => 'fa-bowl-rice'],
-                            ['name' => 'Chat Counter (Any 2)', 'min_price' => 90, 'max_price' => 120, 'unit' => 'per_plate', 'icon' => 'fa-utensils'],
-                        ];
-                    }
-                @endphp
-
-                <div id="food-extras-container" class="space-y-4">
-                    @foreach($existingFoodExtras as $feIndex => $fe)
-                        <div class="food-extra-card rounded-2xl border border-slate-200 bg-slate-50/50 p-4 space-y-3 relative">
-                            <div class="flex items-center justify-between border-b border-slate-200/80 pb-2">
-                                <span class="text-xs font-extrabold text-[#3950a2] uppercase tracking-wider">Extra Counter #<span class="fe-number">{{ $feIndex + 1 }}</span></span>
-                                <button type="button" class="remove-fe-btn text-xs font-bold text-rose-600 hover:text-rose-800 cursor-pointer">Remove Extra</button>
-                            </div>
-                            <div class="grid gap-3 md:grid-cols-4">
-                                <div class="md:col-span-2">
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Extra Counter Name</label>
-                                    <input name="food_extras[{{ $feIndex }}][name]" placeholder="e.g. Dosa Counter (Any 3)" value="{{ old("food_extras.{$feIndex}.name", data_get($fe, 'name')) }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Min Extra Cost (₹)</label>
-                                    <input type="number" name="food_extras[{{ $feIndex }}][min_price]" placeholder="90" value="{{ old("food_extras.{$feIndex}.min_price", data_get($fe, 'min_price', data_get($fe, 'price_per_plate', 90))) }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Max Extra Cost (₹)</label>
-                                    <input type="number" name="food_extras[{{ $feIndex }}][max_price]" placeholder="120" value="{{ old("food_extras.{$feIndex}.max_price", data_get($fe, 'max_price', data_get($fe, 'price_per_plate', 120))) }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Pricing Unit</label>
-                                    <select name="food_extras[{{ $feIndex }}][unit]" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                                        <option value="per_plate" @selected(old("food_extras.{$feIndex}.unit", data_get($fe, 'unit')) === 'per_plate')>Per Plate (₹ / plate)</option>
-                                        <option value="fixed" @selected(old("food_extras.{$feIndex}.unit", data_get($fe, 'unit')) === 'fixed')>Fixed Rental (₹ / hr or flat)</option>
-                                    </select>
-                                </div>
-                                <div class="md:col-span-3">
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">Icon Class</label>
-                                    <input name="food_extras[{{ $feIndex }}][icon]" placeholder="fa-solid fa-utensils" value="{{ old("food_extras.{$feIndex}.icon", data_get($fe, 'icon', 'fa-solid fa-utensils')) }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+                <a href="{{ route($routePrefix.'.index') }}" class="rounded-xl border border-white/15 px-5 py-3 text-center text-sm font-bold text-stone-200">Cancel</a>
+                <button class="admin-primary-button rounded-xl px-7 py-3 text-sm font-bold text-white">{{ $vendor ? 'Save Vendor Changes' : 'Create Vendor' }}</button>
             </div>
-        </section>
-
-        <section data-tab-panel="media" class="admin-card tab-panel hidden p-6">
-            <h2 class="text-lg font-extrabold text-slate-900">Vendor images</h2>
-            <p class="mb-5 text-sm text-slate-500">Upload multiple images. Their public storage paths are recorded in JSON.</p>
-            @if(count($existingImages))
-                <div class="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    @foreach($existingImages as $image)
-                        <label class="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-2">
-                            <img src="{{ asset('storage/'.$image) }}" alt="Vendor image" class="h-32 w-full rounded-lg object-cover">
-                            <span class="mt-2 flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="existing_images[]" value="{{ $image }}" checked> Keep image</span>
-                        </label>
-                    @endforeach
-                </div>
-            @endif
-            <label class="block rounded-xl border-2 border-dashed border-slate-300 p-8 text-center"><span class="block text-sm font-bold text-slate-700">Choose images</span><span class="mt-1 block text-xs text-slate-500">JPG, PNG, GIF or WebP · up to 10 MB each</span><input type="file" name="images[]" accept="image/*" multiple class="mt-4 text-sm"></label>
-        </section>
-
-        <section data-tab-panel="seo" class="admin-card tab-panel hidden p-6">
-            <h2 class="text-lg font-extrabold text-slate-900">Descriptions & discovery</h2>
-            <div class="mt-5 grid gap-5 md:grid-cols-2">
-                <label class="block md:col-span-2"><span class="mb-2 block text-xs font-bold text-slate-700">Short description</span><textarea name="short_description" rows="2" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">{{ old('short_description', data_get($document, 'seo.short_description')) }}</textarea></label>
-                <label class="block md:col-span-2"><span class="mb-2 block text-xs font-bold text-slate-700">Description</span><textarea name="description" rows="5" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">{{ old('description', data_get($document, 'seo.description')) }}</textarea></label>
-                <label class="block"><span class="mb-2 block text-xs font-bold text-slate-700">Tags <span class="font-normal text-slate-400">(comma-separated)</span></span><input name="tags" value="{{ old('tags', implode(', ', data_get($document, 'seo.tags', []))) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"></label>
-                <label class="block"><span class="mb-2 block text-xs font-bold text-slate-700">Keywords <span class="font-normal text-slate-400">(comma-separated)</span></span><input name="keywords" value="{{ old('keywords', implode(', ', data_get($document, 'seo.keywords', []))) }}" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"></label>
-            </div>
-        </section>
-
-        <div class="flex items-center justify-end gap-3 pt-2">
-            <a href="{{ route($routePrefix.'.index') }}" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700">Cancel</a>
-            <button class="admin-primary-button rounded-xl px-6 py-2.5 text-sm font-bold text-white">{{ $vendor ? 'Save New Version' : 'Create Vendor' }}</button>
         </div>
     </form>
 </div>
 
-<template id="attribute-template">
-    @include('dynamic-vendors::partials.attribute-row', ['index' => '__INDEX__', 'attribute' => $blankAttribute[0]])
-</template>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const list = document.getElementById('attribute-list');
-    const template = document.getElementById('attribute-template');
-    const empty = document.getElementById('empty-attributes');
-    const sheetButton = document.getElementById('upload-attribute-sheet');
-    const sheetInput = document.getElementById('attribute-sheet-file');
-    const sheetMessage = document.getElementById('attribute-sheet-message');
-    let dragged = null;
+    const catalog = @json($categoryCatalog);
+    const category = document.getElementById('vendor-category');
+    const form = document.getElementById('category-form');
+    const empty = document.getElementById('category-empty');
+    const fields = document.getElementById('guided-fields');
+    const heading = document.getElementById('category-heading');
+    const isEditing = @json((bool) $vendor);
+    let initialCategory = @json($selectedCategory);
 
-    const reindex = () => {
-        [...list.querySelectorAll('.attribute-row')].forEach((row, index) => {
-            row.dataset.index = index;
-            row.querySelectorAll('[name]').forEach(input => input.name = input.name.replace(/attributes\[[^\]]+\]|attribute_uploads\[[^\]]+\]|attribute_images\[[^\]]+\]|existing_attribute_images\[[^\]]+\]/, match => {
-                if (match.startsWith('attribute_uploads')) return `attribute_uploads[${index}]`;
-                if (match.startsWith('attribute_images')) return `attribute_images[${index}]`;
-                if (match.startsWith('existing_attribute_images')) return `existing_attribute_images[${index}]`;
-                return `attributes[${index}]`;
-            }));
-            row.querySelector('.position-label').textContent = `Attribute ${index + 1}`;
-        });
-        empty.classList.toggle('hidden', list.children.length > 0);
+    const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[character]));
+    const inputFor = (field, index) => {
+        const base = `attributes[${index}]`;
+        const options = field.options || [];
+        let input;
+        if (field.type === 'textarea' || field.type === 'multi_select') {
+            input = `<textarea name="${base}[value]" rows="2" class="vendor-input" placeholder="${escapeHtml(field.help)}"></textarea>`;
+        } else if (field.type === 'dropdown') {
+            input = `<select name="${base}[value]" class="vendor-input"><option value="">Select an option</option>${options.map(option => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join('')}</select>`;
+        } else if (field.type === 'boolean') {
+            input = `<select name="${base}[value]" class="vendor-input"><option value="0">No</option><option value="1">Yes</option></select>`;
+        } else {
+            const type = ['number', 'currency'].includes(field.type) ? 'number' : (field.type === 'email' ? 'email' : (field.type === 'phone' ? 'tel' : 'text'));
+            input = `<input type="${type}" ${['number', 'currency'].includes(field.type) ? 'step="0.01" min="0"' : ''} name="${base}[value]" class="vendor-input" placeholder="${escapeHtml(field.help)}">`;
+        }
+        const pricing = field.type === 'currency' ? `<input type="hidden" name="${base}[pricing_unit]" value="${escapeHtml(field.unit || 'fixed')}">` : '';
+        return `<div class="guided-field" data-guided-field><input type="hidden" name="${base}[label]" value="${escapeHtml(field.label)}"><input type="hidden" name="${base}[type]" value="${escapeHtml(field.type)}"><input type="hidden" name="${base}[required]" value="0"><input type="hidden" name="${base}[allowed_values]" value="${escapeHtml(options.join(', '))}"><span class="vendor-label">${escapeHtml(field.label)}</span>${input}${pricing}<span class="vendor-help">${escapeHtml(field.help)}</span><button type="button" class="remove-guided-field mt-2 text-[11px] font-bold text-rose-300 hover:text-rose-200">Remove this field</button></div>`;
+    };
+    const reindex = () => [...fields.querySelectorAll('[data-guided-field]')].forEach((row, index) => row.querySelectorAll('[name]').forEach(input => input.name = input.name.replace(/attributes\[\d+\]/, `attributes[${index}]`)));
+    const bindRemove = () => document.querySelectorAll('.remove-guided-field').forEach(button => button.onclick = () => { button.closest('[data-guided-field]').remove(); reindex(); });
+    const loadCategory = (name, replace = true) => {
+        empty.classList.toggle('hidden', Boolean(name));
+        form.classList.toggle('hidden', !name);
+        heading.textContent = `${name || 'Vendor'} information`;
+        if (name && replace) fields.innerHTML = (catalog[name] || []).map(inputFor).join('');
+        bindRemove();
     };
 
-    const bindRow = row => {
-        row.querySelector('.remove-attribute').addEventListener('click', () => { row.remove(); reindex(); });
-        row.querySelector('.duplicate-attribute').addEventListener('click', () => {
-            const clone = row.cloneNode(true);
-            const id = clone.querySelector('[data-attribute-id]'); if (id) id.value = '';
-            clone.querySelectorAll('input[type=file]').forEach(input => input.value = '');
-            list.insertBefore(clone, row.nextSibling); bindRow(clone); reindex();
-        });
-        row.addEventListener('dragstart', () => { dragged = row; row.classList.add('opacity-50'); });
-        row.addEventListener('dragend', () => { dragged = null; row.classList.remove('opacity-50'); reindex(); });
-        row.addEventListener('dragover', event => { event.preventDefault(); if (dragged && dragged !== row) list.insertBefore(dragged, row.getBoundingClientRect().top + row.offsetHeight / 2 < event.clientY ? row.nextSibling : row); });
-        row.querySelector('.attribute-type').addEventListener('change', event => {
-            const upload = row.querySelector('.attribute-upload');
-            const value = row.querySelector('.attribute-value');
-            const isUpload = ['image', 'file', 'video'].includes(event.target.value);
-            upload.classList.toggle('hidden', !isUpload);
-            value.classList.toggle('hidden', isUpload);
-        });
-    };
-
-    [...list.querySelectorAll('.attribute-row')].forEach(bindRow);
-    const appendAttribute = attribute => {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = template.innerHTML.replaceAll('__INDEX__', list.children.length).trim();
-        const row = wrapper.firstElementChild;
-        row.querySelector('.attribute-name').value = attribute.label ?? '';
-        row.querySelector('.attribute-type').value = attribute.type ?? 'text';
-        row.querySelector('.attribute-value textarea').value = attribute.value ?? '';
-        list.appendChild(row);
-        bindRow(row);
-        row.querySelector('.attribute-type').dispatchEvent(new Event('change'));
-        return row;
-    };
-    document.getElementById('add-attribute').addEventListener('click', () => {
-        const row = appendAttribute({}); reindex();
-        row.querySelector('.attribute-name').focus();
+    category.addEventListener('change', () => {
+        const hasData = fields.querySelectorAll('[data-guided-field]').length > 0;
+        if (isEditing && hasData && initialCategory && category.value !== initialCategory && !confirm('Changing the category will replace the current detail fields with the new category form. Continue?')) {
+            category.value = initialCategory;
+            return;
+        }
+        loadCategory(category.value, true);
+        initialCategory = category.value;
     });
-    sheetButton.addEventListener('click', () => sheetInput.click());
-    sheetInput.addEventListener('change', async () => {
-        const file = sheetInput.files[0];
-        if (!file) return;
 
-        sheetButton.disabled = true;
-        sheetButton.textContent = 'Importing...';
-        sheetMessage.className = 'mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700';
-        sheetMessage.textContent = 'Reading the attribute sheet...';
-
-        try {
-            const data = new FormData();
-            data.append('attribute_sheet', file);
-            const response = await fetch(sheetButton.dataset.importUrl, {
-                method: 'POST',
-                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
-                body: data,
+    document.getElementById('add-simple-field').addEventListener('click', async () => {
+        let label = '';
+        if (window.Swal) {
+            const result = await window.Swal.fire({
+                title: 'Add another detail',
+                text: 'Enter a clear name for the information you want to record.',
+                input: 'text',
+                inputPlaceholder: 'Example: Award received',
+                showCancelButton: true,
+                confirmButtonText: 'Add detail',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#850625',
+                cancelButtonColor: '#403538',
+                background: '#1b1114',
+                color: '#ffffff',
+                inputValidator: value => value?.trim() ? undefined : 'Please enter a detail name.'
             });
-            const payload = await response.json();
-            if (!response.ok) throw new Error(payload.message || Object.values(payload.errors || {}).flat()[0] || 'The attribute sheet could not be imported.');
-
-            const currentRows = [...list.querySelectorAll('.attribute-row')];
-            if (currentRows.length === 1 && currentRows[0].querySelector('.attribute-name').value.trim() === '' && currentRows[0].querySelector('.attribute-value textarea').value.trim() === '') {
-                currentRows[0].remove();
-            }
-            payload.attributes.forEach(appendAttribute);
-            reindex();
-            sheetMessage.className = 'mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700';
-            sheetMessage.textContent = `${payload.attributes.length} attribute${payload.attributes.length === 1 ? '' : 's'} imported. Review them, then save the vendor.`;
-        } catch (error) {
-            sheetMessage.className = 'mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700';
-            sheetMessage.textContent = error.message;
-        } finally {
-            sheetButton.disabled = false;
-            sheetButton.textContent = 'Upload Attribute Sheet';
-            sheetInput.value = '';
-        }
+            if (!result.isConfirmed) return;
+            label = result.value;
+        } else return;
+        if (!label || !label.trim()) return;
+        fields.insertAdjacentHTML('beforeend', inputFor({label: label.trim(), type: 'text', help: `Enter ${label.trim().toLowerCase()}`, options: []}, fields.children.length));
+        bindRemove(); reindex(); fields.lastElementChild.querySelector('input:not([type=hidden]), textarea, select')?.focus();
     });
-    document.getElementById('attribute-search').addEventListener('input', event => {
-        const term = event.target.value.toLowerCase();
-        [...list.querySelectorAll('.attribute-row')].forEach(row => row.classList.toggle('hidden', !row.querySelector('.attribute-name').value.toLowerCase().includes(term)));
-    });
-    document.querySelectorAll('[data-tab-button]').forEach(button => button.addEventListener('click', () => {
-        document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.toggle('hidden', panel.dataset.tabPanel !== button.dataset.tabButton));
-        document.querySelectorAll('.tab-button').forEach(item => { const active = item === button; item.classList.toggle('bg-[#3950a2]', active); item.classList.toggle('text-white', active); item.classList.toggle('text-slate-600', !active); });
-    }));
 
-    // Offerings Repeater JS Logic
-    const offeringsContainer = document.getElementById('offerings-container');
-    const addOfferingBtn = document.getElementById('add-offering-button');
-
-    const reindexOfferings = () => {
-        if (!offeringsContainer) return;
-        const cards = offeringsContainer.querySelectorAll('.offering-card');
-        cards.forEach((card, index) => {
-            const numberSpan = card.querySelector('.offering-number');
-            if (numberSpan) numberSpan.textContent = index + 1;
-
-            card.querySelectorAll('[name]').forEach(input => {
-                input.name = input.name.replace(/offerings\[\d+\]/, `offerings[${index}]`);
-            });
-        });
-    };
-
-    const bindOfferingEvents = (card) => {
-        const removeBtn = card.querySelector('.remove-offering-btn');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', () => {
-                if (offeringsContainer.querySelectorAll('.offering-card').length > 1) {
-                    card.remove();
-                    reindexOfferings();
-                } else {
-                    alert('At least one package offering is required.');
-                }
-            });
-        }
-    };
-
-    if (offeringsContainer) {
-        offeringsContainer.querySelectorAll('.offering-card').forEach(bindOfferingEvents);
-
-        if (addOfferingBtn) {
-            addOfferingBtn.addEventListener('click', () => {
-                const firstCard = offeringsContainer.querySelector('.offering-card');
-                if (!firstCard) return;
-
-                const clone = firstCard.cloneNode(true);
-                clone.querySelectorAll('input, textarea').forEach(input => {
-                    if (input.type === 'number') {
-                        if (input.name.includes('min_capacity')) input.value = 50;
-                        else if (input.name.includes('max_capacity')) input.value = 1000;
-                        else if (input.name.includes('min_budget')) input.value = 5;
-                        else if (input.name.includes('max_budget')) input.value = 50;
-                    } else if (input.tagName.toLowerCase() === 'select') {
-                        input.selectedIndex = 0;
-                    } else {
-                        input.value = '';
-                    }
-                });
-
-                offeringsContainer.appendChild(clone);
-                bindOfferingEvents(clone);
-                reindexOfferings();
-            });
-        }
-    }
-
-    // Food Packages Repeater JS Logic
-    const fpContainer = document.getElementById('food-packages-container');
-    const addFpBtn = document.getElementById('add-food-package-button');
-
-    const reindexFp = () => {
-        if (!fpContainer) return;
-        fpContainer.querySelectorAll('.food-package-card').forEach((card, index) => {
-            const num = card.querySelector('.fp-number');
-            if (num) num.textContent = index + 1;
-            card.querySelectorAll('[name]').forEach(input => {
-                input.name = input.name.replace(/food_packages\[\d+\]/, `food_packages[${index}]`);
-            });
-        });
-    };
-
-    const bindFpEvents = (card) => {
-        const removeBtn = card.querySelector('.remove-fp-btn');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', () => {
-                if (fpContainer.querySelectorAll('.food-package-card').length > 1) {
-                    card.remove();
-                    reindexFp();
-                } else {
-                    alert('At least one food package is required.');
-                }
-            });
-        }
-    };
-
-    if (fpContainer) {
-        fpContainer.querySelectorAll('.food-package-card').forEach(bindFpEvents);
-        if (addFpBtn) {
-            addFpBtn.addEventListener('click', () => {
-                const first = fpContainer.querySelector('.food-package-card');
-                if (!first) return;
-                const clone = first.cloneNode(true);
-                clone.querySelectorAll('input, textarea').forEach(input => input.value = '');
-                fpContainer.appendChild(clone);
-                bindFpEvents(clone);
-                reindexFp();
-            });
-        }
-    }
-
-    // Food Extras Repeater JS Logic
-    const feContainer = document.getElementById('food-extras-container');
-    const addFeBtn = document.getElementById('add-food-extra-button');
-
-    const reindexFe = () => {
-        if (!feContainer) return;
-        feContainer.querySelectorAll('.food-extra-card').forEach((card, index) => {
-            const num = card.querySelector('.fe-number');
-            if (num) num.textContent = index + 1;
-            card.querySelectorAll('[name]').forEach(input => {
-                input.name = input.name.replace(/food_extras\[\d+\]/, `food_extras[${index}]`);
-            });
-        });
-    };
-
-    const bindFeEvents = (card) => {
-        const removeBtn = card.querySelector('.remove-fe-btn');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', () => {
-                if (feContainer.querySelectorAll('.food-extra-card').length > 1) {
-                    card.remove();
-                    reindexFe();
-                } else {
-                    alert('At least one extra counter is required.');
-                }
-            });
-        }
-    };
-
-    if (feContainer) {
-        feContainer.querySelectorAll('.food-extra-card').forEach(bindFeEvents);
-        if (addFeBtn) {
-            addFeBtn.addEventListener('click', () => {
-                const first = feContainer.querySelector('.food-extra-card');
-                if (!first) return;
-                const clone = first.cloneNode(true);
-                clone.querySelectorAll('input').forEach(input => {
-                    if (input.tagName.toLowerCase() === 'select') input.selectedIndex = 0;
-                    else input.value = '';
-                });
-                feContainer.appendChild(clone);
-                bindFeEvents(clone);
-                reindexFe();
-            });
-        }
-    }
-
-    reindex();
+    loadCategory(category.value, fields.children.length === 0);
 });
 </script>

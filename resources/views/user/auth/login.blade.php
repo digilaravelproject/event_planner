@@ -113,9 +113,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                             </svg>
                         </span>
-                        <input type="password" name="password" id="password" required
-                            class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150"
+                        <input type="password" name="password" id="customer-password" required
+                            class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-11 py-2.5 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition duration-150"
                             placeholder="••••••••">
+                        <button type="button" data-password-toggle data-password-target="customer-password" class="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-400 transition hover:text-[#850625]" aria-label="Show password" aria-pressed="false">
+                            <svg data-password-visible="false" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"/><circle cx="12" cy="12" r="2.75"/></svg>
+                            <svg data-password-visible="true" class="hidden h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m3 3 18 18M10.6 5.4A9.7 9.7 0 0 1 12 5.25c6 0 9.75 6.75 9.75 6.75a16 16 0 0 1-2.3 3.15M6.1 6.1C3.65 8 2.25 12 2.25 12S6 18.75 12 18.75c1.4 0 2.68-.37 3.82-.94M9.88 9.88A3 3 0 0 0 14.12 14.12"/></svg>
+                        </button>
                     </div>
                 </div>
 

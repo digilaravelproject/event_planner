@@ -12,7 +12,7 @@ class DynamicVendorRepository implements DynamicVendorRepositoryInterface
 {
     public function paginate(array $filters, int $perPage = 15): LengthAwarePaginator
     {
-        $query = DynamicVendor::query();
+        $query = DynamicVendor::query()->with(['creator:id,name', 'updater:id,name']);
 
         $query->when($filters['search'] ?? null, function (Builder $query, string $search): void {
             $query->where('vendor_json', 'like', '%'.$this->escapeLike($search).'%');

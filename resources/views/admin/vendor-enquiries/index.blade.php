@@ -11,34 +11,28 @@
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">Vendor Enquiries</h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-1">Review new vendor registration enquiries, inspect their offerings, and manually verify or onboard them.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('admin.dynamic-vendors.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-[#3950a2] hover:bg-[#2d3f82] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition">
-                <i class="fa-solid fa-plus"></i>
-                <span>Add Dynamic Vendor</span>
-            </a>
-        </div>
     </div>
 
     @include('admin.partials.alerts')
 
     <!-- Metrics Strip -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <a href="{{ route('admin.vendor-enquiries.index') }}" class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs hover:border-[#3950a2] transition">
+        <a href="{{ route('admin.vendor-enquiries.index') }}" class="vendor-enquiry-stat rounded-2xl p-4 transition">
             <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Enquiries</p>
             <p class="mt-2 text-2xl font-black text-slate-800">{{ $stats['total'] }}</p>
         </a>
-        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'pending']) }}" class="rounded-2xl border border-blue-200/80 bg-blue-50/50 p-4 shadow-xs hover:border-blue-400 transition">
+        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'pending']) }}" class="vendor-enquiry-stat rounded-2xl p-4 transition">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-bold uppercase tracking-wider text-blue-600">Pending Review</p>
-                <span class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <p class="text-xs font-bold uppercase tracking-wider text-white">Pending Review</p>
+                <span class="h-2 w-2 rounded-full bg-white animate-pulse"></span>
             </div>
-            <p class="mt-2 text-2xl font-black text-blue-700">{{ $stats['pending'] }}</p>
+            <p class="mt-2 text-2xl font-black text-white">{{ $stats['pending'] }}</p>
         </a>
-        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'contacted']) }}" class="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-4 shadow-xs hover:border-amber-400 transition">
+        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'contacted']) }}" class="vendor-enquiry-stat rounded-2xl p-4 transition">
             <p class="text-xs font-bold uppercase tracking-wider text-amber-600">Contacted</p>
             <p class="mt-2 text-2xl font-black text-amber-700">{{ $stats['contacted'] }}</p>
         </a>
-        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'approved']) }}" class="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-4 shadow-xs hover:border-emerald-400 transition">
+        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'approved']) }}" class="vendor-enquiry-stat rounded-2xl p-4 transition">
             <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Approved / Added</p>
             <p class="mt-2 text-2xl font-black text-emerald-700">{{ $stats['approved'] }}</p>
         </a>
@@ -180,16 +174,17 @@
                                 <div class="flex items-center justify-end gap-2">
                                     <a 
                                         href="{{ route('admin.vendor-enquiries.show', $enquiry) }}" 
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#3950a2]/10 text-[#3950a2] hover:bg-[#3950a2] hover:text-white font-bold text-xs transition"
+                                        class="admin-action-icon"
+                                        title="View enquiry"
+                                        aria-label="View enquiry from {{ $enquiry->business_name }}"
                                     >
-                                        <i class="fa-solid fa-eye"></i>
-                                        <span>View</span>
+                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5" stroke-width="2"/></svg>
                                     </a>
 
                                     <form action="{{ route('admin.vendor-enquiries.destroy', $enquiry) }}" method="POST" onsubmit="return confirm('Permanently delete enquiry #{{ $enquiry->id }} for {{ $enquiry->business_name }}?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Delete Enquiry">
+                                        <button type="submit" class="admin-action-icon admin-action-icon-danger" title="Delete Enquiry">
                                             <i class="fa-solid fa-trash-can text-xs"></i>
                                         </button>
                                     </form>

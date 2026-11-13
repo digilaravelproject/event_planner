@@ -210,6 +210,23 @@
         const value = this.dynamicAnswers[code];
         return Array.isArray(value) ? JSON.stringify(value) : (value ?? '');
     },
+    answerForStep(step) {
+        if (!step) return 'Not selected yet';
+        const answers = {
+            event_category: this.dynamicAnswers.event_category,
+            wedding_budget: this.planner.budget ? `₹${this.planner.budget} Lakh` : '',
+            guest_capacity: this.planner.exactGuest ? `${this.planner.exactGuest} Guests` : '',
+            service_area: this.planner.locations,
+            wedding_tradition: this.planner.culture,
+            decoration_type: this.planner.setting || this.planner.decorTheme,
+            venue_setting: this.planner.setting,
+            food_type: this.planner.foodPreference ? this.getFoodPreferenceTitle() : '',
+            event_timeline: this.planner.timeline,
+        };
+        const value = Object.prototype.hasOwnProperty.call(answers, step.code) ? answers[step.code] : this.dynamicAnswers[step.code];
+        if (Array.isArray(value)) return value.length ? value.join(', ') : 'Not selected yet';
+        return String(value ?? '').trim() || 'Not selected yet';
+    },
     init() {
         if (!Array.isArray(this.planner.selectedVendorIds)) this.planner.selectedVendorIds = [];
         if (!this.planner.selectedVendorIds.length && this.cateringVendors.length) {
@@ -976,15 +993,31 @@
             </div>
             
             <!-- Steps Content Include (Generous Center Area with No Unnecessary Scrollbars) -->
-            <div class="flex-1 min-h-0 w-full py-1 sm:py-2 flex flex-col justify-center">
-                @include('ai-planner.steps.step-1-budget')
-                @include('ai-planner.steps.step-2-guests')
-                @include('ai-planner.steps.step-5-location')
-                @include('ai-planner.steps.step-3-type')
-                @include('ai-planner.steps.step-7-setting')
-                @include('ai-planner.steps.step-4-food')
-                @include('ai-planner.steps.step-6-timeline')
-                @include('ai-planner.steps.generic-question')
+            <div class="grid flex-1 min-h-0 w-full gap-4 py-1 sm:py-2 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
+                <div class="min-w-0 flex flex-col justify-center">
+                    @include('ai-planner.steps.step-1-budget')
+                    @include('ai-planner.steps.step-2-guests')
+                    @include('ai-planner.steps.step-5-location')
+                    @include('ai-planner.steps.step-3-type')
+                    @include('ai-planner.steps.step-7-setting')
+                    @include('ai-planner.steps.step-4-food')
+                    @include('ai-planner.steps.step-6-timeline')
+                    @include('ai-planner.steps.generic-question')
+                </div>
+
+                <aside class="rounded-2xl border border-[#850625]/15 bg-gradient-to-br from-[#fffaf3] to-rose-50 p-4 shadow-sm lg:sticky lg:top-28" aria-label="Your selected requirements">
+                    <div class="flex items-center justify-between border-b border-[#850625]/10 pb-3">
+                        <div><p class="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#850625]">Your requirements</p><h3 class="mt-1 text-sm font-extrabold text-slate-900">Selected answers</h3></div>
+                        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#850625] text-white"><i class="fa-solid fa-list-check text-xs"></i></span>
+                    </div>
+                    <div class="custom-slim-scrollbar mt-3 max-h-64 space-y-2 overflow-y-auto pr-1 lg:max-h-[34rem]">
+                        <template x-for="step in plannerSteps" :key="`summary-${step.code}`">
+                            <button type="button" @click="step.number <= maxVisitedStep && goToStep(step.number)" class="w-full rounded-xl border p-3 text-left transition" :class="currentStep === step.number ? 'border-[#850625]/30 bg-[#850625] text-white shadow-md' : 'border-rose-100 bg-white/80 text-slate-700 hover:border-[#850625]/25'">
+                                <span class="flex items-start gap-2.5"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[10px] font-black" :class="currentStep === step.number ? 'bg-white/15 text-[#f3cf5d]' : 'bg-rose-50 text-[#850625]'" x-text="step.number"></span><span class="min-w-0"><strong class="block truncate text-[11px]" x-text="step.name"></strong><small class="mt-1 block line-clamp-2 text-[10px] leading-4" :class="currentStep === step.number ? 'text-white/80' : (answerForStep(step) === 'Not selected yet' ? 'text-slate-400' : 'font-semibold text-[#850625]')" x-text="answerForStep(step)"></small></span></span>
+                            </button>
+                        </template>
+                    </div>
+                </aside>
             </div>
 
             <!-- Action Controls (Back / Continue Buttons - Permanently Pinned at Fixed Bottom) -->

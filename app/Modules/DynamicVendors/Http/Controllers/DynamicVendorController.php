@@ -81,7 +81,9 @@ class DynamicVendorController extends Controller
 
     public function store(StoreDynamicVendorRequest $request): RedirectResponse
     {
-        $vendor = $this->service->create($request->validated(), $request->allFiles(), $request->user('admin')?->id);
+        $data = $request->validated();
+        $data['status'] = 'active';
+        $vendor = $this->service->create($data, $request->allFiles(), $request->user('admin')?->id);
 
         return redirect()->route('admin.dynamic-vendors.show', $vendor)->with('success', 'Dynamic vendor created successfully.');
     }

@@ -436,9 +436,9 @@
 .admin-login-shell {
     overflow-x: hidden;
     background:
-        radial-gradient(circle at 18% 20%, rgb(45 212 191 / 0.22), transparent 28rem),
-        radial-gradient(circle at 85% 15%, rgb(129 140 248 / 0.28), transparent 30rem),
-        linear-gradient(135deg, #101b3e 0%, #263b83 55%, #075f5a 125%);
+        radial-gradient(circle at 18% 20%, rgb(212 175 55 / 0.22), transparent 28rem),
+        radial-gradient(circle at 85% 15%, rgb(225 29 72 / 0.24), transparent 30rem),
+        linear-gradient(135deg, #31040f 0%, #850625 55%, #560116 125%);
 }
 
 .admin-login-shell::before,
@@ -476,6 +476,812 @@
 
 @media (prefers-reduced-motion: reduce) {
     .admin-content > div { animation: none; }
+}
+
+/* Shaadi Sense admin theme -------------------------------------------------
+   Mirrors the public site's burgundy, ivory, gold and ink visual language. */
+:root {
+    --admin-primary: #850625;
+    --admin-primary-dark: #620318;
+    --admin-gold: #d4af37;
+    --admin-gold-soft: #f6e9b9;
+    --admin-ink: #111827;
+    --admin-ivory: #fffaf6;
+}
+
+#admin-sidebar {
+    border-color: rgb(133 6 37 / 0.10) !important;
+    background: rgb(255 253 249 / 0.97) !important;
+    box-shadow: 0 28px 65px -42px rgb(90 8 29 / 0.50) !important;
+}
+
+#admin-sidebar nav a,
+#admin-sidebar summary {
+    border-radius: 0.9rem !important;
+}
+
+#admin-sidebar nav a:hover,
+#admin-sidebar summary:hover {
+    color: var(--admin-primary) !important;
+    background: #fff2f4 !important;
+}
+
+#admin-sidebar nav a[class*="border-[#3950a2]"],
+#admin-sidebar summary[class*="border-[#3950a2]"] {
+    color: #fff !important;
+    background: linear-gradient(135deg, #a20d36, var(--admin-primary-dark)) !important;
+    box-shadow: 0 15px 30px -20px rgb(133 6 37 / 0.9) !important;
+}
+
+#admin-sidebar nav a[class*="border-[#3950a2]"] span:first-child,
+#admin-sidebar summary[class*="border-[#3950a2]"] span:first-child {
+    color: #f6d65f !important;
+    background: rgb(255 255 255 / 0.12) !important;
+}
+
+.admin-page::before {
+    background:
+        radial-gradient(circle at 12% 15%, rgb(133 6 37 / 0.10), transparent 34%),
+        radial-gradient(circle at 82% 5%, rgb(212 175 55 / 0.12), transparent 28%);
+}
+
+.admin-hero,
+.admin-dashboard-welcome {
+    background: linear-gradient(122deg, #4b0718 0%, #850625 58%, #b51a43 118%) !important;
+    box-shadow: 0 26px 58px -32px rgb(101 4 28 / 0.68) !important;
+}
+
+.admin-hero::after {
+    border-color: rgb(212 175 55 / 0.14);
+}
+
+.admin-card {
+    border-color: rgb(133 6 37 / 0.10);
+    background: rgb(255 255 255 / 0.96);
+    box-shadow: 0 18px 45px -32px rgb(91 9 31 / 0.38), 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.admin-card-interactive:hover {
+    border-color: rgb(212 175 55 / 0.55);
+    box-shadow: 0 24px 55px -34px rgb(133 6 37 / 0.46);
+}
+
+.admin-control:focus,
+.admin-content input:not([type='checkbox']):not([type='radio']):not([type='hidden']):focus,
+.admin-content select:focus,
+.admin-content textarea:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 4px rgb(133 6 37 / 0.10);
+}
+
+.admin-primary-button {
+    background: linear-gradient(135deg, #a20d36, #72031e);
+    box-shadow: 0 12px 24px -14px rgb(133 6 37 / 0.9);
+}
+
+.admin-primary-button:hover {
+    box-shadow: 0 16px 28px -14px rgb(133 6 37 / 0.95);
+}
+
+.admin-content h1 { color: var(--admin-ink); }
+.admin-content .admin-hero h1 { color: #fff; }
+
+.admin-content [class*='bg-[#3950a2]'] {
+    background-color: var(--admin-primary) !important;
+    background-image: linear-gradient(135deg, #a20d36, #72031e) !important;
+}
+
+.admin-content [class*='text-[#3950a2]'] { color: var(--admin-primary) !important; }
+.admin-content [class*='bg-[#00c689]'] { background-color: var(--admin-gold) !important; }
+.admin-content [class*='text-[#00c689]'] { color: #a77e08 !important; }
+
+/* Full-information table cells: content wraps, remains selectable and is never
+   silently clipped with an ellipsis. Wide records scroll horizontally. */
+.admin-content table {
+    width: 100%;
+    min-width: max-content;
+}
+
+.admin-content table th,
+.admin-content table td {
+    max-width: 28rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+}
+
+.admin-content table td .truncate,
+.admin-content table td[class*='truncate'] {
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+}
+
+.admin-content table thead {
+    background: linear-gradient(90deg, #fff8f5, #fffdf8);
+}
+
+.admin-content table thead th {
+    color: #79515c;
+    border-bottom: 1px solid rgb(133 6 37 / 0.10);
+}
+
+.admin-content table tbody tr:hover {
+    background-color: rgb(255 241 243 / 0.72);
+}
+
+/* Data-table controls shared by all admin listing tables. */
+.admin-table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgb(133 6 37 / 0.09);
+    background: linear-gradient(90deg, rgb(255 250 246 / 0.95), #fff);
+}
+
+.admin-table-search {
+    position: relative;
+    display: block;
+    width: min(100%, 22rem);
+}
+
+.admin-table-search svg {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    width: 1rem;
+    height: 1rem;
+    transform: translateY(-50%);
+    fill: none;
+    stroke: #9b7a82;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.admin-table-search input {
+    width: 100%;
+    min-height: 2.55rem;
+    padding: 0.6rem 0.9rem 0.6rem 2.55rem;
+    border: 1px solid #ead9dc !important;
+    border-radius: 0.8rem;
+    font-size: 0.78rem;
+    background: #fff !important;
+}
+
+.admin-table-search input:focus {
+    border-color: var(--admin-primary) !important;
+    box-shadow: 0 0 0 3px rgb(133 6 37 / 0.09) !important;
+}
+
+.admin-table-tools {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: #7a6670;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.admin-table-tools label { display: flex; align-items: center; gap: 0.4rem; }
+
+.admin-table-tools select {
+    min-height: 2rem;
+    padding: 0.25rem 1.8rem 0.25rem 0.55rem;
+    border: 1px solid #ead9dc;
+    border-radius: 0.6rem;
+    background: #fff;
+    font-size: 0.72rem;
+}
+
+.admin-table-info { min-width: 4.7rem; text-align: right; }
+.admin-table-pager { display: flex; gap: 0.3rem; }
+
+.admin-table-pager button {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid #ead9dc;
+    border-radius: 0.6rem;
+    background: #fff;
+    color: var(--admin-primary);
+    font-size: 1.15rem;
+    line-height: 1;
+    transition: 150ms ease;
+}
+
+.admin-table-pager button:hover:not(:disabled) {
+    border-color: var(--admin-primary);
+    background: #fff2f4;
+}
+
+.admin-table-pager button:disabled { cursor: not-allowed; opacity: 0.35; }
+
+.admin-sortable {
+    position: relative;
+    padding-right: 2rem !important;
+    cursor: pointer;
+    user-select: none;
+}
+
+.admin-sortable::after {
+    content: '↕';
+    position: absolute;
+    right: 0.75rem;
+    color: #bea5ac;
+    font-size: 0.75rem;
+}
+
+.admin-sortable[aria-sort='ascending']::after { content: '↑'; color: var(--admin-primary); }
+.admin-sortable[aria-sort='descending']::after { content: '↓'; color: var(--admin-primary); }
+
+.admin-table-empty {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: #9b7a82;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+@media (max-width: 720px) {
+    .admin-table-toolbar { align-items: stretch; flex-direction: column; }
+    .admin-table-search { width: 100%; }
+    .admin-table-tools { justify-content: space-between; flex-wrap: wrap; }
+}
+
+/* Refined gold canvas and compact admin density. */
+body:has(.admin-content) {
+    color: #4d3e35;
+    font-size: 0.875rem;
+    background:
+        radial-gradient(circle at 84% 8%, rgb(212 175 55 / 0.13), transparent 25rem),
+        radial-gradient(circle at 18% 0%, rgb(133 6 37 / 0.07), transparent 30rem),
+        #fff8df !important;
+}
+
+#main-content-area > header,
+#admin-sidebar,
+#admin-sidebar > div,
+.admin-content .admin-card,
+.admin-content .rounded-xl.bg-white,
+.admin-content .rounded-2xl.bg-white,
+.admin-content .rounded-3xl.bg-white,
+.admin-content form.bg-white,
+.admin-content article.bg-white,
+.admin-content section.bg-white,
+.admin-content div.bg-white {
+    background-color: rgb(255 249 222 / 0.88) !important;
+    border-color: rgb(180 135 16 / 0.18) !important;
+}
+
+#main-content-area > header,
+.admin-content .admin-card,
+.admin-content .rounded-xl.bg-white,
+.admin-content .rounded-2xl.bg-white,
+.admin-content .rounded-3xl.bg-white {
+    box-shadow: 0 18px 46px -34px rgb(105 67 0 / 0.40), 0 1px 2px rgb(105 67 0 / 0.05) !important;
+}
+
+.admin-content { font-size: 0.82rem; }
+.admin-content h1 { font-size: clamp(1.45rem, 2vw, 1.8rem) !important; }
+.admin-content h2 { font-size: clamp(1.15rem, 1.7vw, 1.45rem); }
+.admin-content p.text-sm,
+.admin-content div.text-sm { font-size: 0.78rem; }
+.admin-content .admin-page { padding-block: 1.35rem; }
+
+/* The admin palette intentionally contains no blue/indigo/teal accents. */
+.admin-content [class*='text-blue-'],
+.admin-content [class*='text-indigo-'],
+.admin-content [class*='text-violet-'],
+.admin-content [class*='text-cyan-'],
+.admin-content [class*='text-teal-'],
+#admin-sidebar [class*='text-blue-'],
+#admin-sidebar [class*='text-indigo-'],
+#admin-sidebar [class*='text-violet-'],
+#admin-sidebar [class*='text-cyan-'],
+#admin-sidebar [class*='text-teal-'],
+#main-content-area > header [class*='text-blue-'],
+#main-content-area > header [class*='text-indigo-'],
+#main-content-area > header [class*='text-[#3950a2]'],
+#admin-sidebar [class*='text-[#3950a2]'] {
+    color: var(--admin-primary) !important;
+}
+
+#admin-sidebar nav > a:not([class*="border-[#3950a2]"]) > span:first-child,
+#admin-sidebar summary:not([class*="border-[#3950a2]"]) > span:first-child,
+#main-content-area > header button > div {
+    color: #850625 !important;
+    background: rgb(212 175 55 / 0.12) !important;
+    border-color: rgb(180 135 16 / 0.18) !important;
+}
+
+.admin-content [class*='bg-blue-'],
+.admin-content [class*='bg-indigo-'],
+.admin-content [class*='bg-violet-'],
+.admin-content [class*='bg-cyan-'],
+.admin-content [class*='bg-teal-'],
+#admin-sidebar [class*='bg-blue-'],
+#admin-sidebar [class*='bg-indigo-'],
+#admin-sidebar [class*='bg-violet-'],
+#admin-sidebar [class*='bg-cyan-'],
+#admin-sidebar [class*='bg-teal-'],
+#main-content-area > header [class*='bg-blue-'],
+#main-content-area > header [class*='bg-indigo-'] {
+    background-color: rgb(133 6 37 / 0.08) !important;
+    background-image: none !important;
+}
+
+.admin-content [class*='border-blue-'],
+.admin-content [class*='border-indigo-'],
+.admin-content [class*='border-violet-'],
+.admin-content [class*='border-cyan-'],
+.admin-content [class*='border-teal-'] {
+    border-color: rgb(133 6 37 / 0.22) !important;
+}
+
+.admin-content .admin-hero [class*='text-blue-'],
+.admin-content .admin-hero [class*='text-indigo-'],
+.admin-content section[style*='linear-gradient'] [class*='text-blue-'] {
+    color: #fff1e6 !important;
+}
+
+.admin-content .admin-hero [class*='text-emerald-'] {
+    color: #f3cf5d !important;
+}
+
+.admin-content [class*='from-[#1d2e68]'] {
+    background-image: linear-gradient(to right, #4a0718, #850625, #a9113a) !important;
+}
+
+.admin-content table thead,
+.admin-table-toolbar,
+.admin-content [class*='from-slate-50'] {
+    background: rgb(248 235 184 / 0.34) !important;
+}
+
+.admin-content table tbody tr:hover { background: rgb(248 235 184 / 0.34) !important; }
+.admin-content table th { color: #765713; }
+.admin-content table td { font-size: 0.75rem; }
+
+.admin-content input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+.admin-content select,
+.admin-content textarea {
+    background-color: rgb(255 251 232 / 0.92) !important;
+    border-color: rgb(180 135 16 / 0.22) !important;
+}
+
+.admin-dashboard-stat {
+    position: relative;
+    overflow: hidden;
+    background: rgb(255 249 222 / 0.80) !important;
+    border-color: rgb(180 135 16 / 0.20) !important;
+}
+
+.admin-dashboard-stat::after {
+    content: '';
+    position: absolute;
+    width: 5rem;
+    height: 5rem;
+    right: -2.2rem;
+    bottom: -2.7rem;
+    border-radius: 9999px;
+    background: rgb(212 175 55 / 0.12);
+}
+
+/* Sunvra-inspired dark glass admin surface, recoloured for Shaadi Sense. */
+body:has(.admin-content) {
+    color: #f7f2ed;
+    background: linear-gradient(135deg, #080707 0%, #430817 100%) !important;
+}
+
+#admin-sidebar,
+#main-content-area > header {
+    border-color: rgb(255 255 255 / 0.12) !important;
+    background: rgb(18 14 15 / 0.82) !important;
+    box-shadow: 0 28px 70px -38px rgb(0 0 0 / 0.75) !important;
+    backdrop-filter: blur(22px) !important;
+}
+
+#admin-sidebar > div {
+    border-color: rgb(255 255 255 / 0.09) !important;
+    background: rgb(255 255 255 / 0.025) !important;
+}
+
+#admin-sidebar nav a,
+#admin-sidebar nav summary { color: #c9c0c2 !important; }
+
+#admin-sidebar nav a:hover,
+#admin-sidebar nav summary:hover {
+    color: #fff !important;
+    background: rgb(133 6 37 / 0.42) !important;
+}
+
+#admin-sidebar nav a[class*="border-[#3950a2]"],
+#admin-sidebar nav summary[class*="border-[#3950a2]"] {
+    color: #fff !important;
+    border-left-color: #d4af37 !important;
+    background: linear-gradient(135deg, #a20d36, #650219) !important;
+}
+
+#admin-sidebar nav a > span:first-child,
+#admin-sidebar nav summary > span:first-child {
+    color: #f4d76f !important;
+    border-color: rgb(212 175 55 / 0.18) !important;
+    background: rgb(212 175 55 / 0.10) !important;
+}
+
+#admin-sidebar .text-slate-900,
+#admin-sidebar .text-slate-800,
+#main-content-area > header .text-slate-900,
+#main-content-area > header .text-slate-800,
+#main-content-area > header .text-slate-700 { color: #fff !important; }
+
+#admin-sidebar .text-slate-400,
+#admin-sidebar .text-slate-500,
+#main-content-area > header .text-slate-400,
+#main-content-area > header .text-slate-500 { color: #b8adaf !important; }
+
+.admin-content .admin-card,
+.admin-content .rounded-xl.bg-white,
+.admin-content .rounded-2xl.bg-white,
+.admin-content .rounded-3xl.bg-white,
+.admin-content form.bg-white,
+.admin-content article.bg-white,
+.admin-content section.bg-white,
+.admin-content div.bg-white,
+.admin-dashboard-stat {
+    color: #f7f2ed;
+    border-color: rgb(255 255 255 / 0.13) !important;
+    background: linear-gradient(145deg, rgb(255 255 255 / 0.10), rgb(255 255 255 / 0.045)) !important;
+    box-shadow: 0 24px 55px -36px rgb(0 0 0 / 0.75) !important;
+    backdrop-filter: blur(18px);
+}
+
+.admin-content [class*='text-slate-900'],
+.admin-content [class*='text-slate-800'],
+.admin-content [class*='text-slate-700'] { color: #fff !important; }
+
+.admin-content [class*='text-slate-600'],
+.admin-content [class*='text-slate-500'] { color: #d0c5c7 !important; }
+
+.admin-content [class*='text-slate-400'] { color: #a99da0 !important; }
+
+.admin-content [class*='border-slate-'],
+.admin-content .border-t,
+.admin-content .border-b { border-color: rgb(255 255 255 / 0.11) !important; }
+
+.admin-content [class*='bg-slate-50'],
+.admin-content [class*='bg-slate-100'],
+.admin-content table thead,
+.admin-table-toolbar {
+    background: rgb(255 255 255 / 0.055) !important;
+}
+
+.admin-content table tbody tr:hover { background: rgb(133 6 37 / 0.18) !important; }
+.admin-content table th { color: #efd36e !important; }
+
+.admin-content input:not([type='checkbox']):not([type='radio']):not([type='hidden']),
+.admin-content select,
+.admin-content textarea,
+.admin-table-search input,
+.admin-table-tools select {
+    color: #fff !important;
+    border-color: rgb(255 255 255 / 0.15) !important;
+    background-color: rgb(0 0 0 / 0.24) !important;
+}
+
+.admin-content input::placeholder,
+.admin-content textarea::placeholder { color: #887d80; }
+.admin-content select option { color: #211719; background: #fff8df; }
+
+.admin-content input:focus,
+.admin-content select:focus,
+.admin-content textarea:focus {
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 4px rgb(212 175 55 / 0.10) !important;
+}
+
+.admin-table-pager button {
+    color: #f2d56d;
+    border-color: rgb(255 255 255 / 0.14);
+    background: rgb(255 255 255 / 0.06);
+}
+
+.admin-content .admin-hero,
+.admin-dashboard-welcome {
+    border-color: rgb(212 175 55 / 0.22) !important;
+    background: linear-gradient(125deg, #560319, #a20d36) !important;
+}
+
+/* Guided vendor wizard */
+.vendor-wizard-card {
+    border: 1px solid rgb(255 255 255 / 0.13);
+    border-radius: 1.5rem;
+    background: linear-gradient(145deg, rgb(255 255 255 / 0.10), rgb(255 255 255 / 0.045));
+    box-shadow: 0 24px 55px -36px rgb(0 0 0 / 0.78);
+    backdrop-filter: blur(18px);
+}
+
+.vendor-step {
+    display: grid;
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid rgb(212 175 55 / 0.30);
+    border-radius: 9999px;
+    color: #f4d76f;
+    background: rgb(212 175 55 / 0.10);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.vendor-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: #f4eee9;
+    font-size: 0.72rem;
+    font-weight: 750;
+}
+
+.vendor-help {
+    display: block;
+    margin-top: 0.4rem;
+    color: #9e9295;
+    font-size: 0.66rem;
+    line-height: 1.45;
+}
+
+.vendor-input {
+    width: 100%;
+    min-height: 2.9rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgb(255 255 255 / 0.15);
+    border-radius: 0.85rem;
+    color: #fff;
+    background: rgb(0 0 0 / 0.25);
+    font-size: 0.78rem;
+}
+
+textarea.vendor-input { min-height: 4.8rem; }
+
+.vendor-file {
+    width: 100%;
+    padding: 0.65rem;
+    border: 1px dashed rgb(212 175 55 / 0.35);
+    border-radius: 0.9rem;
+    color: #d8ced0;
+    background: rgb(0 0 0 / 0.18);
+    font-size: 0.72rem;
+}
+
+.guided-field {
+    padding: 1rem;
+    border: 1px solid rgb(255 255 255 / 0.10);
+    border-radius: 1rem;
+    background: rgb(0 0 0 / 0.16);
+}
+
+.vendor-empty-state {
+    padding: 2.5rem 1.5rem;
+    border: 1px dashed rgb(212 175 55 / 0.28);
+    border-radius: 1.5rem;
+    text-align: center;
+    background: rgb(0 0 0 / 0.16);
+}
+
+/* Consistent admin navigation, metric cards and high-contrast accents. */
+#admin-sidebar .admin-submenu-link {
+    display: block;
+    padding: 0.55rem 0.8rem;
+    border-radius: 0.75rem;
+    color: #d7ced0 !important;
+    font-size: 0.69rem;
+    font-weight: 750;
+    transition: color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+#admin-sidebar .admin-submenu-link:hover {
+    color: #fff !important;
+    background: rgb(133 6 37 / 0.35) !important;
+}
+
+#admin-sidebar .admin-submenu-link.is-active {
+    color: #fff !important;
+    background: linear-gradient(135deg, #a20d36, #650219) !important;
+    box-shadow: 0 12px 26px -18px rgb(133 6 37 / 0.95);
+}
+
+#admin-sidebar nav a,
+#admin-sidebar nav summary,
+#admin-sidebar nav a [class*="text-"],
+#admin-sidebar nav summary [class*="text-"] {
+    color: #fff !important;
+}
+
+#admin-sidebar [class*="text-[#850625]"],
+#admin-sidebar [class*="text-[#3950a2]"],
+#main-content-area > header [class*="text-[#850625]"],
+#main-content-area > header [class*="text-[#3950a2]"] {
+    color: #fff !important;
+}
+
+.admin-content [class*="text-rose-"],
+.admin-content [class*="text-pink-"],
+.admin-content [class*="text-fuchsia-"],
+.admin-content [class*="text-[#3950a2]"],
+.admin-content [class*="text-[#850625]"] {
+    color: #fff !important;
+}
+
+.vendor-enquiry-stat {
+    border: 1px solid rgb(255 255 255 / 0.14) !important;
+    background: linear-gradient(145deg, rgb(255 255 255 / 0.10), rgb(255 255 255 / 0.045)) !important;
+    box-shadow: 0 18px 38px -30px rgb(0 0 0 / 0.85);
+}
+
+.vendor-enquiry-stat:hover {
+    border-color: rgb(212 175 55 / 0.55) !important;
+    transform: translateY(-2px);
+}
+
+.admin-content .vendor-enquiry-stat p,
+.admin-content .vendor-enquiry-stat span {
+    color: #fff !important;
+}
+
+.admin-table-action {
+    color: #fff !important;
+    border: 1px solid rgb(212 175 55 / 0.24) !important;
+    background: linear-gradient(135deg, #a20d36, #650219) !important;
+    box-shadow: 0 10px 22px -16px rgb(0 0 0 / 0.9);
+    white-space: nowrap;
+}
+
+.admin-table-action:hover {
+    border-color: rgb(212 175 55 / 0.58) !important;
+    background: linear-gradient(135deg, #ba1645, #7a0422) !important;
+}
+
+.admin-table-action-danger {
+    background: linear-gradient(135deg, #74202c, #3d1118) !important;
+}
+
+/* Pale legacy action controls become unreadable on the dark glass theme. */
+.admin-content a[class*="bg-rose-50"],
+.admin-content button[class*="bg-rose-50"],
+.admin-content a[class*="bg-indigo-50"],
+.admin-content button[class*="bg-indigo-50"] {
+    color: #fff !important;
+    border-color: rgb(212 175 55 / 0.24) !important;
+    background: #850625 !important;
+}
+
+.staff-permission-count {
+    color: #fff !important;
+    border: 1px solid rgb(212 175 55 / 0.28);
+    background: linear-gradient(135deg, #a20d36, #650219);
+}
+
+.staff-permission-count strong { color: #f4d76f; }
+
+.admin-page-hero {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgb(212 175 55 / 0.28);
+    background:
+        radial-gradient(circle at 92% 5%, rgb(255 255 255 / 0.13), transparent 14rem),
+        linear-gradient(135deg, #78031f, #ad0d3b 62%, #7e0927);
+    box-shadow: 0 22px 45px -32px rgb(133 6 37 / 0.95);
+}
+
+.admin-step-number {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(212 175 55 / 0.42);
+    border-radius: 0.9rem;
+    color: #f3cf5d;
+    background: rgb(212 175 55 / 0.12);
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.admin-action-icon {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(212 175 55 / 0.26) !important;
+    border-radius: 0.75rem;
+    color: #fff !important;
+    background: linear-gradient(135deg, #a20d36, #650219) !important;
+    box-shadow: 0 10px 22px -17px rgb(0 0 0 / 0.95);
+    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.admin-action-icon:hover {
+    color: #fff !important;
+    border-color: rgb(212 175 55 / 0.62) !important;
+    background: linear-gradient(135deg, #bd1748, #780321) !important;
+    transform: translateY(-1px);
+}
+
+.admin-action-icon-danger {
+    background: linear-gradient(135deg, #74202c, #3d1118) !important;
+}
+
+.admin-popover-panel,
+.vendor-detail-card,
+.vendor-danger-card {
+    color: #fff;
+    border: 1px solid rgb(255 255 255 / 0.13) !important;
+    background: linear-gradient(145deg, rgb(83 26 40 / 0.96), rgb(31 17 21 / 0.96)) !important;
+    box-shadow: 0 24px 55px -36px rgb(0 0 0 / 0.9);
+}
+
+.vendor-detail-card [class*="text-slate-"],
+.vendor-detail-card pre,
+.vendor-detail-card p,
+.vendor-detail-card span { color: #fff !important; }
+
+.admin-modal { z-index: 1000; }
+.admin-modal-backdrop { background: rgb(8 5 6 / 0.82); }
+.admin-modal-panel {
+    color: #fff;
+    border: 1px solid rgb(212 175 55 / 0.25);
+    background: linear-gradient(145deg, #35171f, #180d10);
+    box-shadow: 0 35px 90px -30px rgb(0 0 0 / 0.95);
+}
+.admin-modal-panel [class*="text-slate-800"],
+.admin-modal-panel [class*="text-slate-700"] { color: #fff !important; }
+.admin-modal-panel [class*="text-slate-600"],
+.admin-modal-panel [class*="text-slate-400"] { color: #d0c5c7 !important; }
+.admin-modal-panel [class*="border-slate-"] { border-color: rgb(255 255 255 / 0.12) !important; }
+.admin-modal-footer {
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    background: rgb(255 255 255 / 0.04);
+}
+
+#main-content-area > header.admin-topbar {
+    border-color: rgb(212 175 55 / 0.18) !important;
+    background: linear-gradient(120deg, rgb(27 16 19 / 0.96), rgb(63 8 23 / 0.94)) !important;
+}
+
+.admin-header-toggle,
+.admin-profile-trigger {
+    color: #fff !important;
+    border-color: rgb(212 175 55 / 0.24) !important;
+    background: linear-gradient(135deg, rgb(133 6 37 / 0.72), rgb(58 14 25 / 0.78)) !important;
+}
+
+.admin-header-toggle:hover,
+.admin-profile-trigger:hover {
+    color: #fff !important;
+    background: linear-gradient(135deg, #a20d36, #650219) !important;
+}
+
+.admin-profile-trigger svg,
+.admin-profile-trigger span { color: #fff !important; }
+
+.admin-profile-dropdown {
+    border-color: rgb(212 175 55 / 0.25) !important;
+    background: linear-gradient(145deg, #421522, #180d10) !important;
+    box-shadow: 0 25px 65px -25px rgb(0 0 0 / 0.95) !important;
+}
+
+.admin-profile-dropdown a:hover,
+.admin-profile-dropdown button:hover {
+    color: #fff !important;
+    background: rgb(133 6 37 / 0.62) !important;
 }
 /* Native modal lives in the top layer, independent of the fixed navbar. */
 body:has(#login-choice[open]) { overflow: hidden; }

@@ -108,7 +108,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/users/{user}/plans', [UserPlanController::class, 'index'])->middleware('admin.permission:users')->name('admin.users.plans.index');
         Route::get('/user-plans/{plan}', [UserPlanController::class, 'show'])->middleware('admin.permission:users')->name('admin.users.plans.show');
         Route::get('/user-plans/{plan}/download', [UserPlanController::class, 'download'])->middleware('admin.permission:users')->name('admin.users.plans.download');
-        Route::resource('/users', UserController::class)->except(['create', 'show', 'store'])->middleware('admin.permission:users')->names('admin.users');
+        Route::resource('/users', UserController::class)->except(['show'])->middleware('admin.permission:users')->names('admin.users');
         Route::post('/user-queries/{query}/reply', [AdminUserQueryController::class, 'reply'])->middleware('admin.permission:user_queries')->name('admin.user-queries.reply');
         Route::resource('/user-queries', AdminUserQueryController::class)->only(['index', 'update', 'destroy'])->parameters(['user-queries' => 'query'])->middleware('admin.permission:user_queries')->names('admin.user-queries');
         Route::resource('/vendor-enquiries', AdminVendorEnquiryController::class)->only(['index', 'show', 'update', 'destroy'])->parameters(['vendor-enquiries' => 'vendorEnquiry'])->middleware('admin.permission:vendor_enquiries')->names('admin.vendor-enquiries');

@@ -22,7 +22,12 @@ class AiPlannerController extends Controller
     {
         /** @var UserEventPlan|null $editingPlan */
         $editingPlan = $request->attributes->get('editingPlan');
-        $orderedQuestions = EventRequirementQuestion::enabled()->get();
+        $orderedQuestions = EventRequirementQuestion::enabled()->get()
+            ->sortBy(fn (EventRequirementQuestion $question): int => match ($question->question_code) {
+                'event_category' => 0,
+                'service_area' => 1,
+                default => 100 + (int) $question->display_order,
+            })->values();
         $allQuestions = EventRequirementQuestion::all()->keyBy('question_code');
         $questions = $orderedQuestions->keyBy('question_code');
         $pending = (array) $request->session()->get('pending_event_plan', []);

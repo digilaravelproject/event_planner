@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Models\EventRequirementQuestion;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class StoreEventQuestionRequest extends FormRequest
@@ -15,6 +16,16 @@ class StoreEventQuestionRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $questionCode = trim((string) $this->input('question_code'));
+        if ($questionCode === '') {
+            $base = Str::snake(Str::ascii((string) $this->input('question'))) ?: 'event_question';
+            $questionCode = $base;
+            $suffix = 2;
+            $questionId = $this->route('event_question')?->id;
+            while (EventRequirementQuestion::where('question_code', $questionCode)->when($questionId, fn ($query) => $query->where('id', '!=', $questionId))->exists()) {
+                $questionCode = $base.'_'.$suffix++;
+            }
+        }
         $mappedValues = array_values(array_filter(array_map('strval', (array) $this->input('vendor_attribute_values', [])), fn (string $value): bool => $value !== ''));
         $mappedImages = array_values(array_filter(array_map('strval', (array) $this->input('vendor_attribute_images', [])), fn (string $value): bool => $value !== ''));
         $categoryOptions = (array) $this->input('category_options', []);
@@ -37,6 +48,7 @@ class StoreEventQuestionRequest extends FormRequest
             ];
         }
         $this->merge([
+            'question_code' => $questionCode,
             'is_required' => $this->boolean('is_required'),
             'status' => $this->boolean('status'),
             'options' => $optionNames !== []

@@ -20,6 +20,28 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
+    public function create()
+    {
+        $subscriptions = Subscription::orderBy('price')->get();
+
+        return view('admin.users.create', compact('subscriptions'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'mobile_number' => ['required', 'string', 'max:20'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'subscription_id' => ['nullable', 'exists:subscriptions,id'],
+        ]);
+
+        User::create($validated + ['status' => true]);
+
+        return to_route('admin.users.index')->with('success', 'User created successfully.');
+    }
+
     public function exportPdf(AdminUserExportService $export)
     {
         $users = $this->exportUsers();

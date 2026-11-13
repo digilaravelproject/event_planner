@@ -11,7 +11,7 @@
         </div>
         <div class="relative z-10 flex flex-wrap gap-2">
             <form method="POST" action="{{ route('admin.dynamic-vendors.duplicate', $vendor) }}">@csrf<button class="rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">Duplicate</button></form>
-            <a href="{{ route('admin.dynamic-vendors.edit', $vendor) }}" class="rounded-xl bg-white px-5 py-2.5 text-sm font-extrabold text-[#30448b] shadow-lg shadow-slate-950/15 transition hover:-translate-y-0.5">Edit Vendor</a>
+            <a href="{{ route('admin.dynamic-vendors.edit', $vendor) }}" class="admin-table-action rounded-xl px-5 py-2.5 text-sm font-extrabold transition hover:-translate-y-0.5">Edit Vendor</a>
         </div>
     </div>
 
@@ -21,7 +21,7 @@
                 <h2 class="text-lg font-extrabold text-slate-900">Dynamic attributes</h2>
                 <div class="mt-5 grid gap-3 sm:grid-cols-2">
                     @forelse(data_get($vendor->vendor_json, 'attributes', []) as $attribute)
-                        <div class="admin-card-interactive rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50/70 p-4">
+                        <div class="vendor-detail-card admin-card-interactive rounded-xl p-4">
                             <div class="flex items-start justify-between gap-2"><p class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{{ $attribute['label'] }}</p><span class="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">{{ str($attribute['type'])->replace('_', ' ') }}</span></div>
                             <div class="mt-2 break-words text-sm font-semibold text-slate-900">
                                 @if(is_array($attribute['value']))
@@ -41,19 +41,6 @@
                                     @endforeach
                                 </div>
                             @endif
-                            @php
-                                $displayRules = collect($attribute['validation'] ?? []);
-                                $displayRuleText = $displayRules->map(function ($value, $key) {
-                                    if (is_array($value)) {
-                                        $value = implode(', ', $value);
-                                    } elseif (is_bool($value)) {
-                                        $value = $value ? 'yes' : 'no';
-                                    }
-
-                                    return str($key)->replace('_', ' ')->title().': '.$value;
-                                })->implode(' · ');
-                            @endphp
-                            @if($displayRules->isNotEmpty())<p class="mt-2 text-[11px] text-slate-400">Validation: {{ $displayRuleText }}</p>@endif
                         </div>
                     @empty
                         <p class="text-sm text-slate-500">No custom attributes.</p>
@@ -65,10 +52,6 @@
                 <section class="admin-card p-6"><h2 class="text-lg font-extrabold text-slate-900">Images</h2><div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">@foreach(data_get($vendor->vendor_json, 'media.images', []) as $image)<a href="{{ asset('storage/'.$image) }}" target="_blank" rel="noopener"><img src="{{ asset('storage/'.$image) }}" alt="{{ $vendor->name }}" class="h-44 w-full rounded-xl object-cover"></a>@endforeach</div></section>
             @endif
 
-            <details class="admin-card p-6">
-                <summary class="cursor-pointer text-sm font-extrabold text-slate-900">Raw AI-ready JSON</summary>
-                <pre class="mt-4 overflow-x-auto rounded-xl bg-slate-950 p-5 text-xs leading-5 text-emerald-300">{{ json_encode($vendor->vendor_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
-            </details>
         </div>
 
         <aside class="space-y-6">
@@ -92,7 +75,7 @@
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-rose-200 bg-rose-50 p-5"><h2 class="font-extrabold text-rose-900">Danger zone</h2><p class="mt-1 text-xs text-rose-700">Deletion also removes this module's version history.</p><form method="POST" action="{{ route('admin.dynamic-vendors.destroy', $vendor) }}" class="mt-3" onsubmit="return confirm('Permanently delete this vendor?')">@csrf @method('DELETE')<button class="rounded-lg bg-rose-600 px-4 py-2 text-xs font-bold text-white">Delete Vendor</button></form></section>
+            <section class="vendor-danger-card rounded-2xl p-5"><h2 class="font-extrabold text-white">Danger zone</h2><p class="mt-1 text-xs text-white/75">Deletion also removes this module's version history.</p><form method="POST" action="{{ route('admin.dynamic-vendors.destroy', $vendor) }}" class="mt-3" onsubmit="return confirm('Permanently delete this vendor?')">@csrf @method('DELETE')<button class="admin-table-action admin-table-action-danger rounded-lg px-4 py-2 text-xs font-bold">Delete Vendor</button></form></section>
         </aside>
     </div>
 </div>

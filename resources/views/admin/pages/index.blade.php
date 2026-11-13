@@ -23,18 +23,20 @@
     <div class="admin-card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead><tr><th class="px-5 py-4 text-left">Page</th><th class="px-5 py-4 text-left">Slug</th><th class="px-5 py-4 text-left">Status</th><th class="px-5 py-4 text-left">Updated</th><th class="px-5 py-4 text-right">Actions</th></tr></thead>
+                <thead><tr><th class="px-5 py-4 text-left">ID</th><th class="px-5 py-4 text-left">Page</th><th class="px-5 py-4 text-left">Slug</th><th class="px-5 py-4 text-left">Status</th><th class="px-5 py-4 text-left">Created</th><th class="px-5 py-4 text-left">Updated</th><th class="px-5 py-4 text-right">Actions</th></tr></thead>
                 <tbody>
                     @forelse($pages as $page)
                         <tr class="border-t border-slate-100">
+                            <td class="px-5 py-4 font-bold text-[#850625]">#{{ $page->id }}</td>
                             <td class="px-5 py-4"><p class="text-sm font-bold text-slate-800">{{ $page->title }}</p><p class="mt-1 max-w-md truncate text-xs text-slate-400">{{ strip_tags($page->description) }}</p></td>
                             <td class="px-5 py-4 font-mono text-xs text-slate-500">/{{ $page->slug }}</td>
                             <td class="px-5 py-4">@include('admin.partials.status-badge', ['status' => $page->status])</td>
+                            <td class="px-5 py-4 text-xs text-slate-500">{{ $page->created_at->format('d M Y, h:i A') }}</td>
                             <td class="px-5 py-4 text-xs text-slate-500">{{ $page->updated_at->format('d M Y, h:i A') }}</td>
-                            <td class="px-5 py-4"><div class="flex justify-end gap-2"><a href="{{ route('admin.pages.show', $page) }}" class="rounded-lg border px-3 py-1.5 text-xs font-bold">View</a><a href="{{ route('admin.pages.edit', $page) }}" class="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">Edit</a><form method="POST" action="{{ route('admin.pages.destroy', $page) }}" data-confirm="Delete this page?">@csrf @method('DELETE')<button class="rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700">Delete</button></form></div></td>
+                            <td class="px-5 py-4"><div class="flex justify-end gap-2"><a href="{{ route('admin.pages.show', $page) }}" class="admin-action-icon" title="View page" aria-label="View {{ $page->title }}"><i class="fa-solid fa-eye"></i></a><a href="{{ route('admin.pages.edit', $page) }}" class="admin-action-icon" title="Edit page" aria-label="Edit {{ $page->title }}"><i class="fa-solid fa-pen"></i></a><form method="POST" action="{{ route('admin.pages.destroy', $page) }}" data-confirm="Delete this page?">@csrf @method('DELETE')<button class="admin-action-icon admin-action-icon-danger" title="Delete page" aria-label="Delete {{ $page->title }}"><i class="fa-solid fa-trash-can"></i></button></form></div></td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-5 py-16 text-center text-sm text-slate-400">No pages found.</td></tr>
+                        <tr><td colspan="7" class="px-5 py-16 text-center text-sm text-slate-400">No pages found.</td></tr>
                     @endforelse
                 </tbody>
             </table>
