@@ -1349,6 +1349,50 @@ body:has(.admin-content) {
     border: 1px solid rgba(212, 175, 55, 0.25);
 }
 
+/* Ensure hidden utility always wins over !important flex/block */
+.hidden, [hidden], .admin-primary-button.hidden {
+    display: none !important;
+}
+
+/* Tooltip for vendor value card */
+.vendor-value-card {
+    position: relative;
+}
+
+.vendor-value-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    width: max-content;
+    max-width: 280px;
+    padding: 0.6rem 0.85rem;
+    border-radius: 0.75rem;
+    background: #0F172A;
+    color: #FFFFFF;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    pointer-events: none;
+}
+
+.vendor-value-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #0F172A;
+}
+
+.vendor-value-card:hover .vendor-value-tooltip {
+    display: block !important;
+}
+
 /* Step Numbers (1, 2, 3, 4) in guided wizard forms */
 .admin-step-number {
     display: inline-flex !important;

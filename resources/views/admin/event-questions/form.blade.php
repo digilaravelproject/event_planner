@@ -17,20 +17,25 @@
 @endphp
 
 <div class="admin-page mx-auto max-w-5xl space-y-6">
-    <section class="admin-page-hero rounded-3xl p-6 sm:p-8">
-        <a href="{{ route('admin.event-questions.index') }}" class="text-xs font-bold text-white/80 transition hover:text-white">← Question list</a>
-        <div class="mt-4 flex items-start justify-between gap-5">
+    <!-- Header Banner -->
+    <div class="admin-hero mb-6 p-6 sm:p-8 rounded-2xl border border-[#D4AF37]/30 bg-gradient-to-r from-[#850625] via-[#6E0720] to-[#540417] text-white shadow-md">
+        <a href="{{ route('admin.event-questions.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-[#F3E5AB] hover:text-white transition mb-3">
+            <i class="fa-solid fa-arrow-left text-xs"></i> Back to Question list
+        </a>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <p class="text-xs font-extrabold uppercase tracking-[.22em] text-[#f3cf5d]">Guided question setup</p>
-                <h1 class="mt-2 text-3xl font-black text-white">{{ $question->exists ? 'Update Event Question' : 'Add Event Question' }}</h1>
-                <p class="mt-2 max-w-2xl text-sm text-white/80">Write the question, choose how customers answer, and add choices only when needed. Technical settings are handled automatically.</p>
+                <p class="text-xs font-bold uppercase tracking-[.18em] text-[#F3E5AB]">Guided question setup</p>
+                <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold text-white">{{ $question->exists ? 'Update Event Question' : 'Add Event Question' }}</h1>
+                <p class="mt-1 text-sm text-rose-100/90 max-w-2xl">Write the question, choose how customers answer, and add choices only when needed.</p>
             </div>
-            <span class="hidden rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white sm:inline-flex"><i class="fa-solid fa-wand-magic-sparkles mr-2 text-[#f3cf5d]"></i>Easy setup</span>
+            <span class="inline-flex items-center gap-2 rounded-xl border border-[#D4AF37]/30 bg-white/10 px-4 py-2 text-xs font-bold text-[#F3E5AB] backdrop-blur-sm self-start sm:self-center">
+                <i class="fa-solid fa-wand-magic-sparkles text-[#D4AF37]"></i> Easy setup
+            </span>
         </div>
-    </section>
+    </div>
 
     @if(isset($errors) && $errors->any())
-        <div class="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800">
+        <div class="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-800 shadow-xs">
             <strong>Please check the form:</strong> {{ $errors->first() }}
         </div>
     @endif
@@ -50,6 +55,7 @@
             @endforeach
         @endif
 
+        <!-- Step 1: Prompt & Type -->
         <section class="admin-card p-6 sm:p-8">
             <div class="flex items-start gap-4">
                 <span class="admin-step-number">1</span>
@@ -89,15 +95,16 @@
             </div>
         </section>
 
+        <!-- Step 2: Vendor Matching -->
         <section class="admin-card p-6 sm:p-8" id="vendor-mapping-section">
             <div class="flex items-start gap-4">
                 <span class="admin-step-number">2</span>
                 <div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <h2 class="text-xl font-extrabold text-slate-900">Match answers with vendors<span class="sr-only"> — Dynamic vendor mapping</span></h2>
+                        <h2 class="text-xl font-extrabold text-slate-900">Match answers with vendors</h2>
                         <span class="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">Optional</span>
                     </div>
-                    <p class="mt-1 text-sm text-slate-500">Use this when an answer should find vendors with the same information—for example location, capacity, food item, or decoration style.</p>
+                    <p class="mt-1 text-sm text-slate-500">Connect this question to vendor categories (e.g. Venue, Caterer, DJ) so AI Planner finds matching vendors automatically.</p>
                 </div>
             </div>
 
@@ -115,7 +122,7 @@
                                 <option value="{{ $category }}" @selected($selectedVendorCategory === $category)>{{ $category }}</option>
                             @endforeach
                         </select>
-                        <span class="block text-[11px] text-slate-400">Your active DJ, caterer, venue, and other vendor categories appear here automatically.</span>
+                        <span class="block text-[11px] text-slate-400">Active DJ, caterer, venue, and other vendor categories appear here.</span>
                     </label>
                     <label class="block space-y-2">
                         <span class="text-xs font-bold text-slate-700">2. How should vendors match?</span>
@@ -127,7 +134,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        <span class="block text-[11px] text-slate-400">The recommended option connects the answer to every active vendor in that category. Choose a detail only when you need a narrower match.</span>
+                        <span class="block text-[11px] text-slate-400">The recommended option connects the answer to every active vendor in that category.</span>
                     </label>
                 </div>
 
@@ -139,24 +146,26 @@
                                     <h3 class="text-sm font-extrabold text-slate-900">Answers connected to vendors</h3>
                                     <p class="mt-1 text-xs text-slate-500">The recommended category match is selected automatically. You can rename its customer-facing answer below.</p>
                                 </div>
-                                <button type="button" class="select-all-vendor-values rounded-xl border border-[#850625]/20 bg-white px-3 py-2 text-xs font-bold text-[#850625] hover:bg-[#850625] hover:text-white transition">Select all</button>
+                                <button type="button" class="select-all-vendor-values rounded-xl border border-[#850625]/25 bg-white px-3.5 py-2 text-xs font-bold text-[#850625] hover:bg-[#850625] hover:text-white transition shadow-2xs">Select all</button>
                             </div>
                             <div class="mt-4 grid gap-3 sm:grid-cols-2">
                                 @forelse($attribute['values'] as $value)
-                                    <label class="vendor-value-card flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-[#850625] hover:shadow-sm">
+                                    <label class="vendor-value-card relative flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-3.5 transition hover:border-[#850625] hover:shadow-sm">
                                         <input type="checkbox" name="vendor_attribute_values[]" value="{{ $value['value'] }}" data-vendor-value data-label="{{ $value['label'] }}" @checked($selectedAttribute === $attribute['key'] && in_array((string) $value['value'], $selectedValues, true)) class="mt-1 h-4 w-4 shrink-0 accent-[#850625]">
-                                        <span class="min-w-0">
-                                            <strong class="block text-sm text-slate-800">{{ $value['label'] }}</strong>
-                                            <small class="mt-1 block truncate text-[11px] text-slate-500" title="{{ implode(', ', $value['vendor_names'] ?? []) }}">
-                                                {{ $value['vendors_count'] }} {{ Illuminate\Support\Str::plural('vendor', $value['vendors_count']) }}
-                                                @if(!empty($value['vendor_names'])) · {{ implode(', ', array_slice($value['vendor_names'], 0, 3)) }}@endif
+                                        <span class="min-w-0 flex-1">
+                                            <strong class="block text-sm font-bold text-slate-800">{{ $value['label'] }}</strong>
+                                            <small class="mt-1 block truncate text-xs text-slate-500" title="{{ implode(', ', $value['vendor_names'] ?? []) }}">
+                                                <span class="font-semibold text-slate-700">{{ $value['vendors_count'] }}</span> {{ Illuminate\Support\Str::plural('vendor', $value['vendors_count']) }}
+                                                @if(!empty($value['vendor_names']))
+                                                    · <span class="text-slate-400">{{ implode(', ', array_slice($value['vendor_names'], 0, 3)) }}@if(count($value['vendor_names']) > 3)...@endif</span>
+                                                @endif
                                             </small>
                                         </span>
                                         @if(!empty($value['vendor_names']))
-                                            <span class="vendor-value-tooltip" role="tooltip">
-                                                <strong>Vendors offering {{ $value['label'] }}</strong>
-                                                @foreach($value['vendor_names'] as $vendorName)<span>{{ $vendorName }}</span>@endforeach
-                                            </span>
+                                            <div class="vendor-value-tooltip" role="tooltip">
+                                                <span class="font-bold text-[#F3E5AB] block border-b border-white/15 pb-1 mb-1">Vendors offering {{ $value['label'] }}:</span>
+                                                <span class="text-slate-200 block leading-relaxed">{{ implode(', ', $value['vendor_names']) }}</span>
+                                            </div>
                                         @endif
                                     </label>
                                 @empty
@@ -175,16 +184,17 @@
             @endif
         </section>
 
+        <!-- Step 3: Answer choices -->
         <section class="admin-card p-6 sm:p-8" id="answer-options-section">
             <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                 <div class="flex items-start gap-4">
                     <span class="admin-step-number">3</span>
                     <div>
                         <h2 class="text-xl font-extrabold text-slate-900">Answer choices</h2>
-                        <p class="mt-1 text-sm text-slate-500">Mapped vendor values appear here automatically. You can rename the customer-facing label without breaking the vendor match.</p>
+                        <p class="mt-1 text-sm text-slate-500">Mapped vendor values appear here automatically. You can rename labels without breaking the vendor match.</p>
                     </div>
                 </div>
-                <button type="button" id="add-option" class="admin-primary-button inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white">
+                <button type="button" id="add-option" class="admin-primary-button inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:shadow-md transition">
                     <i class="fa-solid fa-plus"></i> Add choice
                 </button>
             </div>
@@ -201,11 +211,13 @@
                     </div>
                 @endforeach
             </div>
-            <div id="free-answer-note" class="hidden mt-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
-                <i class="fa-solid fa-circle-info mr-2 text-amber-600"></i>This answer type does not need predefined choices. Customers will enter their own answer.
+            <div id="free-answer-note" class="hidden mt-5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs font-semibold text-amber-900 flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-amber-600 text-sm"></i>
+                <span>This answer type does not need predefined choices. Customers will type or pick their own answer directly.</span>
             </div>
         </section>
 
+        <!-- Step 4: Display settings -->
         <section class="admin-card p-6 sm:p-8">
             <div class="flex items-start gap-4">
                 <span class="admin-step-number">4</span>
@@ -221,17 +233,17 @@
                     <span class="text-[11px] text-slate-400">Lower numbers appear first.</span>
                 </label>
                 <div class="space-y-3">
-                    <label class="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-200 bg-[#FAF7F2] p-4 transition hover:border-[#850625]/30">
+                    <label class="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-200 bg-[#FAF7F2] p-4 transition hover:border-[#850625]/40 hover:bg-white hover:shadow-xs">
                         <span>
-                            <strong class="block text-sm text-slate-900">Answer required</strong>
-                            <small class="text-slate-500">Customer cannot continue without answering.</small>
+                            <strong class="block text-sm font-bold text-slate-900">Answer required</strong>
+                            <small class="text-xs text-slate-500">Customer cannot continue without answering.</small>
                         </span>
                         <input type="checkbox" name="is_required" value="1" @checked(old('is_required', $question->is_required)) class="h-5 w-5 accent-[#850625]">
                     </label>
-                    <label class="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-200 bg-[#FAF7F2] p-4 transition hover:border-[#850625]/30">
+                    <label class="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-200 bg-[#FAF7F2] p-4 transition hover:border-[#850625]/40 hover:bg-white hover:shadow-xs">
                         <span>
-                            <strong class="block text-sm text-slate-900">Show this question</strong>
-                            <small class="text-slate-500">Turn off to temporarily hide it.</small>
+                            <strong class="block text-sm font-bold text-slate-900">Show this question</strong>
+                            <small class="text-xs text-slate-500">Turn off to temporarily hide it from customers.</small>
                         </span>
                         <input type="checkbox" name="status" value="1" @checked(old('status', $question->exists ? $question->status : true)) class="h-5 w-5 accent-[#850625]">
                     </label>
@@ -239,10 +251,14 @@
             </div>
         </section>
 
-        <div class="flex justify-end gap-3 pt-2">
-            <a href="{{ route('admin.event-questions.index') }}" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-[#FAF7F2] hover:text-[#850625] transition">Cancel</a>
-            <button class="admin-primary-button rounded-xl px-7 py-3 text-sm font-bold text-white">
-                <i class="fa-solid fa-check mr-2"></i>{{ $question->exists ? 'Update Question' : 'Create Question' }}
+        <!-- Footer Actions -->
+        <div class="flex justify-end items-center gap-3 pt-2">
+            <a href="{{ route('admin.event-questions.index') }}" class="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 hover:bg-[#FAF7F2] hover:text-[#850625] transition shadow-xs">
+                Cancel
+            </a>
+            <button type="submit" class="admin-primary-button rounded-xl px-7 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition">
+                <i class="fa-solid fa-check text-xs"></i>
+                <span>{{ $question->exists ? 'Update Question' : 'Create Question' }}</span>
             </button>
         </div>
     </form>
@@ -278,7 +294,16 @@ document.addEventListener('DOMContentLoaded', () => {
         else row.remove();
         reindex(); updateMappingHelp();
     });
-    const toggleOptions = () => { const usesChoices = choiceTypes.includes(type.value); list.classList.toggle('hidden', !usesChoices); addButton.classList.toggle('hidden', !usesChoices); note.classList.toggle('hidden', usesChoices); list.querySelectorAll('input').forEach(input => { input.disabled = !usesChoices; if (input.type !== 'hidden') input.required = usesChoices; }); };
+    const toggleOptions = () => { 
+        const usesChoices = choiceTypes.includes(type.value); 
+        list.classList.toggle('hidden', !usesChoices); 
+        addButton.style.display = usesChoices ? 'inline-flex' : 'none'; 
+        note.classList.toggle('hidden', usesChoices); 
+        list.querySelectorAll('input').forEach(input => { 
+            input.disabled = !usesChoices; 
+            if (input.type !== 'hidden') input.required = usesChoices; 
+        }); 
+    };
     const addMappedOption = (value, label) => {
         let row = [...list.querySelectorAll('.option-row')].find(item => mappedValueFor(item) === value);
         if (row) return;
