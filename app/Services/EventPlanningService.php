@@ -125,9 +125,13 @@ class EventPlanningService
                     ])
                     ->filter(fn ($value) => $value !== null && $value !== '' && $value !== [])
                     ->all();
-                $matches = collect($criteria)->filter(
-                    fn (array $values, string $key): bool => $this->attributeMatches($attributes[$key] ?? null, $values)
-                )->keys()->values()->all();
+                $matches = collect($criteria)->filter(function (array $values, string $key) use ($attributes, $vendor): bool {
+                    if (str_starts_with($key, VendorAttributeCatalogService::CATEGORY_KEY_PREFIX)) {
+                        return $this->attributeMatches($vendor->category, $values);
+                    }
+
+                    return $this->attributeMatches($attributes[$key] ?? null, $values);
+                })->keys()->values()->all();
 
                 return [
                     'id' => $vendor->id,

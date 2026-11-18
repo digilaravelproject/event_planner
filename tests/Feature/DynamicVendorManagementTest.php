@@ -124,12 +124,18 @@ class DynamicVendorManagementTest extends TestCase
             'duration' => '6 hours', 'description' => 'A custom reception menu.',
             'inclusions' => "Welcome drink\nStarter\nMain course",
         ]];
+        $payload['food_menu_items'] = [
+            ['name' => 'Paneer Tikka', 'category' => 'Starters', 'price_per_person' => 225],
+            ['name' => 'Veg Biryani', 'category' => 'Main Course', 'price_per_person' => 180],
+        ];
 
         $this->actingAs($this->admin, 'admin')->post(route('admin.dynamic-vendors.store'), $payload)->assertSessionHasNoErrors();
         $package = data_get(DynamicVendor::firstOrFail()->vendor_json, 'packages.0');
         $this->assertSame('Royal Feast', $package['name']);
         $this->assertSame(['Welcome drink', 'Starter', 'Main course'], $package['inclusions']);
         $this->assertEquals(900, $package['min_price']);
+        $this->assertSame('Paneer Tikka', data_get(DynamicVendor::firstOrFail()->vendor_json, 'food_menu_items.0.name'));
+        $this->assertEquals(225, data_get(DynamicVendor::firstOrFail()->vendor_json, 'food_menu_items.0.price_per_person'));
     }
 
     public function test_update_duplicate_status_and_rollback_each_preserve_version_history(): void
@@ -160,7 +166,7 @@ class DynamicVendorManagementTest extends TestCase
         $this->post(route('admin.dynamic-vendors.duplicate', $vendor))->assertRedirect();
         $copy = DynamicVendor::whereKeyNot($vendor->id)->firstOrFail();
         $this->assertSame('Royal Garden (Copy)', $copy->name);
-        $this->assertSame('draft', $copy->status);
+        $this->assertSame('active', $copy->status);
         $this->assertSame($vendor->id, data_get($copy->vendor_json, 'source.duplicated_from_id'));
         $this->assertCount(1, $copy->versions);
     }

@@ -567,7 +567,7 @@ class AiPlannerController extends Controller
         })->unique(fn (array $item): string => ($item['vendor_id'] ?? 'admin').':'.$item['id'])->values();
         $selectedIds = $selected->whereNull('vendor_id')->pluck('id');
 
-        if (! $question || $selectedIds->diff($values)->isNotEmpty()) {
+        if ($selectedIds->isNotEmpty() && (! $question || $selectedIds->diff($values)->isNotEmpty())) {
             throw ValidationException::withMessages(['answers.food_menu_items' => 'Select menu items from the available food question.']);
         }
 
@@ -605,6 +605,31 @@ class AiPlannerController extends Controller
 
     private function cateringMenuItems(DynamicVendor $vendor, $foodCatalog): array
     {
+        $vendorName = $vendor->name;
+        $configuredItems = collect(data_get($vendor->vendor_json, 'food_menu_items', []))
+            ->map(function (array $item) use ($vendor, $vendorName): ?array {
+                $title = trim((string) ($item['name'] ?? $item['title'] ?? ''));
+                if ($title === '') {
+                    return null;
+                }
+
+                return [
+                    'id' => (string) (($item['id'] ?? null) ?: Str::slug($title, '_')),
+                    'title' => $title,
+                    'category' => trim((string) ($item['category'] ?? '')) ?: 'Menu Items',
+                    'cost' => max(0, (float) ($item['price_per_person'] ?? $item['cost'] ?? 0)),
+                    'source' => 'vendor_menu',
+                    'image' => null,
+                    'vendor_id' => $vendor->id,
+                    'vendor_name' => $vendorName,
+                ];
+            })->filter()->values();
+
+        if ($configuredItems->isNotEmpty()) {
+            return $configuredItems->all();
+        }
+
+        // Compatibility for vendors created before vendor-specific menu rows existed.
         $attribute = collect(data_get($vendor->vendor_json, 'attributes', []))
             ->first(fn (array $item): bool => mb_strtolower(trim((string) ($item['label'] ?? ''))) === 'menu card items');
         $rawItems = (array) data_get($attribute, 'value', []);
@@ -612,7 +637,6 @@ class AiPlannerController extends Controller
             $rawItems = preg_split('/\s*,\s*/', $rawItems[0]) ?: [];
         }
         $images = array_values((array) data_get($attribute, 'images', []));
-        $vendorName = $vendor->name;
 
         return collect($rawItems)->map(function ($title, int $index) use ($foodCatalog, $images, $vendor, $vendorName): ?array {
             $title = trim((string) $title);

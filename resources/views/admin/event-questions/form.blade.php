@@ -12,6 +12,8 @@
     $selectedType = old('question_type', $question->question_type ?: $types->first()?->value);
     $selectedAttribute = old('vendor_attribute_key', $question->vendor_attribute_key);
     $selectedValues = array_map('strval', old('vendor_attribute_values', $question->vendor_attribute_values ?? []));
+    $vendorCategories = collect($attributeCatalog)->pluck('categories')->flatten()->filter()->unique()->sort(SORT_NATURAL | SORT_FLAG_CASE)->values()->all();
+    $selectedVendorCategory = old('vendor_category_filter', data_get($attributeCatalog[$selectedAttribute] ?? [], 'categories.0', ''));
 @endphp
 
 <div class="admin-page mx-auto max-w-5xl space-y-6">
@@ -49,12 +51,15 @@
             @if($attributeCatalog === [])
                 <div class="mt-6 rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-white/75"><i class="fa-solid fa-circle-info mr-2 text-[#f3cf5d]"></i>No reusable vendor details are available yet. Add vendor information first, then return here to create a mapping.</div>
             @else
-                <label class="mt-6 block space-y-2"><span class="text-xs font-bold text-white">Which vendor detail should this answer match?</span><select name="vendor_attribute_key" id="vendor-attribute" class="admin-control w-full px-4 py-3"><option value="">Do not match this question with vendors</option>@foreach($attributeCatalog as $attribute)<option value="{{ $attribute['key'] }}" @selected($selectedAttribute === $attribute['key'])>{{ $attribute['label'] }} — {{ count($attribute['values']) }} available {{ Illuminate\Support\Str::plural('value', count($attribute['values'])) }}</option>@endforeach</select><span class="block text-[11px] text-white/45">Only vendor details that already contain usable data are shown.</span></label>
+                <div class="mt-6 grid gap-4 md:grid-cols-2">
+                    <label class="block space-y-2"><span class="text-xs font-bold text-white">1. Which type of vendor should this question find?</span><select id="vendor-category-filter" name="vendor_category_filter" class="admin-control w-full px-4 py-3"><option value="">Do not match vendors</option>@foreach($vendorCategories as $category)<option value="{{ $category }}" @selected($selectedVendorCategory === $category)>{{ $category }}</option>@endforeach</select><span class="block text-[11px] text-white/45">Your active DJ, caterer, venue, and other vendor categories appear here automatically.</span></label>
+                    <label class="block space-y-2"><span class="text-xs font-bold text-white">2. How should vendors match?</span><select name="vendor_attribute_key" id="vendor-attribute" class="admin-control w-full px-4 py-3"><option value="">Select a vendor type first</option>@foreach($attributeCatalog as $attribute)<option value="{{ $attribute['key'] }}" data-categories='@json($attribute['categories'] ?? [])' data-mapping-type="{{ $attribute['type'] ?? 'text' }}" @selected($selectedAttribute === $attribute['key'])>{{ ($attribute['type'] ?? '') === 'vendor_category' ? $attribute['label'].' — Recommended' : $attribute['label'].' — match a specific answer' }}</option>@endforeach</select><span class="block text-[11px] text-white/45">The recommended option connects the answer to every active vendor in that category. Choose a detail only when you need a narrower match.</span></label>
+                </div>
 
                 <div id="vendor-value-panels" class="mt-5">
                     @foreach($attributeCatalog as $attribute)
                         <div data-vendor-panel="{{ $attribute['key'] }}" class="hidden rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
-                            <div class="flex flex-col justify-between gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center"><div><h3 class="text-sm font-extrabold text-white">Choose the answers customers can select</h3><p class="mt-1 text-xs text-white/50">Each selected value is connected to the vendors listed below it.</p></div><button type="button" class="select-all-vendor-values rounded-xl border border-[#d4af37]/30 bg-[#d4af37]/10 px-3 py-2 text-xs font-bold text-[#f3cf5d]">Select all</button></div>
+                            <div class="flex flex-col justify-between gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center"><div><h3 class="text-sm font-extrabold text-white">Answers connected to vendors</h3><p class="mt-1 text-xs text-white/50">The recommended category match is selected automatically. You can rename its customer-facing answer below.</p></div><button type="button" class="select-all-vendor-values rounded-xl border border-[#d4af37]/30 bg-[#d4af37]/10 px-3 py-2 text-xs font-bold text-[#f3cf5d]">Select all</button></div>
                             <div class="mt-4 grid gap-3 sm:grid-cols-2">
                                 @forelse($attribute['values'] as $value)
                                     <label class="vendor-value-card flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/10 p-3 transition hover:border-[#d4af37]/35">
@@ -111,7 +116,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('question-form'), title = document.getElementById('question-title'), code = document.getElementById('question-code'), type = document.getElementById('question-type'), list = document.getElementById('option-list'), note = document.getElementById('free-answer-note'), addButton = document.getElementById('add-option'), template = document.getElementById('option-template');
-    const vendorSelect = document.getElementById('vendor-attribute'), mappingHelp = document.getElementById('vendor-mapping-help');
+    const vendorCategory = document.getElementById('vendor-category-filter'), vendorSelect = document.getElementById('vendor-attribute'), mappingHelp = document.getElementById('vendor-mapping-help');
     const choiceTypes = ['radio', 'checkbox', 'multi_select', 'dropdown', 'select', 'card_selection'];
     const reindex = () => list.querySelectorAll('.option-row').forEach((row, index) => { row.querySelector('.option-number').textContent = index + 1; row.querySelectorAll('[name], [data-field]').forEach(input => { const field = input.dataset.field || (input.name.match(/\[([^\]]+)\]$/) || [])[1]; if (field) input.name = `category_options[${index}][${field}]`; }); });
     const mappedValueFor = row => row.querySelector('[data-field="vendor_value"], [name$="[vendor_value]"]')?.value || '';
@@ -153,11 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncVendorMapping = () => {
         if (!vendorSelect) return;
         const activeKey = vendorSelect.value;
+        const selectedMappingType = vendorSelect.selectedOptions[0]?.dataset.mappingType;
         const activeValues = new Set();
         document.querySelectorAll('[data-vendor-panel]').forEach(panel => {
             const active = panel.dataset.vendorPanel === activeKey;
             panel.classList.toggle('hidden', !active);
             panel.querySelectorAll('[data-vendor-value], [data-vendor-image]').forEach(input => input.disabled = !active);
+            if (active && selectedMappingType === 'vendor_category') panel.querySelectorAll('[data-vendor-value]').forEach(input => input.checked = true);
             if (active) panel.querySelectorAll('[data-vendor-value]:checked').forEach(input => { activeValues.add(input.value); addMappedOption(input.value, input.dataset.label); });
         });
         [...list.querySelectorAll('.option-row')].forEach(row => { const value = mappedValueFor(row); if (value && !activeValues.has(value)) row.remove(); });
@@ -165,11 +172,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!list.querySelector('.option-row')) blankRow();
         reindex(); updateMappingHelp();
     };
+    const filterVendorMappings = (chooseRecommended = false) => {
+        if (!vendorCategory || !vendorSelect) return;
+        const category = vendorCategory.value;
+        const options = [...vendorSelect.options].slice(1);
+        options.forEach(option => {
+            const categories = JSON.parse(option.dataset.categories || '[]');
+            option.hidden = !category || !categories.includes(category);
+        });
+        const selectedIsVisible = vendorSelect.selectedIndex > 0 && !vendorSelect.selectedOptions[0].hidden;
+        if (chooseRecommended || !selectedIsVisible) {
+            const recommended = options.find(option => !option.hidden && option.dataset.mappingType === 'vendor_category');
+            vendorSelect.value = recommended?.value || '';
+        }
+        vendorSelect.disabled = !category;
+        syncVendorMapping();
+    };
     list.querySelectorAll('.option-row').forEach(bindRemove);
     addButton.addEventListener('click', () => { const row = blankRow(); row.querySelector('input').focus(); });
     type.addEventListener('change', toggleOptions);
     if (vendorSelect) {
         vendorSelect.addEventListener('change', syncVendorMapping);
+        vendorCategory?.addEventListener('change', () => filterVendorMappings(true));
         document.querySelectorAll('[data-vendor-value]').forEach(input => input.addEventListener('change', () => { input.checked ? addMappedOption(input.value, input.dataset.label) : removeMappedOption(input.value); updateMappingHelp(); }));
         document.querySelectorAll('.select-all-vendor-values').forEach(button => button.addEventListener('click', () => {
             const checkboxes = [...button.closest('[data-vendor-panel]').querySelectorAll('[data-vendor-value]')];
@@ -181,6 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
     title.addEventListener('input', () => { if (!code.value || !{{ $question->exists ? 'true' : 'false' }}) code.value = title.value.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); });
     form.addEventListener('submit', () => { if (!code.value) code.value = `question_${Date.now()}`; });
     reindex(); toggleOptions(); syncVendorMapping();
+    filterVendorMappings(false);
 });
 </script>
 @endsection

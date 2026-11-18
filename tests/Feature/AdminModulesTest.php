@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\UserEventPlan;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Services\OpenRouterService;
+use App\Services\VendorAttributeCatalogService;
 use Database\Seeders\AdminModulesSeeder;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Database\Seeders\StandardSubscriptionPlansSeeder;
@@ -272,6 +273,35 @@ class AdminModulesTest extends TestCase
         $this->assertSame(['Pune'], $question->vendor_attribute_values);
         $this->assertSame(['Pune & nearby'], $question->options);
         $this->assertSame(['Pune'], $question->option_vendor_values);
+    }
+
+    public function test_question_mapper_lists_sparse_active_vendors_by_category(): void
+    {
+        DynamicVendor::create([
+            'vendor_json' => ['identity' => ['name' => 'My New DJ', 'category' => 'DJ'], 'attributes' => []],
+            'status' => 'active',
+        ]);
+
+        $response = $this->get(route('admin.event-questions.create'))->assertOk();
+        $response->assertSee('Which type of vendor should this question find?')
+            ->assertSee('DJ')
+            ->assertSee('All DJ vendors')
+            ->assertSee('My New DJ');
+
+        $this->post(route('admin.event-questions.store'), [
+            'question' => 'Would you like a DJ?',
+            'question_code' => 'needs_dj',
+            'question_type' => 'radio',
+            'vendor_attribute_key' => VendorAttributeCatalogService::CATEGORY_KEY_PREFIX.'DJ',
+            'vendor_attribute_values' => ['DJ'],
+            'category_options' => [['name' => 'Yes, find me a DJ', 'vendor_value' => 'DJ']],
+            'display_order' => 8,
+            'status' => 1,
+        ])->assertRedirect(route('admin.event-questions.index'));
+
+        $question = EventRequirementQuestion::where('question_code', 'needs_dj')->firstOrFail();
+        $this->assertSame(VendorAttributeCatalogService::CATEGORY_KEY_PREFIX.'DJ', $question->vendor_attribute_key);
+        $this->assertSame(['DJ'], $question->vendor_attribute_values);
     }
 
     public function test_food_question_saves_category_and_per_person_cost_for_menu_items(): void

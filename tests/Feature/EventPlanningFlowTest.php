@@ -14,6 +14,7 @@ use App\Services\OpenRouterService;
 use App\Services\PlanPdfService;
 use App\Services\PlanPresentationService;
 use App\Services\VendorCostingService;
+use App\Services\VendorAttributeCatalogService;
 use Database\Seeders\EventRequirementQuestionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
@@ -70,6 +71,37 @@ class EventPlanningFlowTest extends TestCase
         $this->assertSame('Suitable Hall', $plan->summary['costing'][0]['attributes'][0]['vendor_name']);
         $this->assertSame('quote_required', $plan->summary['costing'][1]['pricing_status']);
         $this->assertCount(2, $plan->vendor_snapshot);
+    }
+
+    public function test_vendor_category_answer_matches_a_sparse_dj_vendor(): void
+    {
+        $user = User::factory()->create();
+        $dj = DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+            'identity' => ['name' => 'My New DJ', 'category' => 'DJ'],
+            'attributes' => [],
+        ]]);
+        DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+            'identity' => ['name' => 'Unrelated Venue', 'category' => 'Venue'],
+            'attributes' => [],
+        ]]);
+        EventRequirementQuestion::create([
+            'question' => 'Would you like a DJ?', 'question_code' => 'needs_dj', 'question_type' => 'radio',
+            'options' => ['Yes, find me a DJ'], 'option_vendor_values' => ['DJ'],
+            'vendor_attribute_key' => VendorAttributeCatalogService::CATEGORY_KEY_PREFIX.'DJ',
+            'vendor_attribute_label' => 'All DJ vendors', 'vendor_attribute_values' => ['DJ'],
+            'display_order' => 1, 'status' => true,
+        ]);
+        $this->mock(OpenRouterService::class)->shouldReceive('chat')->once()->andReturn(['choices' => [['message' => ['content' => json_encode([
+            'title' => 'DJ plan', 'overview' => 'Category matched.', 'costing' => [],
+        ])]]]]);
+
+        $plan = app(EventPlanningService::class)->create($user, [
+            'guest_count' => 100, 'answers' => ['needs_dj' => 'Yes, find me a DJ'],
+        ]);
+        $snapshot = collect($plan->vendor_snapshot)->keyBy('id');
+
+        $this->assertSame(1, $snapshot[$dj->id]['match_score']);
+        $this->assertSame(0, $snapshot->firstWhere('name', 'Unrelated Venue')['match_score']);
     }
 
     public function test_unknown_quantities_are_not_invented_and_duplicate_categories_are_not_billed_twice(): void
@@ -289,6 +321,31 @@ class EventPlanningFlowTest extends TestCase
             ->assertSessionHas('pending_event_plan.answers.food_menu_items.0.cost', 125.0)
             ->assertSessionHas('pending_event_plan.answers.food_menu_items.1.cost', 50.0)
             ->assertSessionHas('pending_event_plan.answers.food_menu_items.1.vendor_name', 'Second Caterer');
+    }
+
+    public function test_vendor_menu_items_do_not_depend_on_static_food_question_options(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+        EventRequirementQuestion::where('question_code', 'food_type')->update([
+            'options' => ['Static Dish'],
+            'option_metadata' => ['Static Dish' => ['category' => 'Static', 'cost' => 1]],
+        ]);
+        $vendor = DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+            'identity' => ['name' => 'Dynamic Caterer', 'category' => 'Catering'],
+            'food_menu_items' => [[
+                'id' => 'admin_dish', 'name' => 'Admin Added Dish',
+                'category' => 'Starters', 'price_per_person' => 275,
+            ]],
+            'packages' => [],
+        ]]);
+
+        $response = $this->get(route('ai-planner'))->assertOk();
+        $caterer = collect($response->viewData('cateringVendors'))->firstWhere('id', $vendor->id);
+
+        $this->assertSame('Admin Added Dish', data_get($caterer, 'menu_items.0.title'));
+        $this->assertSame(275.0, data_get($caterer, 'menu_items.0.cost'));
+        $this->assertSame('vendor_menu', data_get($caterer, 'menu_items.0.source'));
+        $this->assertNotContains('Static Dish', array_column($caterer['menu_items'], 'title'));
     }
 
     public function test_guest_package_generation_redirects_to_login_instead_of_restarting_questions(): void

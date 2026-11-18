@@ -115,7 +115,7 @@ class DynamicVendorController extends Controller
     {
         $copy = $this->service->duplicate($dynamic_vendor, $request->user('admin')?->id);
 
-        return redirect()->route('admin.dynamic-vendors.edit', $copy)->with('success', 'Vendor duplicated as a draft.');
+        return redirect()->route('admin.dynamic-vendors.edit', $copy)->with('success', 'Vendor duplicated and activated successfully.');
     }
 
     public function status(Request $request, DynamicVendor $dynamic_vendor): RedirectResponse

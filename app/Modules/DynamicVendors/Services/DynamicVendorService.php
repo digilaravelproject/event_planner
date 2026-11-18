@@ -57,7 +57,7 @@ class DynamicVendorService
             $document['source'] = ['duplicated_from_id' => $source->id];
             $vendor = $this->vendors->create([
                 'vendor_json' => $document,
-                'status' => 'draft',
+                'status' => 'active',
                 'created_by' => $adminId,
                 'updated_by' => $adminId,
             ]);
@@ -207,6 +207,20 @@ class DynamicVendorService
             ];
         }
 
+        $foodMenuItems = [];
+        foreach ($input['food_menu_items'] ?? [] as $item) {
+            $itemName = trim((string) ($item['name'] ?? ''));
+            if ($itemName === '') {
+                continue;
+            }
+            $foodMenuItems[] = [
+                'id' => trim((string) ($item['id'] ?? '')) ?: Str::slug($itemName, '_'),
+                'name' => $itemName,
+                'category' => trim((string) ($item['category'] ?? '')) ?: 'Menu Items',
+                'price_per_person' => max(0, (float) ($item['price_per_person'] ?? 0)),
+            ];
+        }
+
         $foodExtras = [];
         foreach ($input['food_extras'] ?? [] as $extra) {
             $exName = trim((string) ($extra['name'] ?? ''));
@@ -259,6 +273,7 @@ class DynamicVendorService
             ],
             'attributes' => $attributes,
             'offerings' => $offerings ?: data_get($existing, 'offerings', []),
+            'food_menu_items' => array_key_exists('food_menu_items', $input) ? $foodMenuItems : data_get($existing, 'food_menu_items', []),
             'food_packages' => $foodPackages ?: data_get($existing, 'food_packages', []),
             'food_extras' => $foodExtras ?: data_get($existing, 'food_extras', []),
             'packages' => array_key_exists('packages', $input) ? $packages : data_get($existing, 'packages', []),

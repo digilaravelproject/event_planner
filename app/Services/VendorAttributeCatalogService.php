@@ -8,13 +8,36 @@ use Illuminate\Validation\ValidationException;
 
 class VendorAttributeCatalogService
 {
+    public const CATEGORY_KEY_PREFIX = '__vendor_category::';
+
     private const UNSUPPORTED_TYPES = ['image', 'file', 'video', 'gps', 'rich_text', 'json', 'phone', 'email', 'url'];
 
     public function catalog(?EventRequirementQuestion $question = null): array
     {
         $catalog = [];
 
-        DynamicVendor::query()->select('vendor_json')->each(function (DynamicVendor $vendor) use (&$catalog): void {
+        DynamicVendor::query()->whereRaw('LOWER(status) = ?', ['active'])->select('vendor_json')->each(function (DynamicVendor $vendor) use (&$catalog): void {
+            $vendorCategory = trim($vendor->category);
+            if ($vendorCategory !== '') {
+                $categoryKey = self::CATEGORY_KEY_PREFIX.$vendorCategory;
+                $catalog[$categoryKey] ??= [
+                    'key' => $categoryKey,
+                    'label' => 'All '.$vendorCategory.' vendors',
+                    'type' => 'vendor_category',
+                    'categories' => [$vendorCategory],
+                    'values' => [],
+                    'images' => [],
+                ];
+                $catalog[$categoryKey]['values'][$vendorCategory] ??= [
+                    'value' => $vendorCategory,
+                    'label' => $vendorCategory,
+                    'vendors_count' => 0,
+                    'vendor_names' => [],
+                ];
+                $catalog[$categoryKey]['values'][$vendorCategory]['vendors_count']++;
+                $catalog[$categoryKey]['values'][$vendorCategory]['vendor_names'][] = $vendor->name;
+            }
+
             foreach (data_get($vendor->vendor_json, 'attributes', []) as $attribute) {
                 $key = trim((string) ($attribute['key'] ?? ''));
                 $label = trim((string) ($attribute['label'] ?? $key));
@@ -28,9 +51,14 @@ class VendorAttributeCatalogService
                     'key' => $key,
                     'label' => $label,
                     'type' => $type,
+                    'categories' => [],
                     'values' => [],
                     'images' => [],
                 ];
+
+                if ($vendorCategory !== '' && ! in_array($vendorCategory, $catalog[$key]['categories'], true)) {
+                    $catalog[$key]['categories'][] = $vendorCategory;
+                }
 
                 foreach ($this->attributeImages($attribute) as $image) {
                     $catalog[$key]['images'][$image] = $image;
@@ -62,6 +90,7 @@ class VendorAttributeCatalogService
         foreach ($catalog as &$attribute) {
             $attribute['values'] = array_values($attribute['values']);
             $attribute['images'] = array_values($attribute['images']);
+            $attribute['categories'] = array_values(array_unique($attribute['categories'] ?? []));
             usort($attribute['values'], fn (array $left, array $right): int => strnatcasecmp($left['label'], $right['label']));
         }
         unset($attribute);
@@ -191,6 +220,7 @@ class VendorAttributeCatalogService
             'key' => $key,
             'label' => $question->vendor_attribute_label ?: $key,
             'type' => 'text',
+            'categories' => [],
             'values' => [],
             'images' => [],
         ];
