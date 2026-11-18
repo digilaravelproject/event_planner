@@ -10,14 +10,26 @@
     ])
     @include('admin.partials.alerts')
 
-    <form class="admin-card mb-5 grid gap-3 p-4 md:grid-cols-4">
-        <input name="search" value="{{ request('search') }}" placeholder="Search title or slug..." class="admin-control px-4 py-2.5 text-sm md:col-span-2">
-        <select name="status" class="admin-control px-3 py-2.5 text-sm">
+    <form class="admin-card mb-5 grid items-center gap-3 p-4 md:grid-cols-4" method="GET" action="{{ route('admin.pages.index') }}">
+        <div class="relative md:col-span-2">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
+            <input name="search" value="{{ request('search') }}" placeholder="Search title or slug..." class="admin-control pl-9 pr-4 text-sm">
+        </div>
+        <select name="status" class="admin-control px-3 text-sm">
             <option value="">All statuses</option>
             <option value="1" @selected(request('status') === '1')>Active</option>
             <option value="0" @selected(request('status') === '0')>Inactive</option>
         </select>
-        <button class="admin-primary-button rounded-xl text-sm font-bold text-white">Filter</button>
+        <div class="flex items-center gap-2">
+            <button type="submit" class="admin-primary-button w-full text-sm font-bold text-white">
+                <i class="fa-solid fa-filter text-xs"></i> Filter
+            </button>
+            @if(request()->filled('search') || request()->filled('status'))
+                <a href="{{ route('admin.pages.index') }}" class="admin-action-icon shrink-0" title="Clear Filters" aria-label="Clear Filters">
+                    <i class="fa-solid fa-rotate-left text-xs"></i>
+                </a>
+            @endif
+        </div>
     </form>
 
     <div class="admin-card overflow-hidden">

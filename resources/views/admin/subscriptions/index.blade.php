@@ -34,21 +34,21 @@
                             <div>
                                 <label for="name" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Plan Name</label>
                                 <input type="text" name="name" id="name" value="{{ old('name', $editingPlan->name) }}" required
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition-all">
                                 @error('name') <p class="text-xs text-red-500 mt-1 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             <div>
                                 <label for="price" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Price (INR)</label>
                                 <input type="number" step="0.01" name="price" id="price" value="{{ old('price', $editingPlan->price) }}" required
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition-all">
                                 @error('price') <p class="text-xs text-red-500 mt-1 font-medium">{{ $message }}</p> @enderror
                             </div>
 
                             <div>
                                 <label for="interval" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Billing Interval</label>
                                 <select name="interval" id="interval" required onchange="syncFreePrice(this)"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition-all">
                                     @foreach(\App\Models\Subscription::INTERVALS as $value => $label)
                                         <option value="{{ $value }}" @selected(old('interval', $editingPlan->interval) === $value)>{{ $label }}</option>
                                     @endforeach
@@ -63,11 +63,11 @@
                                         $fVal = $editingPlan->features[$i] ?? '';
                                     @endphp
                                     <input type="text" name="features[]" value="{{ old('features.'.$i, $fVal) }}" placeholder="Feature item {{ $i + 1 }}"
-                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
+                                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition-all">
                                 @endfor
                             </div>
 
-                            <button type="submit" class="w-full py-2.5 rounded-xl bg-[#3950a2] hover:bg-[#2c3e80] text-white text-sm font-semibold transition shadow-sm hover:shadow cursor-pointer active:scale-[0.99]">
+                            <button type="submit" class="w-full py-2.5 rounded-xl bg-[#850625] hover:bg-[#6E0720] text-white text-sm font-semibold transition shadow-sm hover:shadow cursor-pointer active:scale-[0.99]">
                                 Update Subscription Plan
                             </button>
                         </form>
@@ -84,21 +84,21 @@
                         <div>
                             <label for="name" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Plan Name</label>
                             <input type="text" name="name" id="name" value="{{ old('name') }}" required placeholder="e.g. Premium Plan"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition-all">
                             @error('name') <p class="text-xs text-red-500 mt-1 font-medium">{{ $message }}</p> @enderror
                         </div>
 
                         <div>
                             <label for="price" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Price (INR)</label>
                             <input type="number" step="0.01" name="price" id="price" value="{{ old('price', '2999.00') }}" required
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition-all">
                             @error('price') <p class="text-xs text-red-500 mt-1 font-medium">{{ $message }}</p> @enderror
                         </div>
 
                         <div>
                             <label for="interval" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Billing Interval</label>
                             <select name="interval" id="interval" required onchange="syncFreePrice(this)"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition-all">
                                 @foreach(\App\Models\Subscription::INTERVALS as $value => $label)
                                     <option value="{{ $value }}" @selected(old('interval') === $value)>{{ $label }}</option>
                                 @endforeach
@@ -110,11 +110,11 @@
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Features</label>
                             @for($i = 0; $i < 5; $i++)
                                 <input type="text" name="features[]" placeholder="Feature item {{ $i + 1 }}"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#3950a2]/20 focus:border-[#3950a2] transition-all">
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#850625]/20 focus:border-[#850625] transition-all">
                             @endfor
                         </div>
 
-                        <button type="submit" class="w-full py-2.5 rounded-xl bg-[#3950a2] hover:bg-[#2c3e80] text-white text-sm font-semibold transition shadow-sm hover:shadow cursor-pointer active:scale-[0.99]">
+                        <button type="submit" class="w-full py-2.5 rounded-xl bg-[#850625] hover:bg-[#6E0720] text-white text-sm font-semibold transition shadow-sm hover:shadow cursor-pointer active:scale-[0.99]">
                             Create SaaS Plan
                         </button>
                     </form>
@@ -132,7 +132,7 @@
                     <div class="rounded-xl bg-white border border-slate-200/60 p-6 shadow-sm flex flex-col justify-between relative transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
                         <!-- Actions float menu -->
                         <div class="absolute top-4 right-4 flex items-center gap-2">
-                            <a href="{{ route('admin.subscriptions.index', ['edit' => $plan->id]) }}" class="text-[#3950a2] hover:text-[#2c3e80] transition" title="Edit plan">
+                            <a href="{{ route('admin.subscriptions.index', ['edit' => $plan->id]) }}" class="text-[#850625] hover:text-[#6E0720] transition" title="Edit plan">
                                 <svg class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.83 21.75a4.5 4.5 0 01-2.013 1.24l-3.113.882a.375.375 0 01-.485-.486l.883-3.113a4.5 4.5 0 011.24-2.013L17.285 4.487zm0 0L19.5 6.72" />
                                 </svg>

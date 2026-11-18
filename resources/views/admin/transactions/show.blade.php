@@ -3,7 +3,7 @@
 @section('content')
 <div class="relative z-30 mt-6 space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div><a href="{{ route('admin.transactions.index') }}" class="text-xs font-bold text-[#3950a2]">← Back to transactions</a><h1 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-800">Transaction #{{ $transaction->id }}</h1><p class="mt-1 text-sm font-semibold text-slate-500">Complete subscription payment and validity details.</p></div>
+        <div><a href="{{ route('admin.transactions.index') }}" class="text-xs font-bold text-[#850625]">← Back to transactions</a><h1 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-800">Transaction #{{ $transaction->id }}</h1><p class="mt-1 text-sm font-semibold text-slate-500">Complete subscription payment and validity details.</p></div>
         <span class="inline-flex w-fit rounded-full px-4 py-2 text-xs font-extrabold uppercase {{ $transaction->status === 'active' ? 'bg-emerald-50 text-emerald-700' : ($transaction->status === 'failed' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700') }}">{{ $transaction->status }}</span>
     </div>
     <div class="grid gap-6 lg:grid-cols-2">

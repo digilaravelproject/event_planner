@@ -5,7 +5,7 @@
 <article class="attribute-row admin-card-interactive rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50/80 p-4 shadow-sm" draggable="true" data-index="{{ $index }}">
     <input type="hidden" data-attribute-id name="attributes[{{ $index }}][id]" value="{{ $attribute['id'] ?? '' }}">
     <div class="mb-4 flex items-center justify-between">
-        <div class="flex cursor-grab items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-[#3950a2]"><span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-lg text-indigo-400">⠿</span><span class="position-label">Attribute {{ is_numeric($index) ? $index + 1 : '' }}</span></div>
+        <div class="flex cursor-grab items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-[#850625]"><span class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FFF1F3] text-lg text-[#850625] border border-[#850625]/20">⠿</span><span class="position-label">Attribute {{ is_numeric($index) ? $index + 1 : '' }}</span></div>
         <div class="flex gap-2"><button type="button" class="duplicate-attribute admin-action-icon" title="Duplicate attribute" aria-label="Duplicate attribute"><i class="fa-solid fa-copy" aria-hidden="true"></i></button><button type="button" class="remove-attribute admin-action-icon admin-action-icon-danger" title="Remove attribute" aria-label="Remove attribute"><i class="fa-solid fa-trash-can" aria-hidden="true"></i></button></div>
     </div>
     <div class="grid gap-4 md:grid-cols-12">
@@ -23,7 +23,7 @@
             <label class="text-xs font-bold">Quantity<input type="number" min="0.01" max="100000" step="0.01" name="attributes[{{ $index }}][pricing_quantity]" value="{{ $attribute['pricing_quantity'] ?? data_get($attribute, 'pricing.quantity', '') }}" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Automatic for guests / fixed"></label>
         </div>
     </div>
-    <div class="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/40 p-3">
+    <div class="mt-4 rounded-xl border border-[#D4AF37]/30 bg-[#FFFDF9] p-3">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div><p class="text-xs font-extrabold text-slate-700">Attribute images</p><p class="text-[11px] text-slate-500">Attach one or more images to this attribute.</p></div>
             <input type="file" name="attribute_images[{{ $index }}][]" accept="image/*" multiple class="text-xs text-slate-600">

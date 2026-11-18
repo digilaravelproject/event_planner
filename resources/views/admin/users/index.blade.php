@@ -46,7 +46,7 @@
                             <!-- User Details -->
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="h-10 w-10 rounded-full bg-slate-100 text-[#3950a2] border border-slate-200 flex items-center justify-center font-bold text-sm uppercase">
+                                    <div class="h-10 w-10 rounded-full bg-slate-100 text-[#850625] border border-slate-200 flex items-center justify-center font-bold text-sm uppercase">
                                         {{ substr($user->name, 0, 2) }}
                                     </div>
                                     <div>
@@ -97,7 +97,7 @@
                             <td class="px-6 py-4 text-center">
                                 <form action="{{ route('admin.users.toggle-status', $user->id) }}" method="POST" class="inline-block">
                                     @csrf
-                                    <button type="submit" class="inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[#3950a2] {{ $user->status ? 'bg-[#00c689]' : 'bg-slate-200' }}" role="switch">
+                                    <button type="submit" class="inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[#850625] {{ $user->status ? 'bg-[#00c689]' : 'bg-slate-200' }}" role="switch">
                                         <span class="sr-only">Toggle Status</span>
                                         <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $user->status ? 'translate-x-5' : 'translate-x-0' }}"></span>
                                     </button>

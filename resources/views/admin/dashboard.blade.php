@@ -48,8 +48,8 @@
     <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div><div class="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#3950a2]">Six-month trend</div><h2 class="mt-1 text-xl font-black text-slate-900">Generated plan value</h2><p class="mt-1 text-xs text-slate-500">Saved plan totals from the current planning flow.</p></div>
-                <div class="rounded-xl bg-indigo-50 px-4 py-2 text-right"><div class="text-[9px] font-bold uppercase text-indigo-400">Average plan</div><div class="font-black text-[#3950a2]">{{ $money($metrics['averagePlanValue']) }}</div></div>
+                <div><div class="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#850625]">Six-month trend</div><h2 class="mt-1 text-xl font-black text-slate-900">Generated plan value</h2><p class="mt-1 text-xs text-slate-500">Saved plan totals from the current planning flow.</p></div>
+                <div class="rounded-xl bg-[#FFF1F3] border border-[#850625]/15 px-4 py-2 text-right"><div class="text-[9px] font-bold uppercase text-[#850625]">Average plan</div><div class="font-black text-[#850625]">{{ $money($metrics['averagePlanValue']) }}</div></div>
             </div>
             <div class="mt-7 grid h-64 grid-cols-6 items-end gap-2 sm:gap-4">
                 @foreach($revenueData['labels'] as $index => $label)
@@ -89,8 +89,8 @@
         </article>
 
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div><div class="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#3950a2]">Customer activity</div><h2 class="mt-1 text-lg font-black text-slate-900">Newest users</h2></div>
-            <div class="admin-data-list mt-5 space-y-3">@forelse($recentUsers as $recentUser)<div class="flex items-center gap-3 rounded-2xl bg-slate-50 p-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-black text-[#3950a2]">{{ str($recentUser->name)->substr(0, 1)->upper() }}</span><div class="min-w-0 flex-1"><div class="truncate text-xs font-extrabold text-slate-700">{{ $recentUser->name }}</div><div class="truncate text-[10px] text-slate-400">{{ ucfirst($recentUser->subscriptionFlag()) }}</div></div><span class="text-[10px] text-slate-400">{{ $recentUser->created_at->diffForHumans(null, null, true) }}</span></div>@empty<div class="text-xs text-slate-400">No users yet.</div>@endforelse</div>
+            <div><div class="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#850625]">Customer activity</div><h2 class="mt-1 text-lg font-black text-slate-900">Newest users</h2></div>
+            <div class="admin-data-list mt-5 space-y-3">@forelse($recentUsers as $recentUser)<div class="flex items-center gap-3 rounded-2xl bg-slate-50 p-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#FFF1F3] text-xs font-black text-[#850625] border border-[#850625]/20">{{ str($recentUser->name)->substr(0, 1)->upper() }}</span><div class="min-w-0 flex-1"><div class="truncate text-xs font-extrabold text-slate-700">{{ $recentUser->name }}</div><div class="truncate text-[10px] text-slate-400">{{ ucfirst($recentUser->subscriptionFlag()) }}</div></div><span class="text-[10px] text-slate-400">{{ $recentUser->created_at->diffForHumans(null, null, true) }}</span></div>@empty<div class="text-xs text-slate-400">No users yet.</div>@endforelse</div>
         </article>
     </section>
 </div>

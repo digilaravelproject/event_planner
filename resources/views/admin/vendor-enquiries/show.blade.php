@@ -8,7 +8,7 @@
     <!-- Top Navigation & Action Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <a href="{{ route('admin.vendor-enquiries.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#3950a2] transition mb-2">
+            <a href="{{ route('admin.vendor-enquiries.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#850625] transition mb-2">
                 <i class="fa-solid fa-arrow-left"></i>
                 <span>Back to All Vendor Enquiries</span>
             </a>
@@ -60,7 +60,7 @@
             <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                     <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-store text-[#3950a2]"></i>
+                        <i class="fa-solid fa-store text-[#850625]"></i>
                         <span>Business Information</span>
                     </h2>
                     <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-extrabold text-xs">
@@ -84,7 +84,7 @@
 
                     <div>
                         <span class="text-slate-400 font-bold uppercase tracking-wider block mb-1">Business Contact Number</span>
-                        <a href="tel:{{ $vendorEnquiry->contact_no }}" class="font-bold text-[#3950a2] hover:underline flex items-center gap-1.5 text-sm">
+                        <a href="tel:{{ $vendorEnquiry->contact_no }}" class="font-bold text-[#850625] hover:underline flex items-center gap-1.5 text-sm">
                             <i class="fa-solid fa-phone text-slate-400"></i>
                             {{ $vendorEnquiry->contact_no }}
                         </a>
@@ -92,7 +92,7 @@
 
                     <div>
                         <span class="text-slate-400 font-bold uppercase tracking-wider block mb-1">Business Email</span>
-                        <a href="mailto:{{ $vendorEnquiry->email }}" class="font-bold text-[#3950a2] hover:underline flex items-center gap-1.5 text-sm">
+                        <a href="mailto:{{ $vendorEnquiry->email }}" class="font-bold text-[#850625] hover:underline flex items-center gap-1.5 text-sm">
                             <i class="fa-solid fa-envelope text-slate-400"></i>
                             {{ $vendorEnquiry->email }}
                         </a>
@@ -103,7 +103,7 @@
             <!-- Card 2: Services, Offerings & Pricing -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
                 <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2 pb-4 border-b border-slate-100">
-                    <i class="fa-solid fa-bell-concierge text-[#3950a2]"></i>
+                    <i class="fa-solid fa-bell-concierge text-[#850625]"></i>
                     <span>Services, Pricing & Specifications</span>
                 </h2>
 
@@ -146,7 +146,7 @@
             <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                     <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-images text-[#3950a2]"></i>
+                        <i class="fa-solid fa-images text-[#850625]"></i>
                         <span>Photos, Videos & Media</span>
                     </h2>
                     <span class="text-xs font-bold text-slate-400">
@@ -189,7 +189,7 @@
                                         <span class="text-slate-600 font-semibold truncate max-w-[140px]" title="{{ $name }}">
                                             {{ $name }}
                                         </span>
-                                        <a href="{{ $url }}" download="{{ $name }}" class="text-[#3950a2] hover:underline font-bold" title="Download">
+                                        <a href="{{ $url }}" download="{{ $name }}" class="text-[#850625] hover:underline font-bold" title="Download">
                                             <i class="fa-solid fa-download"></i>
                                         </a>
                                     </div>
@@ -213,7 +213,7 @@
             <!-- Card 4: Owner / Contact Person -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
                 <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2 pb-4 border-b border-slate-100">
-                    <i class="fa-solid fa-user-tie text-[#3950a2]"></i>
+                    <i class="fa-solid fa-user-tie text-[#850625]"></i>
                     <span>Owner & Contact Person</span>
                 </h2>
 
@@ -226,7 +226,7 @@
                     <div>
                         <span class="text-slate-400 font-bold uppercase tracking-wider block mb-1">Owner Phone / WhatsApp</span>
                         <div class="flex items-center gap-2">
-                            <a href="tel:{{ $vendorEnquiry->owner_number }}" class="font-bold text-[#3950a2] hover:underline text-sm">
+                            <a href="tel:{{ $vendorEnquiry->owner_number }}" class="font-bold text-[#850625] hover:underline text-sm">
                                 {{ $vendorEnquiry->owner_number }}
                             </a>
                             <a 
@@ -242,7 +242,7 @@
 
                     <div>
                         <span class="text-slate-400 font-bold uppercase tracking-wider block mb-1">Owner Email</span>
-                        <a href="mailto:{{ $vendorEnquiry->owner_email }}" class="font-bold text-[#3950a2] hover:underline text-sm break-all">
+                        <a href="mailto:{{ $vendorEnquiry->owner_email }}" class="font-bold text-[#850625] hover:underline text-sm break-all">
                             {{ $vendorEnquiry->owner_email }}
                         </a>
                     </div>
@@ -252,7 +252,7 @@
             <!-- Card 5: Update Status & Notes -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
                 <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2 pb-4 border-b border-slate-100">
-                    <i class="fa-solid fa-clipboard-check text-[#3950a2]"></i>
+                    <i class="fa-solid fa-clipboard-check text-[#850625]"></i>
                     <span>Update Status & Notes</span>
                 </h2>
 
@@ -266,7 +266,7 @@
                         </label>
                         <select 
                             name="status" 
-                            class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:border-[#3950a2] focus:ring-1 focus:ring-[#3950a2] outline-none bg-white"
+                            class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:border-[#850625] focus:ring-1 focus:ring-[#850625] outline-none bg-white"
                         >
                             @foreach(\App\Models\VendorEnquiry::STATUSES as $val => $lbl)
                                 <option value="{{ $val }}" @selected($vendorEnquiry->status === $val)>{{ $lbl }}</option>
@@ -282,13 +282,13 @@
                             name="admin_notes" 
                             rows="4" 
                             placeholder="Add notes (e.g., Called vendor, verified venue photos, added to Dynamic Vendors on 15 Oct)..."
-                            class="w-full border border-slate-200 rounded-xl p-3 text-xs font-medium focus:border-[#3950a2] focus:ring-1 focus:ring-[#3950a2] outline-none resize-y"
+                            class="w-full border border-slate-200 rounded-xl p-3 text-xs font-medium focus:border-[#850625] focus:ring-1 focus:ring-[#850625] outline-none resize-y"
                         >{{ old('admin_notes', $vendorEnquiry->admin_notes) }}</textarea>
                     </div>
 
                     <button 
                         type="submit" 
-                        class="w-full rounded-xl bg-[#3950a2] hover:bg-[#2d3f82] text-white py-2.5 font-bold text-xs shadow-sm transition"
+                        class="w-full rounded-xl bg-[#850625] hover:bg-[#6E0720] text-white py-2.5 font-bold text-xs shadow-sm transition"
                     >
                         Save Changes
                     </button>

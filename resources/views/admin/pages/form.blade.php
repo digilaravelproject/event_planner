@@ -6,7 +6,7 @@
         'title' => $page->exists ? 'Edit Page' : 'Create Page',
         'subtitle' => 'Write formatted page content and control its availability.',
     ])
-    @if($errors->any())<div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{{ $errors->first() }}</div>@endif
+    @if(isset($errors) && $errors->any())<div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{{ $errors->first() }}</div>@endif
 
     <form method="POST" action="{{ $page->exists ? route('admin.pages.update', $page) : route('admin.pages.store') }}" id="page-form" class="admin-card space-y-5 p-6 sm:p-8">
         @csrf
@@ -18,10 +18,10 @@
 
         <div>
             <span class="mb-2 block text-xs font-bold">Description *</span>
-            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-[#3950a2] focus-within:ring-2 focus-within:ring-[#3950a2]/10">
+            <div class="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-[#850625] focus-within:ring-2 focus-within:ring-[#850625]/10">
                 <div id="editor-toolbar" class="flex flex-wrap gap-1 border-b border-slate-200 bg-slate-50 p-2">
                     @foreach([['bold','Bold','B'],['italic','Italic','I'],['underline','Underline','U'],['formatBlock','Heading','H2'],['insertUnorderedList','Bullet list','• List'],['insertOrderedList','Numbered list','1. List'],['createLink','Add link','Link'],['removeFormat','Clear formatting','Clear']] as [$command,$title,$label])
-                        <button type="button" data-command="{{ $command }}" title="{{ $title }}" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700">{{ $label }}</button>
+                        <button type="button" data-command="{{ $command }}" title="{{ $title }}" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-[#850625]/10 hover:text-[#850625] hover:border-[#850625]/30 transition">{{ $label }}</button>
                     @endforeach
                 </div>
                 <div id="page-editor" contenteditable="true" class="min-h-72 px-4 py-3 text-sm leading-7 text-slate-700 outline-none" data-placeholder="Write the page description...">{!! old('description', $page->description) !!}</div>

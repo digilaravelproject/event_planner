@@ -27,7 +27,7 @@
                                 @if(is_array($attribute['value']))
                                     <pre class="whitespace-pre-wrap font-sans">{{ json_encode($attribute['value'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                                 @elseif(in_array($attribute['type'], ['image', 'file', 'video']) && $attribute['value'])
-                                    <a class="text-[#3950a2] underline" href="{{ asset('storage/'.$attribute['value']) }}" target="_blank" rel="noopener">Open uploaded file</a>
+                                    <a class="text-[#850625] underline hover:text-[#6E0720]" href="{{ asset('storage/'.$attribute['value']) }}" target="_blank" rel="noopener">Open uploaded file</a>
                                 @elseif(in_array($attribute['type'], ['boolean', 'checkbox']))
                                     {{ $attribute['value'] ? 'Yes' : 'No' }}
                                 @else

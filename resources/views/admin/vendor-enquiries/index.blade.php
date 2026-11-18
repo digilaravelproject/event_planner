@@ -48,25 +48,25 @@
                 name="search" 
                 value="{{ request('search') }}" 
                 placeholder="Search business, owner, phone, email, or area..." 
-                class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:border-[#3950a2] focus:ring-1 focus:ring-[#3950a2] outline-none"
+                class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:border-[#850625] focus:ring-1 focus:ring-[#850625] outline-none"
             >
         </div>
 
-        <select name="status" class="border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:border-[#3950a2] outline-none bg-white">
+        <select name="status" class="border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:border-[#850625] outline-none bg-white">
             <option value="">All Statuses</option>
             @foreach(\App\Models\VendorEnquiry::STATUSES as $key => $label)
                 <option value="{{ $key }}" @selected(request('status') === $key)>{{ $label }}</option>
             @endforeach
         </select>
 
-        <select name="category" class="border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:border-[#3950a2] outline-none bg-white">
+        <select name="category" class="border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:border-[#850625] outline-none bg-white">
             <option value="">All Categories</option>
             @foreach($categories as $cat)
                 <option value="{{ $cat }}" @selected(request('category') === $cat)>{{ $cat }}</option>
             @endforeach
         </select>
 
-        <button type="submit" class="bg-[#3950a2] hover:bg-[#2d3f82] text-white rounded-xl px-5 py-2 text-xs font-bold transition">
+        <button type="submit" class="bg-gradient-to-r from-[#850625] to-[#6E0720] hover:from-[#6E0720] hover:to-[#540417] text-white rounded-xl px-5 py-2 text-xs font-bold transition shadow-sm border border-[#D4AF37]/30">
             Filter
         </button>
 
@@ -103,7 +103,7 @@
 
                             <!-- Business & Category -->
                             <td class="px-5 py-4">
-                                <a href="{{ route('admin.vendor-enquiries.show', $enquiry) }}" class="font-bold text-slate-900 hover:text-[#3950a2] text-sm block">
+                                <a href="{{ route('admin.vendor-enquiries.show', $enquiry) }}" class="font-bold text-slate-900 hover:text-[#850625] text-sm block">
                                     {{ $enquiry->business_name }}
                                 </a>
                                 <span class="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600">
@@ -134,7 +134,7 @@
                             <td class="px-5 py-4">
                                 <div class="font-bold text-slate-800">{{ $enquiry->owner_name }}</div>
                                 <div class="text-slate-500 text-[11px] mt-0.5">
-                                    <a href="tel:{{ $enquiry->owner_number }}" class="hover:underline text-[#3950a2] font-semibold">
+                                    <a href="tel:{{ $enquiry->owner_number }}" class="hover:underline text-[#850625] font-semibold">
                                         {{ $enquiry->owner_number }}
                                     </a>
                                 </div>

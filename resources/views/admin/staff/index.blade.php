@@ -5,7 +5,7 @@
     @include('admin.partials.alerts')
     <div class="admin-hero flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div class="relative z-10"><p class="text-xs font-bold uppercase tracking-[.2em] text-emerald-300">Access management</p><h1 class="mt-2 text-3xl font-extrabold text-white">Staff</h1><p class="mt-1 text-sm text-blue-100">Create staff accounts and control exactly which admin sections they can use.</p></div>
-        <a href="{{ route('admin.staff.create') }}" class="relative z-10 inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#3950a2]">+ Add Staff</a>
+        <a href="{{ route('admin.staff.create') }}" class="relative z-10 inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#850625]">+ Add Staff</a>
     </div>
 
     <div class="admin-card overflow-hidden">

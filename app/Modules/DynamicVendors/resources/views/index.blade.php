@@ -27,11 +27,11 @@
     <form method="GET" class="admin-card overflow-hidden">
         <div class="flex flex-col gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-3">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3950a2]/10 text-[#3950a2]">
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#850625]/10 text-[#850625]">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.53.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.012L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.387-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg>
                 </span>
                 <div><h2 class="text-sm font-extrabold text-slate-900">Find the right vendor</h2><p class="text-xs text-slate-500">Search JSON data and refine the vendor list.</p></div>
-                @if($activeFilterCount > 0)<span class="rounded-full bg-[#00a875]/10 px-2.5 py-1 text-[11px] font-extrabold text-[#008b61]">{{ $activeFilterCount }} active</span>@endif
+                @if($activeFilterCount > 0)<span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700 border border-emerald-200">{{ $activeFilterCount }} active</span>@endif
             </div>
             @if($activeFilterCount > 0)
                 <a href="{{ route('admin.dynamic-vendors.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-rose-600">

@@ -9,7 +9,7 @@
     @include('admin.partials.alerts')
 
     <div>
-        <a href="{{ route('admin.vendor-categories.index') }}" class="text-xs font-bold text-orange-600 hover:text-orange-700">← Vendor Categories</a>
+        <a href="{{ route('admin.vendor-categories.index') }}" class="text-xs font-bold text-[#850625] hover:text-[#6E0720]">← Vendor Categories</a>
         <h1 class="mt-2 text-3xl font-extrabold">{{ $editing ? 'Edit Vendor Category' : 'Add Vendor Category' }}</h1>
         <p class="mt-2 text-sm text-slate-500">These fields appear automatically after an administrator selects this category on the vendor form.</p>
     </div>
@@ -26,12 +26,12 @@
                 <label><span class="admin-form-label">URL slug</span><input name="slug" value="{{ old('slug', $category->slug) }}" class="admin-control w-full px-4 py-3" placeholder="Created automatically"></label>
                 <label class="md:col-span-2"><span class="admin-form-label">Description</span><textarea name="description" rows="2" maxlength="500" class="admin-control w-full px-4 py-3" placeholder="Short description of this vendor service">{{ old('description', $category->description) }}</textarea></label>
                 <label><span class="admin-form-label">Display order</span><input type="number" min="0" name="sort_order" value="{{ old('sort_order', $category->sort_order ?? 0) }}" class="admin-control w-full px-4 py-3"></label>
-                <label class="flex items-center gap-3 self-end rounded-xl border border-orange-100 bg-orange-50/60 px-4 py-3"><input type="hidden" name="is_active" value="0"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $category->is_active)) class="h-4 w-4 accent-orange-500"><span><strong class="block text-sm text-slate-800">Active category</strong><small class="text-slate-500">Available in the Add Vendor dropdown</small></span></label>
+                <label class="flex items-center gap-3 self-end rounded-xl border border-[#D4AF37]/30 bg-[#FFFDF9] px-4 py-3"><input type="hidden" name="is_active" value="0"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $category->is_active)) class="h-4 w-4 accent-[#850625]"><span><strong class="block text-sm text-slate-800">Active category</strong><small class="text-slate-500">Available in the Add Vendor dropdown</small></span></label>
             </div>
         </section>
 
         <section class="admin-card overflow-hidden">
-            <div class="flex flex-col gap-3 border-b border-orange-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between"><div><h2 class="text-lg font-extrabold text-slate-800">Category Form Fields</h2><p class="mt-1 text-xs text-slate-500">Configure the questions displayed when this category is selected.</p></div><button id="add-category-field" type="button" class="rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-xs font-extrabold text-orange-600 hover:bg-orange-100">+ Add Field</button></div>
+            <div class="flex flex-col gap-3 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between"><div><h2 class="text-lg font-extrabold text-slate-800">Category Form Fields</h2><p class="mt-1 text-xs text-slate-500">Configure the questions displayed when this category is selected.</p></div><button id="add-category-field" type="button" class="rounded-xl border border-[#850625]/20 bg-[#FFF1F3] px-4 py-2.5 text-xs font-extrabold text-[#850625] hover:bg-[#850625] hover:text-white transition">+ Add Field</button></div>
             <div id="category-fields" class="space-y-4 p-6">
                 @foreach($formFields as $index => $field)
                     @include('dynamic-vendors::categories.partials.field', ['index' => $index, 'field' => $field, 'attributeTypes' => $attributeTypes])
