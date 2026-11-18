@@ -1349,17 +1349,46 @@ body:has(.admin-content) {
     border: 1px solid rgba(212, 175, 55, 0.25);
 }
 
-.vendor-enquiry-stat {
+/* Step Numbers (1, 2, 3, 4) in guided wizard forms */
+.admin-step-number {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    min-width: 2.25rem !important;
+    min-height: 2.25rem !important;
+    border-radius: 0.75rem !important;
+    background: linear-gradient(135deg, #850625 0%, #6E0720 100%) !important;
     color: #FFFFFF !important;
-    border: 1px solid rgba(212, 175, 55, 0.3) !important;
-    background: linear-gradient(135deg, #850625, #6E0720) !important;
-    box-shadow: 0 14px 28px -18px rgba(133, 6, 37, 0.5) !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    border: 1px solid rgba(212, 175, 55, 0.4) !important;
+    box-shadow: 0 4px 12px rgba(133, 6, 37, 0.25) !important;
 }
 
-.admin-content .vendor-enquiry-stat p,
-.admin-content .vendor-enquiry-stat span,
-.admin-content .vendor-enquiry-stat [class*="text-"] {
-    color: #FFFFFF !important;
+/* Guard: Prevent white text inside admin-card */
+.admin-card h1:not([class*='bg-[#850625]']):not(.admin-primary-button),
+.admin-card h2:not([class*='bg-[#850625]']):not(.admin-primary-button),
+.admin-card h3:not([class*='bg-[#850625]']):not(.admin-primary-button),
+.admin-card h4:not([class*='bg-[#850625]']):not(.admin-primary-button) {
+    color: #0F172A !important;
+}
+
+.admin-card [class*='border-white/'] {
+    border-color: #E2D9CF !important;
+}
+
+.admin-card a[class*='border-white/'] {
+    border-color: #E2D9CF !important;
+    background-color: #FFFFFF !important;
+    color: #475569 !important;
+}
+
+.admin-card a[class*='border-white/']:hover {
+    background-color: #FAF7F2 !important;
+    color: #850625 !important;
+    border-color: #850625 !important;
 }
 
 .admin-content table,

@@ -17,24 +17,24 @@
 
     <!-- Metrics Strip -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <a href="{{ route('admin.vendor-enquiries.index') }}" class="vendor-enquiry-stat rounded-2xl p-4 transition">
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Enquiries</p>
-            <p class="mt-2 text-2xl font-black text-slate-800">{{ $stats['total'] }}</p>
+        <a href="{{ route('admin.vendor-enquiries.index') }}" class="rounded-2xl p-5 border transition {{ !request('status') ? 'bg-gradient-to-br from-[#850625] to-[#6E0720] text-white border-[#D4AF37]/40 shadow-md' : 'bg-white text-slate-800 border-slate-200 hover:border-[#850625]/40 hover:shadow-sm' }}">
+            <p class="text-xs font-bold uppercase tracking-wider {{ !request('status') ? 'text-[#F3E5AB]' : 'text-slate-500' }}">Total Enquiries</p>
+            <p class="mt-2 text-2xl font-black {{ !request('status') ? 'text-white' : 'text-slate-900' }}">{{ $stats['total'] }}</p>
         </a>
-        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'pending']) }}" class="vendor-enquiry-stat rounded-2xl p-4 transition">
+        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'pending']) }}" class="rounded-2xl p-5 border transition {{ request('status') === 'pending' ? 'bg-gradient-to-br from-[#850625] to-[#6E0720] text-white border-[#D4AF37]/40 shadow-md' : 'bg-white text-slate-800 border-slate-200 hover:border-[#850625]/40 hover:shadow-sm' }}">
             <div class="flex items-center justify-between">
-                <p class="text-xs font-bold uppercase tracking-wider text-white">Pending Review</p>
-                <span class="h-2 w-2 rounded-full bg-white animate-pulse"></span>
+                <p class="text-xs font-bold uppercase tracking-wider {{ request('status') === 'pending' ? 'text-[#F3E5AB]' : 'text-rose-600' }}">Pending Review</p>
+                <span class="h-2 w-2 rounded-full {{ request('status') === 'pending' ? 'bg-[#F3E5AB]' : 'bg-rose-500' }} animate-pulse"></span>
             </div>
-            <p class="mt-2 text-2xl font-black text-white">{{ $stats['pending'] }}</p>
+            <p class="mt-2 text-2xl font-black {{ request('status') === 'pending' ? 'text-white' : 'text-rose-700' }}">{{ $stats['pending'] }}</p>
         </a>
-        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'contacted']) }}" class="vendor-enquiry-stat rounded-2xl p-4 transition">
-            <p class="text-xs font-bold uppercase tracking-wider text-amber-600">Contacted</p>
-            <p class="mt-2 text-2xl font-black text-amber-700">{{ $stats['contacted'] }}</p>
+        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'contacted']) }}" class="rounded-2xl p-5 border transition {{ request('status') === 'contacted' ? 'bg-gradient-to-br from-[#850625] to-[#6E0720] text-white border-[#D4AF37]/40 shadow-md' : 'bg-white text-slate-800 border-slate-200 hover:border-[#850625]/40 hover:shadow-sm' }}">
+            <p class="text-xs font-bold uppercase tracking-wider {{ request('status') === 'contacted' ? 'text-[#F3E5AB]' : 'text-amber-600' }}">Contacted</p>
+            <p class="mt-2 text-2xl font-black {{ request('status') === 'contacted' ? 'text-white' : 'text-amber-700' }}">{{ $stats['contacted'] }}</p>
         </a>
-        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'approved']) }}" class="vendor-enquiry-stat rounded-2xl p-4 transition">
-            <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Approved / Added</p>
-            <p class="mt-2 text-2xl font-black text-emerald-700">{{ $stats['approved'] }}</p>
+        <a href="{{ route('admin.vendor-enquiries.index', ['status' => 'approved']) }}" class="rounded-2xl p-5 border transition {{ request('status') === 'approved' ? 'bg-gradient-to-br from-[#850625] to-[#6E0720] text-white border-[#D4AF37]/40 shadow-md' : 'bg-white text-slate-800 border-slate-200 hover:border-[#850625]/40 hover:shadow-sm' }}">
+            <p class="text-xs font-bold uppercase tracking-wider {{ request('status') === 'approved' ? 'text-[#F3E5AB]' : 'text-emerald-600' }}">Approved / Added</p>
+            <p class="mt-2 text-2xl font-black {{ request('status') === 'approved' ? 'text-white' : 'text-emerald-700' }}">{{ $stats['approved'] }}</p>
         </a>
     </div>
 
