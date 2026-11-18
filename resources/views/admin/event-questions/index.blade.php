@@ -17,10 +17,10 @@
             <option value="1" @selected(request('status') === '1')>Enabled</option>
             <option value="0" @selected(request('status') === '0')>Disabled</option>
         </select>
-        <select name="sort" class="admin-control px-3 py-2.5 text-sm">
+        <?php /*<select name="sort" class="admin-control px-3 py-2.5 text-sm">
             <option value="display_order">Display order</option>
             <option value="question" @selected(request('sort') === 'question')>Question</option>
-        </select>
+        </select>*/ ?>
         <button class="admin-primary-button rounded-xl text-sm font-bold text-white">Filter</button>
     </form>
 

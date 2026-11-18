@@ -6,7 +6,7 @@
     <input type="hidden" data-attribute-id name="attributes[{{ $index }}][id]" value="{{ $attribute['id'] ?? '' }}">
     <div class="mb-4 flex items-center justify-between">
         <div class="flex cursor-grab items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-[#3950a2]"><span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-lg text-indigo-400">⠿</span><span class="position-label">Attribute {{ is_numeric($index) ? $index + 1 : '' }}</span></div>
-        <div class="flex gap-2"><button type="button" class="duplicate-attribute rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600">Duplicate</button><button type="button" class="remove-attribute rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-600">Remove</button></div>
+        <div class="flex gap-2"><button type="button" class="duplicate-attribute admin-action-icon" title="Duplicate attribute" aria-label="Duplicate attribute"><i class="fa-solid fa-copy" aria-hidden="true"></i></button><button type="button" class="remove-attribute admin-action-icon admin-action-icon-danger" title="Remove attribute" aria-label="Remove attribute"><i class="fa-solid fa-trash-can" aria-hidden="true"></i></button></div>
     </div>
     <div class="grid gap-4 md:grid-cols-12">
         <label class="block md:col-span-4"><span class="mb-1.5 block text-xs font-bold text-slate-700">Attribute name *</span><input required list="attribute-suggestions" name="attributes[{{ $index }}][label]" value="{{ $attribute['label'] ?? '' }}" class="attribute-name w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"></label>

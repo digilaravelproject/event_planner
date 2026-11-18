@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Tailwind CSS / Vite -->
@@ -42,7 +42,7 @@
         /* Sidebar transition details */
         #admin-sidebar {
             transition: transform 0.25s ease-in-out;
-            transform: translateX(-18rem); /* Hidden by default on mobile */
+            transform: translateX(-15rem); /* Hidden by default on mobile */
             box-shadow: 0 28px 70px -42px rgba(30, 41, 59, 0.58);
         }
         #admin-sidebar nav a {
@@ -77,10 +77,10 @@
                 transform: translateX(0); /* Visible by default on desktop */
             }
             .sidebar-collapsed #admin-sidebar {
-                transform: translateX(-18rem) !important;
+                transform: translateX(-15rem) !important;
             }
             #main-content-area {
-                padding-left: 18.5rem;
+                padding-left: 16rem;
             }
             .sidebar-collapsed #main-content-area {
                 padding-left: 1.5rem !important; /* pl-6 */
@@ -200,7 +200,7 @@
             @endif
 
             @if($adminUser->canAccess('vendors'))
-            @php($vendorsOpen = str_starts_with($currentRoute, 'admin.dynamic-vendors'))
+            @php($vendorsOpen = str_starts_with($currentRoute, 'admin.dynamic-vendors') || str_starts_with($currentRoute, 'admin.vendor-categories'))
             <details class="group" @if($vendorsOpen) open @endif>
                 <summary class="flex cursor-pointer list-none items-center gap-x-3.5 border-l-4 px-4 py-3 text-xs font-bold tracking-tight transition-all {{ $vendorsOpen ? 'border-[#3950a2] bg-slate-50 text-[#3950a2]' : 'border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
                     <span class="flex h-7 w-7 items-center justify-center rounded-lg text-[9px] font-extrabold {{ $vendorsOpen ? 'bg-[#00c689]/10 text-[#00c689]' : 'bg-slate-100 text-slate-400' }}">MV</span>
@@ -210,6 +210,7 @@
                 <div class="ml-10 mt-1 space-y-1 border-l border-[#d4af37]/30 pl-3" style="margin-left: 25% !important;">
                     <a href="{{ route('admin.dynamic-vendors.index') }}" class="admin-submenu-link {{ $currentRoute === 'admin.dynamic-vendors.index' || $currentRoute === 'admin.dynamic-vendors.show' || $currentRoute === 'admin.dynamic-vendors.edit' ? 'is-active' : '' }}">Vendor List</a>
                     <a href="{{ route('admin.dynamic-vendors.create') }}" class="admin-submenu-link {{ $currentRoute === 'admin.dynamic-vendors.create' ? 'is-active' : '' }}">Add Vendor</a>
+                    <a href="{{ route('admin.vendor-categories.index') }}" class="admin-submenu-link {{ str_starts_with($currentRoute, 'admin.vendor-categories') ? 'is-active' : '' }}">Vendor Categories</a>
                 </div>
             </details>
             @endif
@@ -371,6 +372,10 @@
         <main class="admin-content flex-1 overflow-y-auto px-5 sm:px-7 lg:px-8 pb-8 relative" style="z-index: 10;">
             @yield('content')
         </main>
+        <footer class="admin-footer shrink-0 px-5 py-3 sm:px-7 lg:px-8">
+            <p>© {{ date('Y') }}. All rights reserved by Shaadi Sense.</p>
+            <nav aria-label="Footer"><a href="{{ route('home') }}">Support</a><a href="{{ route('home') }}">Privacy</a></nav>
+        </footer>
     </div>
 
     <!-- Scripting for Dynamic Components (Argon Collapsible Sidebar) -->
@@ -426,7 +431,7 @@
             if (!form || form.dataset.confirmed === 'true') return;
             event.preventDefault();
             const submit = () => { form.dataset.confirmed = 'true'; form.submit(); };
-            if (window.Swal) Swal.fire({title: form.dataset.confirm || 'Are you sure?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#850625', confirmButtonText: 'Yes, continue'}).then(result => result.isConfirmed && submit());
+            if (window.Swal) Swal.fire({title: form.dataset.confirm || 'Are you sure?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ff8a0a', confirmButtonText: 'Yes, continue'}).then(result => result.isConfirmed && submit());
             else if (confirm(form.dataset.confirm || 'Are you sure?')) submit();
         });
 

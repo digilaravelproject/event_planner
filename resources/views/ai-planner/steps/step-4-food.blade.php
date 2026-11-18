@@ -106,45 +106,39 @@
             <div class="space-y-0.5">
                 <span class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                     <span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#850625] text-white text-[10px] font-bold">1</span>
-                    <span>Please Choose Your Food Preference</span>
+                    <span>Choose Menu Items from <span class="text-[#850625]" x-text="getSelectedCateringVendor()?.name || 'Selected Caterer'"></span></span>
                 </span>
-                <p class="text-[11px] sm:text-xs text-slate-500">Select dietary choice to view curated catering packages tailored to your tradition.</p>
+                <p class="text-[11px] sm:text-xs text-slate-500">Only menu items configured by the selected vendor are shown. Select or deselect any item.</p>
             </div>
-            <span x-show="planner.foodPreference" class="text-[10px] sm:text-xs font-bold text-[#850625] bg-rose-50 border border-rose-200 px-3 py-1 rounded-full flex items-center gap-1.5">
+            <span x-show="planner.foodItems.length" class="text-[10px] sm:text-xs font-bold text-[#850625] bg-rose-50 border border-rose-200 px-3 py-1 rounded-full flex items-center gap-1.5">
                 <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                <span x-text="getFoodPreferenceTitle()"></span>
+                <span x-text="planner.foodItems.length + ' selected'"></span>
             </span>
         </div>
 
-        <!-- 4 Preference Cards Grid (Dynamic from Admin Question Options) -->
+        <!-- Vendor-managed menu items only; there is intentionally no static fallback catalogue. -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             <template x-for="pref in foodPreferences" :key="pref.id">
-                <div @click="selectFoodPreference(pref.id)"
-                    :class="planner.foodPreference === pref.id 
+                <div @click="toggleFoodItem(pref)"
+                    :class="isFoodSelected(pref)
                         ? 'border-[#850625] bg-gradient-to-br from-rose-50/60 to-amber-50/40 shadow-lg ring-2 ring-[#850625]/25 scale-[1.02]' 
                         : 'border-slate-200 bg-white hover:border-rose-300 hover:shadow-md'"
                     class="rounded-2xl border-2 p-3.5 sm:p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-3 relative group select-none">
                     
                     <!-- Selection Indicator Dot / Check -->
                     <div class="flex items-start justify-between gap-2">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
-                            :class="{
-                                'bg-emerald-100 text-emerald-700': pref.typeKey === 'pure_veg',
-                                'bg-amber-100 text-amber-800': pref.typeKey === 'jain',
-                                'bg-rose-100 text-rose-800': pref.typeKey === 'non_veg',
-                                'bg-indigo-100 text-indigo-700': pref.typeKey === 'mixed'
-                            }">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 bg-emerald-100 text-emerald-700">
                             <i :class="pref.icon" class="text-base sm:text-lg"></i>
                         </div>
 
                         <div class="flex items-center gap-1.5">
                             <span class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
-                                :class="planner.foodPreference === pref.id 
+                                :class="isFoodSelected(pref)
                                     ? 'bg-[#850625] text-white' 
                                     : 'bg-slate-100 text-slate-600 group-hover:bg-rose-100 group-hover:text-[#850625]'"
                                 x-text="pref.badge"></span>
                             <div class="w-4 h-4 rounded-full border flex items-center justify-center text-[9px] font-bold"
-                                :class="planner.foodPreference === pref.id 
+                                :class="isFoodSelected(pref)
                                     ? 'border-[#850625] bg-[#850625] text-white' 
                                     : 'border-slate-300 text-transparent'">
                                 ✓
@@ -162,31 +156,21 @@
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
                         <span class="font-bold text-slate-400 group-hover:text-slate-600 transition-colors" x-text="pref.tag"></span>
                         <span class="font-bold flex items-center gap-1"
-                            :class="planner.foodPreference === pref.id ? 'text-[#850625]' : 'text-slate-400 group-hover:text-[#850625]'">
-                            <span x-text="planner.foodPreference === pref.id ? 'Selected' : 'Select'"></span>
+                            :class="isFoodSelected(pref) ? 'text-[#850625]' : 'text-slate-400 group-hover:text-[#850625]'">
+                            <span x-text="isFoodSelected(pref) ? 'Selected' : 'Select'"></span>
                             <i class="fa-solid fa-arrow-right text-[8px]"></i>
                         </span>
                     </div>
                 </div>
             </template>
         </div>
-    </div>
-
-    <!-- Unlock Prompt if No Preference Selected Yet -->
-    <div x-show="!planner.foodPreference" 
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 translate-y-2"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        class="bg-gradient-to-r from-rose-50 via-amber-50 to-rose-50 border-2 border-dashed border-[#850625]/30 rounded-2xl p-6 text-center space-y-2">
-        <div class="w-12 h-12 mx-auto rounded-full bg-[#850625]/10 text-[#850625] flex items-center justify-center text-xl shadow-xs">
-            <i class="fa-solid fa-hand-pointer animate-bounce"></i>
+        <div x-show="foodPreferences.length === 0" class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center text-sm font-semibold text-amber-900">
+            This vendor has not added any menu items yet.
         </div>
-        <h4 class="text-sm sm:text-base font-extrabold text-slate-900">Step 1: Choose Your Food Preference Above</h4>
-        <p class="text-xs text-slate-600 max-w-md mx-auto">Please click your dietary choice above to unlock catering packages tailored for your celebration.</p>
     </div>
 
-    <!-- TAB 1: Vendor Food Packages (Revealed after Preference is Chosen) -->
-    <div id="catering-packages-section" x-show="planner.foodPreference" 
+    <!-- Vendor packages are visible immediately for the selected caterer. -->
+    <div id="catering-packages-section"
         x-transition:enter="transition ease-out duration-300 transform"
         x-transition:enter-start="opacity-0 translate-y-4"
         x-transition:enter-end="opacity-100 translate-y-0"
@@ -196,7 +180,7 @@
             <div class="space-y-0.5">
                 <span class="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
                     <span class="flex items-center justify-center w-5 h-5 rounded-full bg-[#850625] text-white text-[10px] font-bold">2</span>
-                    <span>Choose Catering Package for <span class="text-[#850625]" x-text="getFoodPreferenceTitle()"></span></span>
+                    <span>Choose Catering Package from <span class="text-[#850625]" x-text="getSelectedCateringVendor()?.name || 'Selected Caterer'"></span></span>
                 </span>
                 <p class="text-[11px] sm:text-xs text-slate-500">Curated menu packages with live ranges based on your guest count.</p>
             </div>
@@ -206,8 +190,8 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <template x-for="pkg in getFoodPackages()" :key="pkg.id + '-' + planner.foodPreference">
-                <div @click="planner.selectedFoodPackageId = pkg.id; plannerError = ''"
+            <template x-for="pkg in getFoodPackages()" :key="pkg.id + '-' + planner.selectedVendorId">
+                <div @click="planner.selectedFoodPackageId = planner.selectedFoodPackageId === pkg.id ? null : pkg.id; plannerError = ''"
                     :class="planner.selectedFoodPackageId === pkg.id ? 'border-[#850625] shadow-2xl ring-2 ring-[#850625]/25 bg-rose-50/20 scale-[1.01]' : 'border-slate-200 bg-white hover:border-rose-200 hover:shadow-lg'"
                     class="rounded-3xl border-2 p-6 transition-all cursor-pointer flex flex-col justify-between space-y-5 relative group">
 
@@ -220,7 +204,7 @@
                         <div class="border-b border-slate-100 pb-3">
                             <div class="flex items-center justify-between gap-2">
                                 <h3 class="text-xl font-extrabold text-slate-900 font-serif-luxury" x-text="pkg.name"></h3>
-                                <span class="text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md bg-rose-100 text-[#850625]" x-text="getFoodPreferenceTitle()"></span>
+                                <span class="text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-md bg-rose-100 text-[#850625]">Catering Package</span>
                             </div>
                             <p class="text-xs text-slate-500 mt-1 line-clamp-2" x-text="pkg.tagline || 'Curated food menu package for your event.'"></p>
                         </div>
@@ -249,15 +233,18 @@
                         <button type="button" 
                             :class="planner.selectedFoodPackageId === pkg.id ? 'bg-[#850625] text-white shadow-md' : 'bg-slate-100 text-slate-700 group-hover:bg-[#850625] group-hover:text-white'"
                             class="w-full py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-2">
-                            <span x-text="planner.selectedFoodPackageId === pkg.id ? 'Selected Package' : 'Select Package'"></span>
+                            <span x-text="planner.selectedFoodPackageId === pkg.id ? 'Deselect Package' : 'Select Package'"></span>
                         </button>
                     </div>
                 </div>
             </template>
         </div>
+        <div x-show="getFoodPackages().length === 0" class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center text-sm font-semibold text-amber-900">
+            This vendor has not created any packages yet.
+        </div>
 
         <!-- 3. Extras & Live Food Counters -->
-        <div class="space-y-4 pt-6 border-t border-slate-200">
+        <div x-show="getFoodExtras().length > 0" class="space-y-4 pt-6 border-t border-slate-200">
             <div>
                 <span class="text-xs font-extrabold text-slate-700 uppercase tracking-wider block">3. Add Extra Live Food Counters & Extras</span>
                 <p class="text-xs text-slate-500">Enhance your catering experience with live counters & extra services.</p>
@@ -341,7 +328,7 @@
                 </div>
                 <h3 class="text-xl font-extrabold text-slate-900 font-serif-luxury" x-text="calculateCateringCostRange().formattedTotalRange"></h3>
                 <p class="text-xs text-slate-600">
-                    Calculated for <span class="font-bold text-slate-900" x-text="calculateCateringCostRange().guests + ' Guests'"></span> based on <span class="font-bold text-[#850625]" x-text="(planner.foodPreference ? getFoodPreferenceTitle() + ' • ' : '') + (planner.cateringMode === 'package' ? (getSelectedPackage()?.name || 'Package') : 'Custom Menu')"></span>
+                    Calculated for <span class="font-bold text-slate-900" x-text="calculateCateringCostRange().guests + ' Guests'"></span> based on <span class="font-bold text-[#850625]" x-text="getCombinedFoodAnswer() || 'No food selection'"></span>
                     <template x-if="planner.selectedFoodExtras.length > 0">
                         <span>+ <span class="font-bold text-rose-800" x-text="planner.selectedFoodExtras.length + ' Extras'"></span></span>
                     </template>

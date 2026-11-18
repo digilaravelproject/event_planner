@@ -37,6 +37,8 @@ return [
 
     'openrouter' => [
         'url' => env('OPENROUTER_URL', 'https://openrouter.ai/api/v1'),
+        'connect_timeout' => (int) env('OPENROUTER_CONNECT_TIMEOUT', 3),
+        'timeout' => (int) env('OPENROUTER_TIMEOUT', 10),
     ],
 
     'razorpay' => [

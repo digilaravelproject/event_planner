@@ -2,14 +2,46 @@
 
 @section('title', $plan->title.' - Shaadi Sense')
 
+@push('styles')
+<style>
+    @media (min-width: 1024px) {
+        html,
+        body {
+            height: 100%;
+            overflow: hidden !important;
+        }
+
+        #plan-scroll-shell {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #plan-scroll-grid {
+            height: 100%;
+            min-height: 0;
+            align-items: stretch;
+        }
+
+        #plan-sidebar-scroll,
+        #plan-main-scroll {
+            height: 100%;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-gutter: stable;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 @php
     $content = $presentation['content'];
     $editablePlan = $plan->parent ?: $plan;
 @endphp
-<div class="min-h-screen pt-24 md:pt-28 pb-16 px-4 sm:px-6 lg:px-8" style="background: radial-gradient(circle at 85% 10%, rgba(226,184,47,.12), transparent 26rem), radial-gradient(circle at 8% 35%, rgba(158,20,59,.09), transparent 28rem), #fbf7f2;">
-    <div class="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <aside class="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-28 rounded-3xl p-6 text-white overflow-hidden relative" style="background: linear-gradient(165deg, #a00b38 0%, #790521 52%, #4d0114 100%); color: #fff; box-shadow: 0 26px 60px rgba(87, 2, 25, .32);">
+<div id="plan-scroll-shell" class="min-h-screen pt-24 md:pt-28 pb-16 lg:pb-5 px-4 sm:px-6 lg:px-8" style="background: radial-gradient(circle at 85% 10%, rgba(226,184,47,.12), transparent 26rem), radial-gradient(circle at 8% 35%, rgba(158,20,59,.09), transparent 28rem), #fbf7f2;">
+    <div id="plan-scroll-grid" class="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <aside id="plan-sidebar-scroll" class="lg:col-span-4 xl:col-span-3 rounded-3xl p-6 text-white overflow-hidden relative" style="background: linear-gradient(165deg, #a00b38 0%, #790521 52%, #4d0114 100%); color: #fff; box-shadow: 0 26px 60px rgba(87, 2, 25, .32);">
             <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#D4AF37]/15 blur-2xl"></div>
             <div class="relative">
                 <div class="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-widest text-[#D4AF37]"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ $content['brand_label'] }}</div>
@@ -45,7 +77,7 @@
             </div>
         </aside>
 
-        <main class="lg:col-span-8 xl:col-span-9 space-y-6">
+        <main id="plan-main-scroll" class="lg:col-span-8 xl:col-span-9 space-y-6 lg:pr-2">
             @if(session('success'))<div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-semibold text-emerald-700">{{ session('success') }}</div>@endif
 
             <section class="rounded-3xl p-7 sm:p-10 text-center relative overflow-hidden" style="background: linear-gradient(135deg, #ffffff 0%, #fffaf7 58%, #fbe8ed 100%); border: 1px solid #f5cfd8; box-shadow: 0 20px 45px rgba(95, 7, 34, .13);">

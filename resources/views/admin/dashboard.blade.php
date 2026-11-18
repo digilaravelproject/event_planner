@@ -14,7 +14,7 @@
 <div class="mt-5 space-y-5">
     @include('admin.partials.alerts')
 
-    <section class="relative overflow-hidden rounded-3xl border border-[#d4af37]/25 p-7 text-white shadow-xl sm:p-8" style="background: linear-gradient(120deg, #4a0718 0%, #850625 58%, #a9113a 100%);">
+    <section class="admin-orange-panel relative overflow-hidden rounded-3xl border p-7 text-white shadow-xl sm:p-8">
         <div class="absolute -right-16 -top-24 h-72 w-72 rounded-full border-[3rem] border-[#d4af37]/10"></div>
         <div class="absolute bottom-0 right-1/3 h-32 w-32 translate-y-20 rounded-full bg-amber-300/10 blur-xl"></div>
         <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -33,13 +33,13 @@
 
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach([
-            ['Users', $metrics['totalUsers'], ($metrics['userGrowth'] >= 0 ? '+' : '').$metrics['userGrowth'].'% month growth', 'US', '#850625', route('admin.users.index')],
-            ['Generated plans', $metrics['totalPlans'], $metrics['plansThisMonth'].' created this month', 'PL', '#850625', null],
-            ['Active vendors', $metrics['activeVendors'], $vendorCategories->count().' service categories', 'VE', '#9f6f08', route('admin.dynamic-vendors.index')],
-            ['Active subscriptions', $metrics['activeSubscribers'], $money($metrics['totalRevenue']).' recorded revenue', 'SU', '#b7791f', route('admin.subscriptions.index')],
-        ] as [$label, $value, $detail, $mark, $colour, $url])
+            ['Users', $metrics['totalUsers'], ($metrics['userGrowth'] >= 0 ? '+' : '').$metrics['userGrowth'].'% month growth', 'US', route('admin.users.index')],
+            ['Generated plans', $metrics['totalPlans'], $metrics['plansThisMonth'].' created this month', 'PL', null],
+            ['Active vendors', $metrics['activeVendors'], $vendorCategories->count().' service categories', 'VE', route('admin.dynamic-vendors.index')],
+            ['Active subscriptions', $metrics['activeSubscribers'], $money($metrics['totalRevenue']).' recorded revenue', 'SU', route('admin.subscriptions.index')],
+        ] as [$label, $value, $detail, $mark, $url])
             <a @if($url) href="{{ $url }}" @endif class="admin-dashboard-stat group rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-                <div class="flex items-start justify-between gap-4"><div><div class="text-[10px] font-extrabold uppercase tracking-[.16em] text-slate-400">{{ $label }}</div><div class="mt-2 text-3xl font-black tracking-tight text-slate-900">{{ number_format((float) $value, 0) }}</div></div><span class="flex h-11 w-11 items-center justify-center rounded-xl text-xs font-black text-white" style="background: {{ $colour }}">{{ $mark }}</span></div>
+                <div class="flex items-start justify-between gap-4"><div><div class="text-[10px] font-extrabold uppercase tracking-[.16em] text-slate-400">{{ $label }}</div><div class="mt-2 text-3xl font-black tracking-tight text-slate-900">{{ number_format((float) $value, 0) }}</div></div><span class="admin-orange-icon flex h-11 w-11 items-center justify-center rounded-xl text-xs font-black text-white">{{ $mark }}</span></div>
                 <div class="mt-4 border-t border-slate-100 pt-3 text-xs font-semibold text-slate-500">{{ $detail }}</div>
             </a>
         @endforeach
@@ -56,14 +56,14 @@
                     @php($height = max(6, ($revenueData['values'][$index] / $maxPlanValue) * 100))
                     <div class="flex h-full min-w-0 flex-col justify-end text-center">
                         <div class="mb-2 truncate text-[9px] font-bold text-slate-500" title="{{ $money((float) $revenueData['values'][$index]) }}">{{ $money((float) $revenueData['values'][$index]) }}</div>
-                        <div class="group relative mx-auto w-full max-w-14 overflow-hidden rounded-t-xl shadow-sm" style="height: {{ $height }}%; background: linear-gradient(to top, #850625, #d4af37);"><span class="absolute inset-x-0 bottom-2 text-[10px] font-black text-white">{{ $revenueData['plans'][$index] }}</span></div>
+                        <div class="admin-chart-bar group relative mx-auto w-full max-w-14 overflow-hidden rounded-t-xl shadow-sm" style="height: {{ $height }}%;"><span class="absolute inset-x-0 bottom-2 text-[10px] font-black text-white">{{ $revenueData['plans'][$index] }}</span></div>
                         <div class="mt-2 truncate text-[9px] font-bold uppercase text-slate-400">{{ $label }}</div>
                     </div>
                 @endforeach
             </div>
         </article>
 
-        <article class="rounded-3xl p-6 text-white shadow-sm" style="background: linear-gradient(155deg, #850625, #520116);">
+        <article class="admin-orange-panel rounded-3xl p-6 text-white shadow-sm">
             <div class="text-[10px] font-extrabold uppercase tracking-[.18em] text-amber-300">Service catalogue</div><h2 class="mt-1 text-xl font-black">Active vendor mix</h2><p class="mt-1 text-xs text-rose-100/70">Top categories from active vendor records.</p>
             <div class="mt-6 space-y-4">
                 @forelse($vendorCategories as $category => $count)
@@ -79,7 +79,7 @@
     <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <article class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm xl:col-span-2">
             <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5"><div><div class="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#850625]">Latest activity</div><h2 class="mt-1 text-lg font-black text-slate-900">Recently generated plans</h2></div><span class="rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-[#850625]" style="color: Black !important;">{{ $metrics['totalPlans'] }} total</span></div>
-            <div class="divide-y divide-slate-100">
+            <div class="admin-data-list divide-y divide-slate-100">
                 @forelse($recentPlans as $recentPlan)
                     <a href="{{ route('admin.users.plans.show', $recentPlan) }}" class="grid gap-2 px-6 py-4 transition hover:bg-slate-50 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-5"><div class="min-w-0"><div class="truncate text-sm font-extrabold text-slate-800">{{ $recentPlan->title }}</div><div class="mt-1 truncate text-xs text-slate-400">{{ $recentPlan->user?->name ?? 'Deleted user' }} · {{ number_format($recentPlan->guest_count) }} guests</div></div><div class="text-sm font-black text-[#850625]">{{ $money((float) $recentPlan->total_cost) }}</div><div class="text-xs text-slate-400">{{ $recentPlan->created_at->diffForHumans() }}</div></a>
                 @empty
@@ -90,7 +90,7 @@
 
         <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div><div class="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#3950a2]">Customer activity</div><h2 class="mt-1 text-lg font-black text-slate-900">Newest users</h2></div>
-            <div class="mt-5 space-y-3">@forelse($recentUsers as $recentUser)<div class="flex items-center gap-3 rounded-2xl bg-slate-50 p-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-black text-[#3950a2]">{{ str($recentUser->name)->substr(0, 1)->upper() }}</span><div class="min-w-0 flex-1"><div class="truncate text-xs font-extrabold text-slate-700">{{ $recentUser->name }}</div><div class="truncate text-[10px] text-slate-400">{{ ucfirst($recentUser->subscriptionFlag()) }}</div></div><span class="text-[10px] text-slate-400">{{ $recentUser->created_at->diffForHumans(null, null, true) }}</span></div>@empty<div class="text-xs text-slate-400">No users yet.</div>@endforelse</div>
+            <div class="admin-data-list mt-5 space-y-3">@forelse($recentUsers as $recentUser)<div class="flex items-center gap-3 rounded-2xl bg-slate-50 p-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-black text-[#3950a2]">{{ str($recentUser->name)->substr(0, 1)->upper() }}</span><div class="min-w-0 flex-1"><div class="truncate text-xs font-extrabold text-slate-700">{{ $recentUser->name }}</div><div class="truncate text-[10px] text-slate-400">{{ ucfirst($recentUser->subscriptionFlag()) }}</div></div><span class="text-[10px] text-slate-400">{{ $recentUser->created_at->diffForHumans(null, null, true) }}</span></div>@empty<div class="text-xs text-slate-400">No users yet.</div>@endforelse</div>
         </article>
     </section>
 </div>

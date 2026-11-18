@@ -137,7 +137,7 @@ class EventPlanningService
                     'attributes' => $attributes,
                     'attribute_definitions' => data_get($vendor->vendor_json, 'attributes', []),
                     'offerings' => data_get($vendor->vendor_json, 'offerings', []),
-                    'food_packages' => data_get($vendor->vendor_json, 'food_packages', []),
+                    'food_packages' => $this->normalizedFoodPackages($vendor),
                     'food_extras' => data_get($vendor->vendor_json, 'food_extras', []),
                     'rates_saved_at' => $vendor->updated_at?->toIso8601String(),
                     'matched_requirement_keys' => $matches,
@@ -417,8 +417,8 @@ class EventPlanningService
             ];
         })->values();
 
-        if ($menuItems->isEmpty() && ! empty($answers['selected_food_package'])) {
-            $menuItems = collect(app(VendorCostingService::class)->foodPackageLines($answers, $vendors, $guestCount));
+        if (! empty($answers['selected_food_package']) || ! empty($answers['selected_food_extras'])) {
+            $menuItems = $menuItems->concat(app(VendorCostingService::class)->foodPackageLines($answers, $vendors, $guestCount));
         }
         if ($menuItems->isEmpty()) {
             return $summary;
@@ -442,7 +442,7 @@ class EventPlanningService
         } else {
             $costing->put($cateringIndex, $catering);
         }
-        // A custom menu replaces all AI catering allocations, not just the first one.
+        // Customer-selected packages and menu items replace all AI catering allocations.
         $costing = $costing->filter(fn (array $item, $index): bool => $index === ($cateringIndex === false ? $costing->keys()->last() : $cateringIndex)
             || ! preg_match('/cater|food|menu/i', (string) ($item['category'] ?? '')));
 
@@ -462,5 +462,21 @@ class EventPlanningService
         ])->values()->all();
 
         return $summary;
+    }
+
+    private function normalizedFoodPackages(DynamicVendor $vendor): array
+    {
+        $packages = collect(data_get($vendor->vendor_json, 'packages', []))
+            ->filter(fn ($package): bool => is_array($package) && ! empty($package['id']))
+            ->map(fn (array $package): array => [
+                'id' => (string) $package['id'],
+                'name' => (string) ($package['name'] ?? 'Package'),
+                'min_price_per_plate' => max(0, (float) ($package['min_price'] ?? 0)),
+                'max_price_per_plate' => max(0, (float) ($package['max_price'] ?? $package['min_price'] ?? 0)),
+                'tagline' => (string) ($package['description'] ?? ''),
+                'items' => array_values((array) ($package['inclusions'] ?? [])),
+            ])->values()->all();
+
+        return $packages !== [] ? $packages : array_values((array) data_get($vendor->vendor_json, 'food_packages', []));
     }
 }

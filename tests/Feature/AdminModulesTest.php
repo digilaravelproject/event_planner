@@ -123,8 +123,15 @@ class AdminModulesTest extends TestCase
 
         app(OpenRouterService::class)->chat([['role' => 'user', 'content' => 'Plan my event.']]);
 
+        $clientMethod = (new \ReflectionClass(OpenRouterService::class))->getMethod('client');
+        $clientMethod->setAccessible(true);
+        $clientOptions = $clientMethod->invoke(app(OpenRouterService::class), 'test-key')->getOptions();
+        $this->assertSame((int) config('services.openrouter.timeout'), $clientOptions['timeout']);
+        $this->assertSame((int) config('services.openrouter.timeout'), $clientOptions['curl'][CURLOPT_TIMEOUT]);
+
         Http::assertSent(fn ($request) => $request->url() === 'https://openrouter.ai/api/v1/chat/completions'
             && $request['model'] === 'openrouter/auto'
+            && $request['max_tokens'] === 1800
             && data_get($request->data(), 'messages.0.content') === 'Use only supplied vendor data.');
     }
 

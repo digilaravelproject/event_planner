@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('content')
 <div class="admin-page space-y-5">
-    <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-r from-[#1d2e68] via-[#3950a2] to-[#14758a] p-7 text-white shadow-xl sm:p-9">
+    <section class="admin-orange-panel relative overflow-hidden rounded-[28px] p-7 text-white shadow-xl sm:p-9">
         <div class="absolute -right-16 -top-20 h-64 w-64 rounded-full border-[36px] border-white/5"></div>
         <div class="relative flex flex-wrap items-end justify-between gap-6"><div><p class="text-[10px] font-extrabold uppercase tracking-[.28em] text-emerald-300">Live marketplace intelligence</p><h2 class="mt-2 text-3xl font-black sm:text-4xl">Vendor Analytics</h2><p class="mt-2 max-w-2xl text-sm text-white">Current vendor inventory, user activity and planning demand for the selected period.</p></div><div class="rounded-2xl border border-white/15 bg-white/10 px-5 py-3 backdrop-blur"><p class="text-[9px] font-bold uppercase tracking-widest text-white">Reporting window</p><p class="mt-1 text-sm font-extrabold">{{ $from->format('d M Y') }} — {{ $to->format('d M Y') }}</p></div></div>
     </section>
@@ -33,7 +33,7 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const analyticsCharts=@json($charts);const palette=['#850625','#d4af37','#b45309','#e11d48','#9f6f08','#6b041e','#f97316','#78716c'];
+const analyticsCharts=@json($charts);const palette=['#ff8a0a','#ffad33','#e96d00','#ffc46b','#f97316','#fb923c','#fdba74','#c65d00'];
 Object.entries(analyticsCharts).forEach(([key,data])=>{const canvas=document.getElementById(`chart-${key}`);const circular=key==='categories';const empty=!data.values.length||data.values.every(value=>Number(value)===0);new Chart(canvas,{type:circular?'doughnut':'bar',data:{labels:empty?['No data']:data.labels,datasets:[{label:'Total',data:empty?[1]:data.values,backgroundColor:empty?['#e2e8f0']:(circular?palette:palette[0]),borderRadius:7,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:circular,position:'bottom'},tooltip:{enabled:!empty}},cutout:circular?'68%':undefined,scales:circular?{}:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:'#eef2f7'}},x:{grid:{display:false}}}}});});
 const period=document.getElementById('analytics-period');function customDates(){document.querySelectorAll('.custom-date').forEach(el=>el.classList.toggle('hidden',period.value!=='custom'));}period.addEventListener('change',customDates);customDates();
 </script>

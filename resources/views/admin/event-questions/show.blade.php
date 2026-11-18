@@ -32,7 +32,7 @@
                     @php($optionDetails = (array) data_get($question->option_metadata, $optionValue, []))
                     <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3">
                         <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-xs font-extrabold text-indigo-700">{{ $index + 1 }}</span>
-                        <span class="min-w-0 flex-1"><span class="block break-words text-sm font-semibold text-slate-700">{{ $option }}</span>@if($question->vendor_attribute_key === 'menu_card_items')<span class="mt-1 block text-xs text-slate-500">{{ $optionDetails['category'] ?? 'Menu Items' }} · ₹{{ number_format((float) ($optionDetails['cost'] ?? 0), 2) }} per guest</span>@endif</span>
+                        <span class="min-w-0 flex-1"><span class="block break-words text-sm font-semibold text-slate-700" style="color: black !important;">{{ $option }}</span>@if($question->vendor_attribute_key === 'menu_card_items')<span class="mt-1 block text-xs text-slate-500">{{ $optionDetails['category'] ?? 'Menu Items' }} · ₹{{ number_format((float) ($optionDetails['cost'] ?? 0), 2) }} per guest</span>@endif</span>
                     </div>
                 @empty
                     <p class="text-sm text-slate-400">This question does not use predefined options.</p>
@@ -55,7 +55,7 @@
 
         <div class="mt-8 flex justify-end gap-3 border-t border-slate-100 pt-6">
             <a href="{{ route('admin.event-questions.index') }}" class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700">Back</a>
-            <a href="{{ route('admin.event-questions.edit', $question) }}" class="admin-primary-button rounded-xl px-5 py-2.5 text-sm font-bold text-white">Edit Question</a>
+            <a href="{{ route('admin.event-questions.edit', $question) }}" class="admin-action-icon" title="Edit question" aria-label="Edit {{ $question->question }}"><i class="fa-solid fa-pen" aria-hidden="true"></i></a>
         </div>
     </section>
 </div>

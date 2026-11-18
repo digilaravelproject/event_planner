@@ -137,18 +137,32 @@ class VendorCostingService
             $selection = json_decode($selection, true) ?: [];
         }
         $selectedVendors = array_map('intval', (array) ($answers['selected_caterers'] ?? []));
-        $vendor = collect($vendors)->first(fn ($vendor) => in_array($vendor['id'], $selectedVendors, true)
-            && collect($vendor['food_packages'] ?? [])->contains('id', $selection['id'] ?? ''));
-        $package = $vendor ? collect($vendor['food_packages'])->firstWhere('id', $selection['id']) : null;
-        if (! $package) {
+        $selectedExtras = array_values((array) ($answers['selected_food_extras'] ?? []));
+        $vendor = collect($vendors)->first(function ($vendor) use ($selectedVendors, $selection): bool {
+            $packages = collect($vendor['food_packages'] ?? $vendor['packages'] ?? []);
+
+            return in_array((int) $vendor['id'], $selectedVendors, true)
+                && $packages->contains('id', $selection['id'] ?? '');
+        });
+        if (! $vendor && $selection === []) {
+            $vendor = collect($vendors)->first(fn ($candidate): bool => in_array((int) $candidate['id'], $selectedVendors, true)
+                && collect($candidate['food_extras'] ?? [])->pluck('id')->intersect($selectedExtras)->isNotEmpty());
+        }
+        $package = $vendor
+            ? collect($vendor['food_packages'] ?? $vendor['packages'] ?? [])->firstWhere('id', $selection['id'] ?? null)
+            : null;
+        if ($selection !== [] && ! $package) {
             return [['name' => 'Selected food package', 'value' => 'No matching saved package rate for the selected vendor. Request a quote.', 'cost' => 0, 'pricing_status' => 'quote_required']];
         }
-        $services = [[
+        if (! $vendor) {
+            return [];
+        }
+        $services = $package ? [[
             'name' => $package['name'], 'min' => $package['min_price_per_plate'] ?? null,
             'max' => $package['max_price_per_plate'] ?? null, 'unit' => 'per_guest',
-        ]];
+        ]] : [];
         foreach ($vendor['food_extras'] ?? [] as $extra) {
-            if (in_array($extra['id'] ?? '', $answers['selected_food_extras'] ?? [], true)
+            if (in_array($extra['id'] ?? '', $selectedExtras, true)
                 && ! in_array($extra['name'], $package['items'] ?? [], true)) {
                 $services[] = ['name' => $extra['name'], 'min' => $extra['min_price'] ?? null, 'max' => $extra['max_price'] ?? null,
                     'unit' => ($extra['unit'] ?? '') === 'per_plate' ? 'per_guest' : ($extra['unit'] ?? '')];

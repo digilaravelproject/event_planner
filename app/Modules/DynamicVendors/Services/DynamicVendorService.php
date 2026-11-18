@@ -2,6 +2,7 @@
 
 namespace App\Modules\DynamicVendors\Services;
 
+use App\Services\RichTextSanitizer;
 use App\Modules\DynamicVendors\Models\DynamicVendor;
 use App\Modules\DynamicVendors\Models\DynamicVendorVersion;
 use App\Modules\DynamicVendors\Repositories\DynamicVendorRepositoryInterface;
@@ -222,6 +223,34 @@ class DynamicVendorService
             ];
         }
 
+        $packages = [];
+        foreach ($input['packages'] ?? [] as $package) {
+            $name = trim((string) ($package['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+            $inclusions = is_array($package['inclusions'] ?? null)
+                ? $package['inclusions']
+                : preg_split('/\r\n|\r|\n|,/', (string) ($package['inclusions'] ?? ''));
+            $packages[] = [
+                'id' => trim((string) ($package['id'] ?? '')) ?: (string) Str::uuid(),
+                'name' => $name,
+                'min_price' => $this->nullableNumber($package['min_price'] ?? null) ?? 0,
+                'max_price' => $this->nullableNumber($package['max_price'] ?? null) ?? $this->nullableNumber($package['min_price'] ?? null) ?? 0,
+                'duration' => trim((string) ($package['duration'] ?? '')),
+                'description' => trim((string) ($package['description'] ?? '')),
+                'inclusions' => array_values(array_filter(array_map('trim', $inclusions ?: []))),
+            ];
+        }
+
+        $additionalDetails = collect($input['additional_details'] ?? [])
+            ->map(fn (array $detail): array => [
+                'title' => trim((string) ($detail['title'] ?? '')),
+                'content' => app(RichTextSanitizer::class)->sanitize((string) ($detail['content'] ?? '')),
+            ])
+            ->filter(fn (array $detail): bool => $detail['title'] !== '' || strip_tags($detail['content']) !== '')
+            ->values()->all();
+
         return [
             'schema_version' => 1,
             'identity' => [
@@ -232,7 +261,9 @@ class DynamicVendorService
             'offerings' => $offerings ?: data_get($existing, 'offerings', []),
             'food_packages' => $foodPackages ?: data_get($existing, 'food_packages', []),
             'food_extras' => $foodExtras ?: data_get($existing, 'food_extras', []),
+            'packages' => array_key_exists('packages', $input) ? $packages : data_get($existing, 'packages', []),
             'media' => ['images' => array_values($images)],
+            'additional_details' => array_key_exists('additional_details', $input) ? $additionalDetails : data_get($existing, 'additional_details', []),
             'seo' => [
                 'short_description' => $input['short_description'] ?? null,
                 'description' => $input['description'] ?? null,

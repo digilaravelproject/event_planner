@@ -42,9 +42,8 @@
             <form action="{{ route('admin.vendor-enquiries.destroy', $vendorEnquiry) }}" method="POST" onsubmit="return confirm('Permanently delete this enquiry?')">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 px-3.5 py-2.5 text-xs font-bold transition">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span>Delete</span>
+                <button type="submit" class="admin-action-icon admin-action-icon-danger" title="Delete enquiry" aria-label="Delete enquiry from {{ $vendorEnquiry->business_name }}">
+                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                 </button>
             </form>
         </div>

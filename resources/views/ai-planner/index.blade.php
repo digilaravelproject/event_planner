@@ -65,8 +65,8 @@
     totalSteps: {{ count($plannerSteps) }},
     plannerSteps: @js($plannerSteps),
     dynamicAnswers: @js($genericInitialAnswers),
-    maxVisitedStep: {{ max($initialStep ?? 1, !empty($hasPrefilledGuests) ? ($stepNumbers['guest_capacity'] ?? 3) : ($initialStep ?? 1)) }},
-    autoSkipGuests: @js((bool) ($hasPrefilledGuests ?? false)),
+    maxVisitedStep: {{ $initialStep ?? 1 }},
+    autoSkipGuests: false,
     guestStepNumber: {{ $stepNumbers['guest_capacity'] ?? 3 }},
     isCalculating: false,
     calculationStage: 0,
@@ -220,7 +220,7 @@
             wedding_tradition: this.planner.culture,
             decoration_type: this.planner.setting || this.planner.decorTheme,
             venue_setting: this.planner.setting,
-            food_type: this.planner.foodPreference ? this.getFoodPreferenceTitle() : '',
+            food_type: this.getCombinedFoodAnswer(),
             event_timeline: this.planner.timeline,
         };
         const value = Object.prototype.hasOwnProperty.call(answers, step.code) ? answers[step.code] : this.dynamicAnswers[step.code];
@@ -234,6 +234,10 @@
         }
         if (!this.planner.selectedVendorId || !this.planner.selectedVendorIds.includes(this.planner.selectedVendorId)) {
             this.planner.selectedVendorId = this.planner.selectedVendorIds[0] || (this.cateringVendors[0]?.id || null);
+        }
+        const initialFoodPackages = this.getFoodPackages();
+        if (this.planner.selectedFoodPackageId && !initialFoodPackages.some(pkg => pkg.id === this.planner.selectedFoodPackageId)) {
+            this.planner.selectedFoodPackageId = null;
         }
         if (this.planner.eventDate && this.planner.eventDate < this.todayDate) {
             this.planner.eventDate = '';
@@ -301,6 +305,9 @@
             this.planner.selectedVendorIds.push(vendor.id);
         }
         this.planner.selectedVendorId = vendor.id;
+        this.planner.selectedFoodPackageId = null;
+        this.planner.selectedFoodExtras = [];
+        this.planner.foodItems = this.planner.foodItems.filter(item => item.vendor_id === vendor.id);
         this.plannerError = '';
     },
     removeCateringVendor(vendorId) {
@@ -316,95 +323,35 @@
     selectedCateringVendors() {
         return this.cateringVendors.filter(vendor => this.planner.selectedVendorIds.includes(vendor.id));
     },
-    managedFoodPreferences: @js($foodPreferences ?? []),
     get foodPreferences() {
-        const adminOptions = (this.managedFoodPreferences && this.managedFoodPreferences.length)
-            ? this.managedFoodPreferences
-            : (this.managedOptions['food_type']?.option_details || []);
-
-        if (adminOptions && adminOptions.length) {
-            return adminOptions.map(opt => {
-                const title = String(opt.title || opt.name || opt.value || '').trim();
-                const lower = title.toLowerCase();
-                let defaultIcon = 'fa-solid fa-leaf';
-                let defaultBadge = 'Catering';
-                let defaultTag = 'Special Feast';
-                let typeKey = 'pure_veg';
-
-                if (lower.includes('jain')) {
-                    defaultIcon = 'fa-solid fa-seedling';
-                    defaultBadge = 'Jain Special';
-                    defaultTag = 'No Onion • No Garlic';
-                    typeKey = 'jain';
-                } else if (lower.includes('non') && (lower.includes('veg') || lower.includes('meat') || lower.includes('chicken') || lower.includes('mutton') || lower.includes('halal'))) {
-                    defaultIcon = 'fa-solid fa-drumstick-bite';
-                    defaultBadge = 'Non-Veg';
-                    defaultTag = 'Gourmet Meats';
-                    typeKey = 'non_veg';
-                } else if (lower.includes('mix') || (lower.includes('veg') && lower.includes('&') && lower.includes('non')) || lower.includes('multi')) {
-                    defaultIcon = 'fa-solid fa-utensils';
-                    defaultBadge = 'Most Popular';
-                    defaultTag = 'Dual Kitchen';
-                    typeKey = 'mixed';
-                } else if (lower.includes('veg')) {
-                    defaultIcon = 'fa-solid fa-leaf';
-                    defaultBadge = 'Pure Veg';
-                    defaultTag = 'Shakahari Feast';
-                    typeKey = 'pure_veg';
-                }
-
-                return {
-                    id: opt.value || title,
-                    typeKey: typeKey,
-                    title: title,
-                    subtitle: opt.subtitle || 'Personalized catering package for your celebration.',
-                    badge: defaultBadge,
-                    icon: (opt.icon && opt.icon !== 'fa-solid fa-star') ? opt.icon : defaultIcon,
-                    image: opt.image || null,
-                    tag: defaultTag
-                };
-            });
-        }
-
-        return [
-            { id: 'Pure Vegetarian', typeKey: 'pure_veg', title: 'Pure Vegetarian', subtitle: '100% strictly vegetarian delicacies & authentic recipes', badge: 'Pure Veg', icon: 'fa-solid fa-leaf', tag: 'Shakahari Feast' },
-            { id: 'Jain Food Available', typeKey: 'jain', title: 'Jain Food Available', subtitle: 'Prepared strictly without onion, garlic, or root vegetables', badge: 'Jain Special', icon: 'fa-solid fa-seedling', tag: 'No Onion • No Garlic' },
-            { id: 'Non-Vegetarian', typeKey: 'non_veg', title: 'Non-Vegetarian', subtitle: 'Rich poultry, tender mutton, coastal seafood & biryanis', badge: 'Non-Veg', icon: 'fa-solid fa-drumstick-bite', tag: 'Gourmet Meats' },
-            { id: 'Mixed Food (Veg & Non-Veg)', typeKey: 'mixed', title: 'Mixed Food (Veg & Non-Veg)', subtitle: 'Separate Veg & Non-Veg live counters catering to all guests', badge: 'Most Popular', icon: 'fa-solid fa-utensils', tag: 'Dual Kitchen' }
-        ];
-    },
-    selectFoodPreference(prefId) {
-        this.planner.foodPreference = prefId;
-        this.plannerError = '';
-        const packages = this.getFoodPackages();
-        if (packages.length && !packages.some(p => p.id === this.planner.selectedFoodPackageId)) {
-            this.planner.selectedFoodPackageId = packages[1]?.id || packages[0]?.id || 'deluxe_menu';
-        }
-        this.$nextTick(() => {
-            const pkgSection = document.getElementById('catering-packages-section');
-            if (pkgSection) {
-                pkgSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
+        return this.foodOptions().map(item => ({
+            ...item,
+            subtitle: item.category || 'Menu Item',
+            badge: item.category || 'Menu Item',
+            icon: 'fa-solid fa-utensils',
+            tag: this.formatMenuCost(item.cost)
+        }));
     },
     getFoodPreferenceTitle() {
-        const pref = this.foodPreferences.find(p => p.id === this.planner.foodPreference);
-        return pref ? pref.title : 'Food Preference';
+        return this.planner.foodItems.map(item => item.title).join(', ');
     },
     getCombinedFoodAnswer() {
-        const pref = this.foodPreferences.find(p => p.id === this.planner.foodPreference);
-        const prefTitle = pref ? pref.title : (this.planner.foodPreference || 'Pure Vegetarian');
-        if (this.planner.cateringMode === 'package') {
-            const pkg = this.getSelectedPackage();
-            return pkg ? `${prefTitle} • ${pkg.name}` : prefTitle;
-        }
-        return `${prefTitle} • ${this.planner.foodItems.map(item => item.title).join(', ')}`;
+        const parts = [];
+        const pkg = this.getSelectedPackage();
+        if (pkg) parts.push(pkg.name);
+        if (this.planner.foodItems.length) parts.push(this.planner.foodItems.map(item => item.title).join(', '));
+        return parts.join(' • ');
     },
     getFoodPackages() {
         const vendor = this.getSelectedCateringVendor();
+        if (vendor && vendor.packages && vendor.packages.length) {
+            return vendor.packages;
+        }
         if (vendor && vendor.food_packages && vendor.food_packages.length) {
             return vendor.food_packages;
         }
+        return [];
+        /* Legacy static package catalogue below is unreachable by design. */
         const activePref = this.foodPreferences.find(p => p.id === this.planner.foodPreference);
         const pref = activePref ? activePref.typeKey : (
             (this.planner.foodPreference || '').toLowerCase().includes('jain') ? 'jain' : (
@@ -586,19 +533,11 @@
         if (vendor && vendor.food_extras && vendor.food_extras.length) {
             return vendor.food_extras;
         }
-        return [
-            { id: 'chinese_counter', name: 'Chinese Counter (Any 3)', min_price: 90, max_price: 120, unit: 'per_plate', icon: 'fa-bowl-rice' },
-            { id: 'chat_counter', name: 'Chat Counter (Any 2)', min_price: 90, max_price: 120, unit: 'per_plate', icon: 'fa-utensils' },
-            { id: 'dosa_counter', name: 'Dosa Counter (Any 3)', min_price: 90, max_price: 120, unit: 'per_plate', icon: 'fa-plate-wheat' },
-            { id: 'italian_pasta', name: 'Italian - Pasta (Any 2)', min_price: 90, max_price: 130, unit: 'per_plate', icon: 'fa-bowl-food' },
-            { id: 'italian_pizza', name: 'Italian - Pizza (Any 2)', min_price: 90, max_price: 130, unit: 'per_plate', icon: 'fa-pizza-slice' },
-            { id: 'fruit_counter', name: 'Exotic Fruit Counter', min_price: 85, max_price: 110, unit: 'per_plate', icon: 'fa-apple-whole' },
-            { id: 'hall_rent_extra', name: 'Extra Hall Rent (Per Hour)', min_price: 10000, max_price: 12000, unit: 'fixed', icon: 'fa-clock' }
-        ];
+        return [];
     },
     getSelectedPackage() {
         const packages = this.getFoodPackages();
-        return packages.find(p => p.id === this.planner.selectedFoodPackageId) || packages[0] || null;
+        return packages.find(p => p.id === this.planner.selectedFoodPackageId) || null;
     },
     toggleFoodExtra(extraId) {
         const idx = this.planner.selectedFoodExtras.indexOf(extraId);
@@ -618,23 +557,17 @@
         let fixedMin = 0;
         let fixedMax = 0;
 
-        if (this.planner.cateringMode === 'package') {
-            const pkg = this.getSelectedPackage();
-            if (pkg) {
-                minPerPlate += Number(pkg.min_price_per_plate || 700);
-                maxPerPlate += Number(pkg.max_price_per_plate || 900);
-            }
-        } else {
-            this.planner.foodItems.forEach(item => {
-                const cost = Number(item.cost || 0);
-                minPerPlate += cost > 0 ? cost : 100;
-                maxPerPlate += cost > 0 ? cost * 1.3 : 150;
-            });
-            if (!this.planner.foodItems.length) {
-                minPerPlate = 500;
-                maxPerPlate = 800;
-            }
+        const pkg = this.getSelectedPackage();
+        if (pkg) {
+            minPerPlate += Number(pkg.min_price_per_plate || 0);
+            maxPerPlate += Number(pkg.max_price_per_plate || pkg.min_price_per_plate || 0);
         }
+
+        this.planner.foodItems.forEach(item => {
+            const cost = Math.max(0, Number(item.cost || 0));
+            minPerPlate += cost;
+            maxPerPlate += cost;
+        });
 
         const extrasList = this.getFoodExtras();
         this.planner.selectedFoodExtras.forEach(extraId => {
@@ -695,8 +628,8 @@
             str_contains(strtolower($savedAnswers['food_type'] ?? ''), 'mixed') ? 'mixed' : (
             !empty($savedAnswers['food_type']) ? 'pure_veg' : ''
         ))))),
-        selectedFoodPackageId: @js(data_get($savedAnswers, 'selected_food_package.id', 'deluxe_menu')),
-        selectedFoodExtras: @js($savedArray('selected_food_extras', ['chinese_counter', 'chat_counter'])),
+        selectedFoodPackageId: @js(data_get($savedAnswers, 'selected_food_package.id')),
+        selectedFoodExtras: @js($savedArray('selected_food_extras')),
         foodType: '',
         foodItems: @js($savedArray('food_menu_items')),
         locations: @js($savedArray('service_area')),
@@ -802,7 +735,7 @@
             wedding_tradition: Boolean(this.planner.culture),
             decoration_type: Boolean(this.planner.setting || this.planner.decorTheme),
             venue_setting: Boolean(this.planner.setting),
-            food_type: Boolean(this.planner.foodPreference) && ((this.planner.cateringMode === 'package' && this.planner.selectedFoodPackageId) || (this.planner.cateringMode === 'custom' && this.planner.foodItems.length > 0)),
+            food_type: Boolean(this.planner.selectedFoodPackageId || this.planner.foodItems.length > 0),
             event_timeline: Boolean(this.planner.timeline)
         };
         if (!(step.code in valid)) {
@@ -811,12 +744,8 @@
         }
         if (!valid[step.code]) {
             if (step.code === 'food_type') {
-                if (!this.planner.foodPreference) {
-                    this.plannerError = 'Please choose your food preference (Pure Veg, Jain, Non-Veg, or Mixed) to continue.';
-                    return false;
-                }
-                if (this.planner.cateringMode === 'package' && !this.planner.selectedFoodPackageId) {
-                    this.plannerError = 'Please select a catering package to continue.';
+                if (!this.planner.selectedFoodPackageId && !this.planner.foodItems.length) {
+                    this.plannerError = 'Please select at least one package or menu item to continue.';
                     return false;
                 }
             }
@@ -842,12 +771,6 @@
         if (!this.validateCurrentStep()) return;
         if (this.currentStep < this.totalSteps) {
             let nextTarget = this.currentStep + 1;
-
-            // If user is advancing and guest count was prefilled from homepage, auto-skip guest step on initial pass
-            if (this.autoSkipGuests && nextTarget === this.guestStepNumber) {
-                this.autoSkipGuests = false;
-                nextTarget = Math.min(this.totalSteps, this.guestStepNumber + 1);
-            }
 
             this.currentStep = nextTarget;
             this.maxVisitedStep = Math.max(this.maxVisitedStep, this.currentStep);
@@ -971,7 +894,7 @@
         --}}
 
         <!-- Main Interactive Questionnaire & Steps Area (Covers Full Viewport, Eliminates Artificial Scrollbars) -->
-        <div class="w-full bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-[28px] p-2.5 sm:p-6 lg:p-7 shadow-[0_20px_50px_-15px_rgba(133,6,37,0.1)] border border-[#850625]/15 flex flex-col justify-between relative scroll-mt-24 sm:scroll-mt-32"
+        <div x-data="{ requirementsOpen: false }" class="w-full bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-[28px] p-2.5 sm:p-6 lg:p-7 shadow-[0_20px_50px_-15px_rgba(133,6,37,0.1)] border border-[#850625]/15 flex flex-col justify-between relative scroll-mt-24 sm:scroll-mt-32"
              style="min-height: calc(100vh - 160px);">
 
             <!-- Slim Header Progress Tracker (Permanently Pinned at Top) -->
@@ -985,6 +908,10 @@
                         <span class="hidden xs:inline-block px-2 py-0.5 rounded-full bg-rose-50 text-[#850625] text-[9px] font-extrabold uppercase tracking-wide border border-rose-100">Progress</span>
                         <span>Step <span class="font-extrabold text-[#850625]" x-text="currentStep"></span> of <span class="font-extrabold text-slate-800" x-text="totalSteps"></span></span>
                         <span class="text-slate-400 font-normal">(<span class="font-semibold text-slate-600" x-text="Math.round(Math.min(currentStep, totalSteps) / totalSteps * 100) + '%'"></span>)</span>
+                        <button type="button" @click="requirementsOpen = !requirementsOpen" :aria-expanded="requirementsOpen.toString()" aria-controls="planner-requirements-sidebar" class="ml-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#850625]/20 bg-white text-lg font-black leading-none text-[#850625] shadow-sm transition hover:scale-105 hover:bg-[#850625] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#850625]/30" :title="requirementsOpen ? 'Hide question preview' : 'Show question preview'">
+                            <span x-text="requirementsOpen ? '\u2212' : '+'"></span>
+                            <span class="sr-only" x-text="requirementsOpen ? 'Hide question preview' : 'Show question preview'"></span>
+                        </button>
                     </span>
                 </div>
                 <div class="w-full h-1 sm:h-1.5 bg-rose-100/70 rounded-full overflow-hidden shadow-inner">
@@ -993,7 +920,7 @@
             </div>
             
             <!-- Steps Content Include (Generous Center Area with No Unnecessary Scrollbars) -->
-            <div class="grid flex-1 min-h-0 w-full gap-4 py-1 sm:py-2 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
+            <div class="grid flex-1 min-h-0 w-full gap-4 py-1 sm:py-2 lg:items-start" :class="requirementsOpen ? 'lg:grid-cols-[minmax(0,1fr)_17rem]' : 'lg:grid-cols-1'">
                 <div class="min-w-0 flex flex-col justify-center">
                     @include('ai-planner.steps.step-1-budget')
                     @include('ai-planner.steps.step-2-guests')
@@ -1005,7 +932,7 @@
                     @include('ai-planner.steps.generic-question')
                 </div>
 
-                <aside class="rounded-2xl border border-[#850625]/15 bg-gradient-to-br from-[#fffaf3] to-rose-50 p-4 shadow-sm lg:sticky lg:top-28" aria-label="Your selected requirements">
+                <aside id="planner-requirements-sidebar" x-cloak x-show="requirementsOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-8" class="rounded-2xl border border-[#850625]/15 bg-gradient-to-br from-[#fffaf3] to-rose-50 p-4 shadow-sm lg:sticky lg:top-28" aria-label="Your selected requirements">
                     <div class="flex items-center justify-between border-b border-[#850625]/10 pb-3">
                         <div><p class="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#850625]">Your requirements</p><h3 class="mt-1 text-sm font-extrabold text-slate-900">Selected answers</h3></div>
                         <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#850625] text-white"><i class="fa-solid fa-list-check text-xs"></i></span>
@@ -1132,10 +1059,10 @@
         <input type="hidden" name="answers[venue_setting]" :value="planner.setting">
         <input type="hidden" name="answers[food_preference]" :value="planner.foodPreference">
         <input type="hidden" name="answers[food_type]" :value="getCombinedFoodAnswer()">
-        <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.cateringMode === 'custom' ? planner.foodItems : [])">
+        <input type="hidden" name="answers[food_menu_items]" :value="JSON.stringify(planner.foodItems)">
         <input type="hidden" name="answers[selected_caterers]" :value="JSON.stringify(planner.selectedVendorIds)">
-        <input type="hidden" name="answers[selected_food_package]" :value="planner.cateringMode === 'package' ? JSON.stringify(getSelectedPackage()) : ''">
-        <input type="hidden" name="answers[selected_food_extras]" :value="JSON.stringify(planner.cateringMode === 'package' ? planner.selectedFoodExtras : [])">
+        <input type="hidden" name="answers[selected_food_package]" :value="getSelectedPackage() ? JSON.stringify(getSelectedPackage()) : ''">
+        <input type="hidden" name="answers[selected_food_extras]" :value="JSON.stringify(planner.selectedFoodExtras)">
         <input type="hidden" name="answers[service_area]" :value="JSON.stringify(planner.locations)">
         <input type="hidden" name="answers[event_timeline]" :value="planner.timeline">
         <input type="hidden" name="answers[event_date]" :value="planner.eventDate">

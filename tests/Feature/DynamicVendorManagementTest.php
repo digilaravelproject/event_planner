@@ -75,7 +75,8 @@ class DynamicVendorManagementTest extends TestCase
         $response->assertRedirect(route('admin.dynamic-vendors.show', $vendor));
         $this->get(route('admin.dynamic-vendors.show', $vendor))
             ->assertOk()
-            ->assertSee('Dynamic attributes');
+            ->assertSee('Dynamic attributes')
+            ->assertDontSee('Version history');
         $this->assertSame('Royal Garden', $vendor->name);
         $this->assertSame('Wedding Hall', $vendor->category);
         $this->assertEquals(250000, data_get($vendor->vendor_json, 'attributes.0.value'));
@@ -112,6 +113,23 @@ class DynamicVendorManagementTest extends TestCase
         foreach ($images as $image) {
             Storage::disk('public')->assertExists($image);
         }
+    }
+
+    public function test_admin_created_packages_are_saved_per_vendor(): void
+    {
+        $payload = $this->payload();
+        $payload['category'] = 'Catering';
+        $payload['packages'] = [[
+            'name' => 'Royal Feast', 'min_price' => 900, 'max_price' => 1250,
+            'duration' => '6 hours', 'description' => 'A custom reception menu.',
+            'inclusions' => "Welcome drink\nStarter\nMain course",
+        ]];
+
+        $this->actingAs($this->admin, 'admin')->post(route('admin.dynamic-vendors.store'), $payload)->assertSessionHasNoErrors();
+        $package = data_get(DynamicVendor::firstOrFail()->vendor_json, 'packages.0');
+        $this->assertSame('Royal Feast', $package['name']);
+        $this->assertSame(['Welcome drink', 'Starter', 'Main course'], $package['inclusions']);
+        $this->assertEquals(900, $package['min_price']);
     }
 
     public function test_update_duplicate_status_and_rollback_each_preserve_version_history(): void

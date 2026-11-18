@@ -57,6 +57,17 @@ abstract class DynamicVendorRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'tags' => ['nullable', 'string'],
             'keywords' => ['nullable', 'string'],
+            'packages' => ['nullable', 'array', 'max:50'],
+            'packages.*.id' => ['nullable', 'string', 'max:100'],
+            'packages.*.name' => ['nullable', 'string', 'max:255'],
+            'packages.*.min_price' => ['nullable', 'numeric', 'min:0'],
+            'packages.*.max_price' => ['nullable', 'numeric', 'min:0'],
+            'packages.*.duration' => ['nullable', 'string', 'max:100'],
+            'packages.*.description' => ['nullable', 'string', 'max:2000'],
+            'packages.*.inclusions' => ['nullable'],
+            'additional_details' => ['nullable', 'array', 'max:30'],
+            'additional_details.*.title' => ['nullable', 'string', 'max:255'],
+            'additional_details.*.content' => ['nullable', 'string', 'max:20000'],
             'offerings' => ['nullable', 'array'],
             'offerings.*.name' => ['nullable', 'string', 'max:255'],
             'offerings.*.category' => ['nullable', 'string', 'max:255'],
@@ -87,6 +98,13 @@ abstract class DynamicVendorRequest extends FormRequest
         return [function (Validator $validator): void {
             foreach ($this->input('attributes', []) as $index => $attribute) {
                 $this->validateDynamicAttribute($validator, (int) $index, $attribute);
+            }
+            foreach ($this->input('packages', []) as $index => $package) {
+                $minimum = $package['min_price'] ?? null;
+                $maximum = $package['max_price'] ?? null;
+                if ($minimum !== null && $minimum !== '' && $maximum !== null && $maximum !== '' && (float) $maximum < (float) $minimum) {
+                    $validator->errors()->add("packages.$index.max_price", 'The maximum package price must be at least the minimum price.');
+                }
             }
         }];
     }

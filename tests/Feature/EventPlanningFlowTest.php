@@ -135,7 +135,57 @@ class EventPlanningFlowTest extends TestCase
         ], [$vendor], 100);
         $this->assertEquals([80000, 5000], array_column($lines, 'cost'));
         $this->assertStringContainsString('starting rate', $lines[0]['value']);
+        $extraOnly = app(VendorCostingService::class)->foodPackageLines([
+            'selected_caterers' => [42], 'selected_food_extras' => ['dessert'],
+        ], [$vendor], 100);
+        $this->assertSame([5000.0], array_column($extraOnly, 'cost'));
         $this->assertSame('quote_required', app(VendorCostingService::class)->foodPackageLines(['selected_food_package' => ['id' => 'deluxe']], [$vendor], 100)[0]['pricing_status']);
+    }
+
+    public function test_admin_created_package_and_selected_menu_items_are_added_to_plan_costing(): void
+    {
+        $user = User::factory()->create();
+        $vendor = DynamicVendor::create(['status' => 'active', 'vendor_json' => [
+            'identity' => ['name' => 'Admin Caterer', 'category' => 'Catering'],
+            'attributes' => [['key' => 'menu_card_items', 'label' => 'Menu Card Items', 'value' => ['Paneer Tikka']]],
+            'packages' => [[
+                'id' => 'silver-food', 'name' => 'Silver Food', 'min_price' => 200,
+                'max_price' => 300, 'inclusions' => ['Jain Food'],
+            ]],
+        ]]);
+        $this->mock(OpenRouterService::class)->shouldReceive('chat')->once()->andReturn(['choices' => [['message' => ['content' => json_encode([
+            'title' => 'Selected catering plan', 'overview' => 'Customer selections.', 'costing' => [],
+        ])]]]]);
+
+        $plan = app(EventPlanningService::class)->create($user, [
+            'guest_count' => 100,
+            'answers' => [
+                'selected_caterers' => [$vendor->id],
+                'selected_food_package' => ['id' => 'silver-food', 'min_price_per_plate' => 1],
+                'food_menu_items' => [[
+                    'id' => 'paneer', 'title' => 'Paneer Tikka', 'category' => 'Starters',
+                    'cost' => 50, 'vendor_id' => $vendor->id, 'vendor_name' => 'Admin Caterer',
+                ]],
+            ],
+        ]);
+
+        $catering = collect($plan->summary['costing'])->first(
+            fn (array $item): bool => str_contains(strtolower($item['category']), 'cater')
+        );
+        $this->assertSame(25000.0, (float) $catering['amount']);
+        $this->assertSame(['Paneer Tikka', 'Silver Food'], array_column($catering['attributes'], 'name'));
+        $this->assertSame('priced', $catering['pricing_status']);
+    }
+
+    public function test_homepage_prefills_do_not_skip_any_planner_question(): void
+    {
+        $this->seed(EventRequirementQuestionSeeder::class);
+
+        $response = $this->get(route('ai-planner', ['type' => 'wedding', 'guests' => 100]))->assertOk();
+
+        $this->assertSame(1, $response->viewData('initialStep'));
+        $response->assertSee('currentStep: 1', false)
+            ->assertSee('autoSkipGuests: false', false);
     }
 
     public function test_pdf_includes_itemized_vendor_rates_across_multiple_pages(): void
@@ -196,6 +246,10 @@ class EventPlanningFlowTest extends TestCase
         $first = DynamicVendor::create(['status' => 'active', 'vendor_json' => [
             'identity' => ['name' => 'First Caterer', 'category' => 'Catering'],
             'attributes' => [['label' => 'Menu Card Items', 'value' => 'Paneer Tikka, Veg Biryani']],
+            'packages' => [[
+                'id' => 'first-feast', 'name' => 'First Feast', 'min_price' => 750,
+                'max_price' => 950, 'description' => 'Saved by the admin', 'inclusions' => ['Starter', 'Main course'],
+            ]],
         ]]);
         $second = DynamicVendor::create(['status' => 'active', 'vendor_json' => [
             'identity' => ['name' => 'Second Caterer', 'category' => 'Catering'],
@@ -211,8 +265,12 @@ class EventPlanningFlowTest extends TestCase
         $this->assertSame(['First Caterer', 'Second Caterer'], $vendors->pluck('name')->all());
         $this->assertSame(['Paneer Tikka', 'Veg Biryani'], array_column($vendors->first()['menu_items'], 'title'));
         $this->assertSame(['Gulab Jamun'], array_column($vendors->last()['menu_items'], 'title'));
+        $this->assertSame('First Feast', data_get($vendors->first(), 'packages.0.name'));
         $response->assertSee('selectedVendorIds:', false)
             ->assertSee('selectedCateringVendors()', false)
+            ->assertSee('initialFoodPackages', false)
+            ->assertSee('selectedFoodPackageId: null', false)
+            ->assertSee('Vendor packages are visible immediately', false)
             ->assertSee('Available Catering Vendors');
 
         $this->post(route('ai-planner.generate'), [

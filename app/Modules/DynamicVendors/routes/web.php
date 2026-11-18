@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\DynamicVendors\Http\Controllers\DynamicVendorController;
+use App\Modules\DynamicVendors\Http\Controllers\VendorCategoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth:admin', 'admin.active', 'admin.permission:vendors'])
@@ -19,6 +20,23 @@ Route::middleware(['web', 'auth:admin', 'admin.active', 'admin.permission:vendor
                 'create' => 'create',
                 'store' => 'store',
                 'show' => 'show',
+                'edit' => 'edit',
+                'update' => 'update',
+                'destroy' => 'destroy',
+            ]);
+    });
+
+Route::middleware(['web', 'auth:admin', 'admin.active', 'admin.permission:vendors'])
+    ->prefix('admin/vendor-categories')
+    ->name('admin.vendor-categories.')
+    ->group(function (): void {
+        Route::resource('/', VendorCategoryController::class)
+            ->parameters(['' => 'vendor_category'])
+            ->except('show')
+            ->names([
+                'index' => 'index',
+                'create' => 'create',
+                'store' => 'store',
                 'edit' => 'edit',
                 'update' => 'update',
                 'destroy' => 'destroy',

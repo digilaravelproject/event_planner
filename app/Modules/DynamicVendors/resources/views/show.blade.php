@@ -5,13 +5,13 @@
     @include('admin.partials.alerts')
     <div class="admin-hero flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <div class="relative z-10">
-            <a href="{{ route('admin.dynamic-vendors.index') }}" class="text-xs font-bold text-blue-100 transition hover:text-white">← Manage Vendors</a>
+            <a href="{{ route('admin.dynamic-vendors.index') }}" class="text-xs font-bold text-blue-100 transition hover:text-white" style="color: var(--admin-orange) !important;">← Manage Vendors</a>
             <div class="mt-2 flex flex-wrap items-center gap-3"><h1 class="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">{{ $vendor->name }}</h1><x-dynamic-vendors::status-badge :status="$vendor->status" /></div>
-            <p class="mt-1 text-sm text-blue-100">{{ $vendor->category }} · Updated {{ $vendor->updated_at->diffForHumans() }}</p>
+            <p class="mt-1 text-sm text-blue-100" style="color: black !important;">{{ $vendor->category }} · Updated {{ $vendor->updated_at->diffForHumans() }}</p>
         </div>
         <div class="relative z-10 flex flex-wrap gap-2">
-            <form method="POST" action="{{ route('admin.dynamic-vendors.duplicate', $vendor) }}">@csrf<button class="rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">Duplicate</button></form>
-            <a href="{{ route('admin.dynamic-vendors.edit', $vendor) }}" class="admin-table-action rounded-xl px-5 py-2.5 text-sm font-extrabold transition hover:-translate-y-0.5">Edit Vendor</a>
+            <form method="POST" action="{{ route('admin.dynamic-vendors.duplicate', $vendor) }}">@csrf<button class="admin-action-icon" title="Duplicate vendor" aria-label="Duplicate {{ $vendor->name }}"><i class="fa-solid fa-copy" aria-hidden="true"></i></button></form>
+            <a href="{{ route('admin.dynamic-vendors.edit', $vendor) }}" class="admin-action-icon" title="Edit vendor" aria-label="Edit {{ $vendor->name }}"><i class="fa-solid fa-pen" aria-hidden="true"></i></a>
         </div>
     </div>
 
@@ -48,6 +48,15 @@
                 </div>
             </section>
 
+            <section class="admin-card p-6">
+                <h2 class="text-lg font-extrabold text-slate-900">Vendor packages</h2>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    @forelse(data_get($vendor->vendor_json, 'packages', []) as $package)
+                        <article class="rounded-xl border border-slate-200 p-4"><h3 class="font-extrabold text-slate-900">{{ $package['name'] }}</h3><p class="mt-1 text-sm font-bold text-[#850625]">₹{{ number_format($package['min_price'] ?? 0) }} – ₹{{ number_format($package['max_price'] ?? $package['min_price'] ?? 0) }}</p>@if($package['duration'] ?? null)<p class="mt-1 text-xs text-slate-500">{{ $package['duration'] }}</p>@endif<p class="mt-2 text-sm text-slate-600">{{ $package['description'] ?? '' }}</p></article>
+                    @empty<p class="text-sm text-slate-500">No packages created for this vendor.</p>@endforelse
+                </div>
+            </section>
+
             @if(data_get($vendor->vendor_json, 'media.images'))
                 <section class="admin-card p-6"><h2 class="text-lg font-extrabold text-slate-900">Images</h2><div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">@foreach(data_get($vendor->vendor_json, 'media.images', []) as $image)<a href="{{ asset('storage/'.$image) }}" target="_blank" rel="noopener"><img src="{{ asset('storage/'.$image) }}" alt="{{ $vendor->name }}" class="h-44 w-full rounded-xl object-cover"></a>@endforeach</div></section>
             @endif
@@ -64,18 +73,7 @@
                 </dl>
             </section>
 
-            <section class="admin-card p-5">
-                <div class="flex items-center justify-between"><h2 class="font-extrabold text-slate-900">Version history</h2><span class="text-xs font-bold text-slate-400">{{ $vendor->versions->count() }} versions</span></div>
-                <div class="mt-4 space-y-3">
-                    @foreach($vendor->versions as $version)
-                        <div class="rounded-xl border border-slate-200 p-3">
-                            <div class="flex items-center justify-between"><div><p class="text-sm font-bold text-slate-800">Version {{ $version->version }}</p><p class="text-[11px] text-slate-400">{{ $version->created_at->format('d M Y, h:i A') }} · {{ $version->creator?->name ?? 'System' }}</p></div>@if(!$loop->first)<form method="POST" action="{{ route('admin.dynamic-vendors.rollback', [$vendor, $version]) }}" onsubmit="return confirm('Restore this snapshot? The current state will remain in history.')">@csrf<button class="text-xs font-bold text-[#3950a2] hover:underline">Restore</button></form>@else<span class="text-[10px] font-bold uppercase text-emerald-600">Current</span>@endif</div>
-                        </div>
-                    @endforeach
-                </div>
-            </section>
-
-            <section class="vendor-danger-card rounded-2xl p-5"><h2 class="font-extrabold text-white">Danger zone</h2><p class="mt-1 text-xs text-white/75">Deletion also removes this module's version history.</p><form method="POST" action="{{ route('admin.dynamic-vendors.destroy', $vendor) }}" class="mt-3" onsubmit="return confirm('Permanently delete this vendor?')">@csrf @method('DELETE')<button class="admin-table-action admin-table-action-danger rounded-lg px-4 py-2 text-xs font-bold">Delete Vendor</button></form></section>
+            <section class="vendor-danger-card rounded-2xl p-5"><h2 class="font-extrabold text-white">Danger zone</h2><p class="mt-1 text-xs text-white/75">Permanently remove this vendor and its associated data.</p><form method="POST" action="{{ route('admin.dynamic-vendors.destroy', $vendor) }}" class="mt-3" onsubmit="return confirm('Permanently delete this vendor?')">@csrf @method('DELETE')<button class="admin-action-icon admin-action-icon-danger" title="Delete vendor" aria-label="Delete {{ $vendor->name }}"><i class="fa-solid fa-trash-can" aria-hidden="true"></i></button></form></section>
         </aside>
     </div>
 </div>

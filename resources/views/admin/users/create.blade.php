@@ -4,7 +4,7 @@
 <div class="mx-auto max-w-4xl space-y-6">
     <section class="admin-page-hero rounded-3xl p-6 sm:p-8">
         <p class="text-xs font-extrabold uppercase tracking-[.22em] text-[#f3cf5d]">User management</p>
-        <h1 class="mt-2 text-3xl font-black text-white" style="color: white !important;">Add User</h1>
+        <h1 class="mt-2 text-3xl font-black">Add User</h1>
         <p class="mt-2 max-w-2xl text-sm text-white/75">Create a customer account with only the information needed to get started.</p>
     </section>
 

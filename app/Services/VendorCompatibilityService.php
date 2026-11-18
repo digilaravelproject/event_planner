@@ -22,8 +22,10 @@ class VendorCompatibilityService
 
         $packageId = data_get($answers, 'selected_food_package.id');
         $extras = collect(data_get($vendor->vendor_json, 'food_extras', []))->pluck('id');
+        $packages = collect(data_get($vendor->vendor_json, 'packages', []))
+            ->concat(data_get($vendor->vendor_json, 'food_packages', []));
 
-        return (! $packageId || collect(data_get($vendor->vendor_json, 'food_packages', []))->contains('id', $packageId))
+        return (! $packageId || $packages->contains('id', $packageId))
             && collect($answers['selected_food_extras'] ?? [])->diff($extras)->isEmpty();
     }
 

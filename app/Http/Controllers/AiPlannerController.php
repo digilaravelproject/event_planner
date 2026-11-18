@@ -118,6 +118,7 @@ class AiPlannerController extends Controller
                         'note' => is_array($note) ? implode(' ', $note) : (string) $note,
                         'images' => $pkgImages,
                         'food_packages' => data_get($vendor->vendor_json, 'food_packages', []),
+                        'packages' => data_get($vendor->vendor_json, 'packages', []),
                         'food_extras' => data_get($vendor->vendor_json, 'food_extras', []),
                     ];
                 }, $offerings);
@@ -140,18 +141,26 @@ class AiPlannerController extends Controller
                     'name' => $brandName,
                     'category' => $vendor->category,
                     'food_packages' => data_get($vendor->vendor_json, 'food_packages', []),
+                    'packages' => collect(data_get($vendor->vendor_json, 'packages', []))->map(fn (array $package): array => [
+                        'id' => $package['id'] ?? null,
+                        'name' => $package['name'] ?? 'Package',
+                        'min_price_per_plate' => (float) ($package['min_price'] ?? 0),
+                        'max_price_per_plate' => (float) ($package['max_price'] ?? $package['min_price'] ?? 0),
+                        'tagline' => $package['description'] ?? '',
+                        'duration' => $package['duration'] ?? '',
+                        'items' => array_values((array) ($package['inclusions'] ?? [])),
+                    ])->values()->all(),
                     'food_extras' => data_get($vendor->vendor_json, 'food_extras', []),
                     'menu_items' => $this->cateringMenuItems($vendor, $foodCatalog),
                 ];
             })->values()->all();
 
-        $budgetStepNumber = $stepNumbers['wedding_budget'] ?? 2;
         $hasPrefilledType = $request->filled('type') && ! empty(trim((string) $request->query('type')));
         $hasPrefilledGuests = $request->filled('guests') && ! empty(trim((string) $request->query('guests')));
 
-        $defaultInitialStep = ($hasPrefilledType && ! $editingPlan && ! old('planner_step'))
-            ? $budgetStepNumber
-            : 1;
+        // Homepage values prefill the relevant answers, but every question must still
+        // be shown so the customer can review or change those values.
+        $defaultInitialStep = 1;
 
         $initialStep = max(1, min(count($plannerSteps), (int) old('planner_step', $defaultInitialStep)));
 

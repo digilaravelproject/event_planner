@@ -2,9 +2,27 @@
 
 namespace App\Modules\DynamicVendors\Support;
 
+use App\Modules\DynamicVendors\Models\VendorCategory;
+use Illuminate\Support\Facades\Schema;
+
 class VendorCategoryFieldCatalog
 {
     public static function all(): array
+    {
+        if (Schema::hasTable('vendor_categories')) {
+            return VendorCategory::query()
+                ->active()
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get()
+                ->mapWithKeys(fn (VendorCategory $category): array => [$category->name => $category->fields ?? []])
+                ->all();
+        }
+
+        return self::defaults();
+    }
+
+    public static function defaults(): array
     {
         $contact = [
             self::field('Contact Person', 'text', 'Who should the team contact?'),

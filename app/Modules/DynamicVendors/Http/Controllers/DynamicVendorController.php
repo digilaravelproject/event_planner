@@ -3,6 +3,7 @@
 namespace App\Modules\DynamicVendors\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\EventRequirementQuestion;
 use App\Modules\DynamicVendors\Http\Requests\DynamicVendorRequest;
 use App\Modules\DynamicVendors\Http\Requests\StoreDynamicVendorRequest;
 use App\Modules\DynamicVendors\Http\Requests\UpdateDynamicVendorRequest;
@@ -11,6 +12,7 @@ use App\Modules\DynamicVendors\Models\DynamicVendorVersion;
 use App\Modules\DynamicVendors\Repositories\DynamicVendorRepositoryInterface;
 use App\Modules\DynamicVendors\Services\AttributeSheetService;
 use App\Modules\DynamicVendors\Services\DynamicVendorService;
+use App\Modules\DynamicVendors\Support\VendorCategoryFieldCatalog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,11 +27,6 @@ class DynamicVendorController extends Controller
         'Supported Locations', 'Decor Category', 'Supported Traditions', 'Decoration Type',
         'Package Details Note', 'Parking', 'Decoration', 'Photography', 'DJ', 'Lighting', 'Sound', 'Food Type',
         'Cuisine', 'Rooms', 'Check In', 'Check Out', 'Drone', 'Album', 'Delivery Time',
-    ];
-
-    private const CATEGORY_SUGGESTIONS = [
-        'Venue', 'Photographer', 'Decorator', 'DJ', 'Catering', 'Invitation', 'Jewellery',
-        'Makeup', 'Travel', 'Hotel', 'Transport', 'Pandit', 'Mehendi', 'Florist', 'Entertainment',
     ];
 
     public function __construct(
@@ -90,7 +87,7 @@ class DynamicVendorController extends Controller
 
     public function show(DynamicVendor $dynamic_vendor): View
     {
-        $dynamic_vendor->load(['versions.creator', 'creator', 'updater']);
+        $dynamic_vendor->load(['creator', 'updater']);
 
         return view('dynamic-vendors::show', ['vendor' => $dynamic_vendor]);
     }
@@ -138,7 +135,7 @@ class DynamicVendorController extends Controller
 
     private function formOptions(): array
     {
-        $venueQuestion = \App\Models\EventRequirementQuestion::where('question_code', 'venue_setting')->first();
+        $venueQuestion = EventRequirementQuestion::where('question_code', 'venue_setting')->first();
         $venueCategories = array_values(array_unique(array_merge(
             ['Sea-Facing Beachfront', 'Lawn & Poolside', 'Grand AC Ballroom', 'Heritage Resort'],
             $venueQuestion?->options ?? []
@@ -147,7 +144,7 @@ class DynamicVendorController extends Controller
         return [
             'attributeTypes' => DynamicVendorRequest::TYPES,
             'attributeSuggestions' => self::SUGGESTIONS,
-            'categorySuggestions' => self::CATEGORY_SUGGESTIONS,
+            'categorySuggestions' => array_keys(VendorCategoryFieldCatalog::all()),
             'venueCategories' => $venueCategories,
         ];
     }

@@ -38,6 +38,7 @@ class OpenRouterService
         $response = $this->client($this->apiKey())->post('/chat/completions', [
             'model' => $model ?: AiSetting::getValue('openrouter_model', 'openrouter/auto'),
             'messages' => $messages,
+            'max_tokens' => 1800,
         ]);
         $response->throw();
 
@@ -60,6 +61,9 @@ class OpenRouterService
 
     private function client(string $apiKey)
     {
+        $connectTimeout = max(1, min(5, (int) config('services.openrouter.connect_timeout', 3)));
+        $requestTimeout = max($connectTimeout + 1, min(20, (int) config('services.openrouter.timeout', 10)));
+
         return Http::baseUrl(config('services.openrouter.url'))
             ->acceptJson()
             ->asJson()
@@ -68,7 +72,20 @@ class OpenRouterService
                 'HTTP-Referer' => config('app.url'),
                 'X-Title' => config('app.name'),
             ])
-            ->connectTimeout(3)
-            ->timeout(8);
+            ->connectTimeout($connectTimeout)
+            ->timeout($requestTimeout)
+            ->withOptions([
+                // On Windows the generic Guzzle timeout can remain blocked inside
+                // CurlHandler until PHP's 60-second fatal limit. Native cURL options
+                // guarantee that Laravel regains control and can build a fallback plan.
+                'force_ip_resolve' => 'v4',
+                'curl' => [
+                    CURLOPT_CONNECTTIMEOUT => $connectTimeout,
+                    CURLOPT_TIMEOUT => $requestTimeout,
+                    CURLOPT_LOW_SPEED_LIMIT => 1,
+                    CURLOPT_LOW_SPEED_TIME => min(5, $requestTimeout),
+                    CURLOPT_NOSIGNAL => true,
+                ],
+            ]);
     }
 }

@@ -18,7 +18,7 @@
     <section class="admin-page-hero rounded-3xl p-6 sm:p-8">
         <a href="{{ route('admin.event-questions.index') }}" class="text-xs font-bold text-white/75 transition hover:text-white">← Question list</a>
         <div class="mt-4 flex items-start justify-between gap-5">
-            <div><p class="text-xs font-extrabold uppercase tracking-[.22em] text-[#f3cf5d]">Guided question setup</p><h1 class="mt-2 text-3xl font-black text-white" style="color: white !important;">{{ $question->exists ? 'Update Event Question' : 'Add Event Question' }}</h1><p class="mt-2 max-w-2xl text-sm text-white/75">Write the question, choose how customers answer, and add choices only when needed. Technical settings are handled automatically.</p></div>
+            <div><p class="text-xs font-extrabold uppercase tracking-[.22em] text-[#f3cf5d]">Guided question setup</p><h1 class="mt-2 text-3xl font-black">{{ $question->exists ? 'Update Event Question' : 'Add Event Question' }}</h1><p class="mt-2 max-w-2xl text-sm text-white/75">Write the question, choose how customers answer, and add choices only when needed. Technical settings are handled automatically.</p></div>
             <span class="hidden rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold text-white sm:inline-flex"><i class="fa-solid fa-wand-magic-sparkles mr-2 text-[#f3cf5d]"></i>Easy setup</span>
         </div>
     </section>
@@ -60,6 +60,12 @@
                                     <label class="vendor-value-card flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-black/10 p-3 transition hover:border-[#d4af37]/35">
                                         <input type="checkbox" name="vendor_attribute_values[]" value="{{ $value['value'] }}" data-vendor-value data-label="{{ $value['label'] }}" @checked($selectedAttribute === $attribute['key'] && in_array((string) $value['value'], $selectedValues, true)) class="mt-1 h-4 w-4 shrink-0 accent-[#d4af37]">
                                         <span class="min-w-0"><strong class="block text-sm text-white">{{ $value['label'] }}</strong><small class="mt-1 block truncate text-[11px] text-white/50" title="{{ implode(', ', $value['vendor_names'] ?? []) }}">{{ $value['vendors_count'] }} {{ Illuminate\Support\Str::plural('vendor', $value['vendors_count']) }}@if(!empty($value['vendor_names'])) · {{ implode(', ', array_slice($value['vendor_names'], 0, 3)) }}@endif</small></span>
+                                        @if(!empty($value['vendor_names']))
+                                            <span class="vendor-value-tooltip" role="tooltip">
+                                                <strong>Vendors offering {{ $value['label'] }}</strong>
+                                                @foreach($value['vendor_names'] as $vendorName)<span>{{ $vendorName }}</span>@endforeach
+                                            </span>
+                                        @endif
                                     </label>
                                 @empty
                                     <p class="text-sm text-white/55 sm:col-span-2">This vendor detail does not contain any selectable values yet.</p>
@@ -69,7 +75,7 @@
                         </div>
                     @endforeach
                 </div>
-                <div id="vendor-mapping-help" class="mt-4 hidden rounded-xl border border-emerald-300/20 bg-emerald-400/10 p-3 text-xs text-emerald-100"><i class="fa-solid fa-link mr-2"></i><span></span></div>
+                <div id="vendor-mapping-help" class="admin-success-message mt-4 hidden rounded-xl border p-3 text-xs"><i class="fa-solid fa-link mr-2"></i><span></span></div>
             @endif
         </section>
 
